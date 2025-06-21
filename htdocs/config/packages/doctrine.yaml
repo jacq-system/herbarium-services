@@ -1,0 +1,64 @@
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                url: '%env(resolve:DATABASE_URL)%'
+                keep_replica: true
+                profiling_collect_backtrace: '%kernel.debug%'
+                use_savepoints: true
+                replicas: # usage of replicas - https://medium.com/@dominykasmurauskas1/how-to-add-read-write-replicas-on-symfony-6-using-doctrine-bundle-a46447449f35
+                    replica1:
+                        url: '%env(resolve:DATABASE_RO_URL)%'
+
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/vendor/jacq-system/orm-model/src/Entity'
+                prefix: 'JACQ\Entity'
+                alias: App
+        controller_resolver:
+            auto_mapping: false
+        dql:
+            string_functions:
+                GetScientificName: JACQ\Doctrine\Functions\GetScientificNameFunction
+                GetProtolog: JACQ\Doctrine\Functions\GetProtologFunction
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+        dbal:
+            connections:
+                default:
+                    options:
+                        1009: '/etc/mysql/ssl/ca-cert.pem' # PDO::MYSQL_ATTR_SSL_CA
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system
