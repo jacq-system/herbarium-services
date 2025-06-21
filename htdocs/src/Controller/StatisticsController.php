@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use JACQ\Enum\CoreObjectsEnum;
 use JACQ\Enum\TimeIntervalEnum;
-use App\Service\Tools\StatisticsService;
+use JACQ\Service\StatisticsService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
