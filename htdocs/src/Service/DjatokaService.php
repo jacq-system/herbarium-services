@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace App\Service\Tools;
+namespace App\Service;
 
+use Doctrine\ORM\EntityNotFoundException;
 use Exception;
 use JACQ\Repository\Herbarinput\ImageDefinitionRepository;
 use JACQ\Repository\Herbarinput\SpecimensRepository;
 use JACQ\Service\ImageService;
-use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 readonly class DjatokaService

@@ -1,0 +1,124 @@
+{% extends 'output/main.html.twig' %}
+
+{% block main %}
+
+    <div class="container">
+
+        <h4>check all Djatoka installations at {{ "now"|date('r') }}</h4>
+
+        {% if fail is defined and fail is not empty %}
+        <h4>Servers with errors</h4>
+        <table class="compact">
+            <thead>
+            <tr>
+                <th>source (id)</th>
+                <th>specimen-id</th>
+                <th>RPC</th>
+                <th>image</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for server in fail %}
+                <tr>
+                    <td><a href="{{ path('app_tools_checkDjatokaServers', { sourceId: server['source_id'] }) }}">{{ server['source'] }}({{ server['source_id'] }})</a></td>
+                    <td>{{ server['specimenID'] }}</td>
+                    {% if server['errorRPC'] is not empty %}
+                        <td class="red-text">{{ server['errorRPC']}}</td>
+                    {% else %}
+                        <td class="green-text">OK</td>
+                    {% endif %}
+                    {% if server['errorImage'] is not empty %}
+                        <td class="red-text">{{ server['errorImage']}}</td>
+                    {% else %}
+                        <td class="green-text">OK</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        {% if warn is defined and warn is not empty %}
+            <hr>
+
+            <h4>Servers with warnings</h4>
+            <table class="compact">
+                <thead>
+                <tr>
+                    <th>source (id)</th>
+                    <th>specimen-id</th>
+                    <th>RPC</th>
+                    <th>image</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for server in warn %}
+                    <tr>
+                        <td><a href="{{ path('app_tools_checkDjatokaServers', { sourceId: server['source_id'] }) }}">{{ server['source'] }}({{ server['source_id'] }})</a></td>
+                        <td>{{ server['specimenID'] }}</td>
+                        {% if server['warningRPC'] is not empty %}
+                            <td class="red-text">{{ server['warningRPC']}}</td>
+                        {% else %}
+                            <td class="green-text">OK</td>
+                        {% endif %}
+                        {% if server['errorImage'] is not empty %}
+                            <td class="red-text">{{ server['errorImage']}}</td>
+                        {% else %}
+                            <td class="green-text">OK</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if ok is defined and ok is not empty %}
+            <hr>
+            <h4>Servers without errors</h4>
+            <table class="compact">
+                <thead>
+                <tr>
+                    <th>source (id)</th>
+                    <th>specimen-id</th>
+                    <th>RPC</th>
+                    <th>image</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for server in ok %}
+                    <tr>
+                        <td><a href="{{ path('app_tools_checkDjatokaServers', { sourceId: server['source_id'] }) }}">{{ server['source'] }}({{ server['source_id'] }})</a></td>
+                        <td>{{ server['specimenID'] }}</td>
+                        <td class="green-text">OK</td>
+                        <td class="green-text">OK</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if noPicture is defined and noPicture is not empty %}
+            <hr>
+            <h4>Servers with no available pictures</h4>
+            <table class="compact">
+                <thead>
+                <tr>
+                    <th>source (id)</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for server in noPicture %}
+                    <tr>
+                        <td><a href="{{ path('app_tools_checkDjatokaServers', { sourceId: server['source_id'] }) }}">{{ server['source'] }}({{ server['source_id'] }})</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+        <p>To scan just a single source, add the parameter "?sourceId=&lt;id&gt;" to
+            the URL.</p>
+        {% if noRowError is defined and noRowError is not empty %}
+             {{ noRowError }}
+        {% endif %}
+    </div>
+
+{% endblock %}
