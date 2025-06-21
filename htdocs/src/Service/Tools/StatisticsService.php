@@ -153,7 +153,7 @@ readonly class StatisticsService
      * @param TimeIntervalEnum $interval resolution of statistics analysis (day, week, month, year)
      * @return array found results
      */
-    public function getResults($periodStart, $periodEnd, int $updated, CoreObjectsEnum $type, TimeIntervalEnum $interval)
+    public function getResults(string $periodStart, string $periodEnd, int $updated, CoreObjectsEnum $type, TimeIntervalEnum $interval)
     {
         $dbRows = match ($type) {
             CoreObjectsEnum::Names => $this->getNames($interval, $periodStart, $periodEnd, $updated),

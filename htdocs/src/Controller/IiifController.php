@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Exception;
 use JACQ\Service\Legacy\IiifFacade;
 use JACQ\Service\SpecimenService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -58,7 +59,7 @@ class IiifController extends AbstractFOSRestController
     {
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        }catch (\Exception $e){
+        }catch (Exception $e){
             $view = $this->view([], 404);
             return $this->handleView($view);
         }
@@ -114,7 +115,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
     {
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        }catch (\Exception $e){
+        }catch (Exception $e){
             $view = $this->view([], 404);
             return $this->handleView($view);
         }

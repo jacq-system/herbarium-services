@@ -115,7 +115,7 @@ class ClassificationDownloadService
      * @param array $parentTaxSynonymies an array of db-rows of all parent tax-synonymy entries
      * @param array $taxSynonymy db-row of the currently active tax-synonym entry
      */
-    protected function exportClassification($parentTaxSynonymies, Synonymy $taxSynonymy)
+    protected function exportClassification($parentTaxSynonymies, Synonymy $taxSynonymy): void
     {
 
         $line[0] = $this->uuidService->getResolvableUri($this->uuidService->getUuid('citation', $taxSynonymy->getLiterature()->getId()));

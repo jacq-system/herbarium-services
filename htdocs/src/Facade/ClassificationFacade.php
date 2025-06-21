@@ -321,7 +321,7 @@ readonly class ClassificationFacade
      * @param int $insertSeries optional ID of cication-Series to insert
      * @return array List of synonyms including extra information
      */
-    public function resolveSynonyms($referenceType, $referenceID, $taxonID, $insertSeries = 0): array
+    public function resolveSynonyms(string $referenceType, int $referenceID, int $taxonID, int $insertSeries = 0): array
     {
         $results = [];
         $basID = 0;
@@ -347,46 +347,45 @@ readonly class ClassificationFacade
             );
         }
 
-        switch (trim($referenceType)) {
-            case 'citation': //TODO only citation type is implemented, rearrange?
-                $synonyms = $this->taxonService->findSynonyms($taxonID, $referenceID);
-                foreach ($synonyms as $synonym) {
-                    // ignore if synonym is basionym
-                    if ($basionym !== null && $synonym['taxonID'] == $basionymID) {
-                        $basionymResult["referenceInfo"]["cited"] = true;
-                    } else {
-                        $results[] = array(
-                            "taxonID" => intval($synonym['taxonID']),
-                            "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $synonym['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
+        //TODO only citation type is implemented, rearrange?
+        if (trim($referenceType) == 'citation') {
+            $synonyms = $this->taxonService->findSynonyms($taxonID, $referenceID);
+            foreach ($synonyms as $synonym) {
+                // ignore if synonym is basionym
+                if ($basionym !== null && $synonym['taxonID'] == $basionymID) {
+                    $basionymResult["referenceInfo"]["cited"] = true;
+                } else {
+                    $results[] = array(
+                        "taxonID" => intval($synonym['taxonID']),
+                        "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $synonym['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
 
-                            "referenceName" => $synonym['scientificName'],
-                            "referenceId" => $referenceID,
-                            "referenceType" => $referenceType,
-                            "hasType" => $this->taxonService->hasType($synonym['taxonID']),
-                            "hasSpecimen" => $this->speciesRepository->hasSpecimen($synonym['taxonID']),
-                            "insertedCitation" => false,
-                            "referenceInfo" => array(
-                                "type" => ($synonym['homotype'] > 0) ? "homotype" : "heterotype",
-                                'cited' => true
-                            ),
-                        );
-                        $insertedCitations = $this->getInsertedCitation($insertSeries, $referenceID, $synonym['taxonID']);
-                        if (!empty($insertedCitations)) {
-                            foreach ($insertedCitations as $citation) {
-                                $results[] = array(
-                                    "taxonID" => $citation['taxonID'],
-                                    "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $citation['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
-                                    "referenceId" => $citation['referenceId'],
-                                    "referenceName" => $citation['referenceName'],
-                                    "referenceType" => $citation['referenceType'],
-                                    "hasChildren" => $citation['hasChildren'],
-                                    "insertedCitation" => true,
-                                );
-                            }
+                        "referenceName" => $synonym['scientificName'],
+                        "referenceId" => $referenceID,
+                        "referenceType" => $referenceType,
+                        "hasType" => $this->taxonService->hasType($synonym['taxonID']),
+                        "hasSpecimen" => $this->speciesRepository->hasSpecimen($synonym['taxonID']),
+                        "insertedCitation" => false,
+                        "referenceInfo" => array(
+                            "type" => ($synonym['homotype'] > 0) ? "homotype" : "heterotype",
+                            'cited' => true
+                        ),
+                    );
+                    $insertedCitations = $this->getInsertedCitation($insertSeries, $referenceID, $synonym['taxonID']);
+                    if (!empty($insertedCitations)) {
+                        foreach ($insertedCitations as $citation) {
+                            $results[] = array(
+                                "taxonID" => $citation['taxonID'],
+                                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $citation['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
+                                "referenceId" => $citation['referenceId'],
+                                "referenceName" => $citation['referenceName'],
+                                "referenceType" => $citation['referenceType'],
+                                "hasChildren" => $citation['hasChildren'],
+                                "insertedCitation" => true,
+                            );
                         }
                     }
                 }
-                break;
+            }
         }
 
         // if we have a basionym, prepend it to list

@@ -2,6 +2,7 @@
 
 namespace App\Service\Tools;
 
+use Exception;
 use JACQ\Repository\Herbarinput\ImageDefinitionRepository;
 use JACQ\Repository\Herbarinput\SpecimensRepository;
 use JACQ\Service\ImageService;
@@ -70,7 +71,7 @@ readonly class DjatokaService
                         $filename = $data['result'][0];
                     }
                 }
-                catch( \Exception $e ) {
+                catch( Exception $e ) {
                     $ok = false;
                     $errorRPC = $e->getMessage();
                 }
@@ -101,7 +102,7 @@ readonly class DjatokaService
                         }
                     }
                 }
-                catch(\Exception $e ) {
+                catch(Exception $e ) {
                     $ok = false;
                     $errorImage = htmlentities($e->getMessage());
                 }

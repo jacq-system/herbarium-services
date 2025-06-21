@@ -51,12 +51,11 @@ readonly class CoordinateConversionService
 
     public function latlon2utm(float $lat, float $lon): array
     {
-        $lat = floatval($lat);
+        $lat = $lat;
         $from = GeographicPoint::create(
             Geographic2D::fromSRID(Geographic2D::EPSG_WGS_84),
             new Degree($lat),
-            new Degree(floatval($lon)),
-            null
+            new Degree($lon)
         );
         $to = $from->asUTMPoint();
         if ($lat < -32) {

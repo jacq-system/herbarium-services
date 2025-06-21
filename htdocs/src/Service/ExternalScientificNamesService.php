@@ -7,6 +7,7 @@ use JACQ\Entity\Jacq\Herbarinput\ExternalServices;
 use JACQ\Repository\Herbarinput\ExternalServicesRepository;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Throwable;
 
 class ExternalScientificNamesService
 {
@@ -71,7 +72,7 @@ class ExternalScientificNamesService
                     }
                     break;
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->result[$service->getName()]['error'] = $e->getMessage();
         }
     }
@@ -103,7 +104,7 @@ class ExternalScientificNamesService
      * @param array $result given result of the service, json decoded
      * @return void
      */
-    private function wfo_read(ExternalServices $service, $result): void
+    private function wfo_read(ExternalServices $service, array $result): void
     {
         if (!empty($result['match'])) {
             $this->result[$service->getApiCode()]['match'] = array('id'    => $result['match']['wfo_id'],

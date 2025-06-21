@@ -180,8 +180,8 @@ class GeoController extends AbstractFOSRestController
     {
         $data = array();
         $data['nation'] = $this->coordinateBoundaryService->nationBoundaries($nationID, $lat, $lon);
-        if (isset($provinceID)) {
-            $data['province'] = $this->coordinateBoundaryService->provinceBoundaries($provinceID, $lat, $lon);
+        if (isset($province)) {
+            $data['province'] = $this->coordinateBoundaryService->provinceBoundaries($province, $lat, $lon);
         }
         //TODO better to use http codes, left for backward compatibility
         $data['error'] = (empty($data)) ? "nothing to do" : '';

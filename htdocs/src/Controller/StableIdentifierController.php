@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Exception;
 use JACQ\Service\SpecimenService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use OpenApi\Attributes\Get;
@@ -84,7 +85,7 @@ class StableIdentifierController extends AbstractFOSRestController
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
         }
-        catch (\Exception $e){
+        catch (Exception $e){
             $view = $this->view([], 404);
             return $this->handleView($view);
         }

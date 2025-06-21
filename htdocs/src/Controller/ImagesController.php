@@ -269,7 +269,7 @@ class ImagesController extends AbstractFOSRestController
     public function list(int $specimenID, int $imageNr = 0): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
-        $results = $this->imageLinkMapper->getList($imageNr);
+        $results = $this->imageLinkMapper->getList();
 
         $view = $this->view($results, 200);
 
