@@ -17,16 +17,9 @@ class DevelopersService
     {
     }
 
-    public function testApiWithExamples(): array
+    public function testApiWithExamples(string $path, array $methods): array
     {
-        $results = [];
-//        $symfonySwaggerPath = $this->router->generate("app.swagger", [], UrlGeneratorInterface::ABSOLUTE_URL);
-        $responseSwagger = $this->client->request('GET', 'https://jacqservicestest.dyn.cloud.e-infra.cz/doc.json');
-        $apiDoc = json_decode($responseSwagger->getContent(), true);
-        $i=0;
-        foreach ($apiDoc['paths'] as $path => $methods) {
-            $i++;
-            if($i>30){ continue;}
+        $results=[];
             foreach ($methods as $method => $details) {
                 if ($method !== 'get') {
                     /** testing only GET to be easy */
@@ -66,7 +59,7 @@ class DevelopersService
                 }
 
             }
-        }
+
 
         return $results;
     }
