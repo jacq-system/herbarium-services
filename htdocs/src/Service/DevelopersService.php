@@ -9,7 +9,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class DevelopersService
 {
-    protected const array Domains = ["https://jacq.dyn.cloud.e-infra.cz/", "https://services.jacq.org/jacq-"];
+    protected const array Domains = ["https://jacqtest.dyn.cloud.e-infra.cz/", "https://services.jacq.org/jacq-"];
 
     public function __construct(protected readonly EntityManagerInterface $entityManager, protected HttpClientInterface $client, protected RouterInterface $router)
     {
@@ -19,7 +19,7 @@ class DevelopersService
     {
         $results = [];
 //        $symfonySwaggerPath = $this->router->generate("app.swagger", [], UrlGeneratorInterface::ABSOLUTE_URL);
-        $responseSwagger = $this->client->request('GET', 'https://jacqtest.dyn.cloud.e-infra.cz/services/doc.json');
+        $responseSwagger = $this->client->request('GET', 'https://jacqtest.dyn.cloud.e-infra.cz/doc.json');
         $apiDoc = json_decode($responseSwagger->getContent(), true);
         $i=0;
         foreach ($apiDoc['paths'] as $path => $methods) {
