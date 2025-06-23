@@ -326,19 +326,18 @@ readonly class ClassificationFacade
         $results = [];
         $basID = 0;
         $basionymResult = null;
-
-        $basionym = $this->speciesRepository->getBasionym($taxonID);
+        $species = $this->speciesRepository->find($taxonID);
+        $basionym = $species->getBasionym();
 
         if ($basionym !== null) {
-            $basionymID = $basionym['basID'];
             $basionymResult = array(
                 "taxonID" => $basID,
-                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionymID], UrlGeneratorInterface::ABSOLUTE_URL)),
-                "referenceName" => $basionym['scientificName'],
+                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionym->getId()], UrlGeneratorInterface::ABSOLUTE_URL)),
+                "referenceName" => $this->speciesRepository->getScientificName($basionym),
                 "referenceId" => $referenceID,
                 "referenceType" => $referenceType,
-                "hasType" => $this->taxonService->hasType($basionymID),
-                "hasSpecimen" => $this->speciesRepository->hasSpecimen($basionymID),
+                "hasType" => $this->taxonService->hasType($basionym->getId()),
+                "hasSpecimen" => $this->speciesRepository->hasSpecimen($basionym->getId()),
                 "insertedCitation" => false,
                 "referenceInfo" => array(
                     "type" => "homotype",
@@ -352,7 +351,7 @@ readonly class ClassificationFacade
             $synonyms = $this->taxonService->findSynonyms($taxonID, $referenceID);
             foreach ($synonyms as $synonym) {
                 // ignore if synonym is basionym
-                if ($basionym !== null && $synonym['taxonID'] == $basionymID) {
+                if ($basionym !== null && $synonym['taxonID'] == $basionym->getId()) {
                     $basionymResult["referenceInfo"]["cited"] = true;
                 } else {
                     $results[] = array(

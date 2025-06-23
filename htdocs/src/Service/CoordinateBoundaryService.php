@@ -26,7 +26,7 @@ readonly class CoordinateBoundaryService
     {
         $qb = $this->entityManager->getRepository(GeoNationBoundaries::class)->createQueryBuilder('b')
             ->select('b')
-            ->where('b.nationID = :nationID')
+            ->where('b.nationId = :nationID')
             ->setParameter('nationID', $nationID);
         $boundaries = $qb->getQuery()->getResult();
 
@@ -46,7 +46,7 @@ readonly class CoordinateBoundaryService
     {
         $qb = $this->entityManager->getRepository(GeoProvinceBoundaries::class)->createQueryBuilder('b')
             ->select('b')
-            ->where('b.provinceID = :provinceID')
+            ->where('b.provinceId = :provinceID')
             ->setParameter('provinceID', $provinceID);
         $boundaries = $qb->getQuery()->getResult();
 
