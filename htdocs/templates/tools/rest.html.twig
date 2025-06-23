@@ -1,29 +1,31 @@
-{% extends '../base.html.twig' %}
-{% block title %}Homepage{% endblock %}
+{% extends 'base.html.twig' %}
+{% block title %}RESTS service checkpoint{% endblock %}
 
 {% block body %}
-    <h3>REST test</h3>
-    <p>testing API of JACQ.org and the Symfony clone using example values in OpenApi definition (of the Symfony <a
-            href="https://github.com/jacq-system/symfony">repository</a>)</p>
+    <div class="container-fluid">
+        <h3>REST test</h3>
+        <p>testing API of JACQ.org and the Symfony clone using example values in OpenApi definition (of the Symfony <a
+                href="https://github.com/jacq-system/symfony">repository</a>)</p>
 
-    {% for path, domain in results %}
-        <div class="row">
-            <h5>{{ path }}</h5>
+        {% for path, domain in results %}
+            <div class="row">
+                <h5>{{ path }}</h5>
 
-            {% for server, item in domain %}
-                <div class="col s6">
-                    <h5 class="card-panel {% if item.code == 200 %}teal{% elseif item.code == 404 %}red{% else %}orange{% endif %} lighten-2">{{ server }}
-                        - {{ item.code }}</h5>
-                    <a href="{{ item.url }}">{{ item.url }}</a>
+                {% for server, item in domain %}
+                    <div class="col-6">
+                        <h5 class="bg-{% if item.code == 200 %}success{% elseif item.code == 404 %}danger{% else %}info{% endif %}">{{ server }}
+                            - {{ item.code }}</h5>
+                        <a href="{{ item.url }}">{{ item.url }}</a>
 
-                    {% if item.content is not null %}
-                        <p>{{ item.content }}</p>
-                    {% endif %}
+                        {% if item.content is not null %}
+                            <p>{{ item.content }}</p>
+                        {% endif %}
 
-                </div>
-            {% endfor %}
+                    </div>
+                {% endfor %}
 
-        </div>
-    {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock %}

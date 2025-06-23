@@ -4,6 +4,8 @@ namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\HttpClient\Exception\TimeoutExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
@@ -24,7 +26,7 @@ class DevelopersService
         $i=0;
         foreach ($apiDoc['paths'] as $path => $methods) {
             $i++;
-//            if($i>40){ continue;}
+            if($i>30){ continue;}
             foreach ($methods as $method => $details) {
                 if ($method !== 'get') {
                     /** testing only GET to be easy */
@@ -32,25 +34,34 @@ class DevelopersService
                 }
                 foreach (self::Domains as $domain) {
                     $rawRequest = $this->prepareRequest($domain . ltrim($path, '/'), $details);
-                    $individualResponse = $this->client->request(strtoupper($method), $rawRequest["path"], ["query" => $rawRequest["parameters"], 'headers' => [
-                        'Accept' => 'application/json',
-                    ]]);
-                    if ($individualResponse->getStatusCode() == 200) {
+                    try {
+                        $individualResponse = $this->client->request(strtoupper($method), $rawRequest["path"], ["query" => $rawRequest["parameters"], 'headers' => [
+                            'Accept' => 'application/json',
+                            "timeout" => 2.0
+                        ]]);
+                        $statusCode = $individualResponse->getStatusCode();
                         $result = [
-                            "code" => $individualResponse->getStatusCode(),
-                            "content-type" => $individualResponse->getHeaders()['content-type'][0],
-                            "content" => $individualResponse->getContent(),
+                            "code" => $statusCode,
+                            "content-type" => $statusCode === 200 ? $individualResponse->getHeaders()['content-type'][0] : '',
+                            "content" => $statusCode === 200 ? $individualResponse->getContent() : '',
                             "url" => $individualResponse->getInfo("url")
                         ];
-                    } else {
+
+                    } catch (TimeoutExceptionInterface $e) {
                         $result = [
-                            "code" => $individualResponse->getStatusCode(),
-                            "content-type" => "",
-                            "content" => "",
-                            "url" => $individualResponse->getInfo("url")
+                            "code" => 408,  // HTTP 408 Request Timeout
+                            "content-type" => '',
+                            "content" => '',
+                            "url" => $rawRequest["path"]
+                        ];
+                    } catch (TransportExceptionInterface $e) {
+                        $result = [
+                            "code" => 500,
+                            "content-type" => '',
+                            "content" => '',
+                            "url" => $rawRequest["path"]
                         ];
                     }
-
                     $results[$path][$domain] = $result;
                 }
 
