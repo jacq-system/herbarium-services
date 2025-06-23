@@ -11,55 +11,74 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class DevelopersService
 {
-    protected const array Domains = ["https://jacqservicestest.dyn.cloud.e-infra.cz/", "https://services.jacq.org/jacq-"];
+    public const array Domains = ["https://jacqservicestest.dyn.cloud.e-infra.cz/", "https://services.jacq.org/jacq-"];
 
     public function __construct(protected readonly EntityManagerInterface $entityManager, protected HttpClientInterface $client, protected RouterInterface $router)
     {
     }
 
-    public function testApiWithExamples(string $path, array $methods): array
+    public function testApiWithExamples(): array
     {
-        $results=[];
+        $responseSwagger = $this->client->request('GET', 'https://jacqservicestest.dyn.cloud.e-infra.cz/doc.json');
+        $apiDoc = json_decode($responseSwagger->getContent(), true);
+
+        $pendingMap = [];
+        $results = [];
+
+        foreach ($apiDoc['paths'] as $path => $methods) {
             foreach ($methods as $method => $details) {
-                if ($method !== 'get') {
-                    /** testing only GET to be easy */
+                if (strtolower($method) !== 'get') {
                     continue;
                 }
                 foreach (self::Domains as $domain) {
                     $rawRequest = $this->prepareRequest($domain . ltrim($path, '/'), $details);
-                    try {
-                        $individualResponse = $this->client->request(strtoupper($method), $rawRequest["path"], ["query" => $rawRequest["parameters"], 'headers' => [
-                            'Accept' => 'application/json',
-                            "timeout" => 2.0
-                        ]]);
-                        $statusCode = $individualResponse->getStatusCode();
-                        $result = [
-                            "code" => $statusCode,
-                            "content-type" => $statusCode === 200 ? $individualResponse->getHeaders()['content-type'][0] : '',
-                            "content" => $statusCode === 200 ? $individualResponse->getContent() : '',
-                            "url" => $individualResponse->getInfo("url")
-                        ];
 
-                    } catch (TimeoutExceptionInterface $e) {
-                        $result = [
-                            "code" => 408,  // HTTP 408 Request Timeout
-                            "content-type" => '',
-                            "content" => '',
-                            "url" => $rawRequest["path"]
-                        ];
-                    } catch (TransportExceptionInterface $e) {
-                        $result = [
-                            "code" => 500,
-                            "content-type" => '',
-                            "content" => '',
-                            "url" => $rawRequest["path"]
-                        ];
-                    }
-                    $results[$path][$domain] = $result;
+                    $response = $this->client->request(strtoupper($method), $rawRequest['path'], [
+                        'query' => $rawRequest['parameters'],
+                        'headers' => ['Accept' => 'application/json'],
+                        'timeout' => 15.0,
+                        'max_duration' => 15.0
+                    ]);
+
+                    $hash = spl_object_hash($response);
+                    $pendingMap[$hash] = [
+                        'path' => $path,
+                        'domain' => $domain,
+                        'response' => $response,
+                    ];
+
+                    $results[$path][$domain] = null;
                 }
-
             }
+        }
 
+        foreach ($pendingMap as $path => $domains) {
+            foreach ($domains as $domain => $response) {
+                try {
+                    $statusCode = $response->getStatusCode();
+                    $url = $response->getInfo('url');
+                    $content = $statusCode === 200 ? htmlspecialchars(substr($response->getContent(), 0, 200)) : '';
+
+                    $results[$path][$domain] = [
+                        'status' => $statusCode,
+                        'url' => $url,
+                        'content' => $content,
+                    ];
+                } catch (TimeoutExceptionInterface $e) {
+                    $results[$path][$domain] = [
+                        'status' => 408,
+                        'url' => '',
+                        'content' => 'Timeout',
+                    ];
+                } catch (TransportExceptionInterface $e) {
+                    $results[$path][$domain] = [
+                        'status' => 500,
+                        'url' => '',
+                        'content' => 'Transport error',
+                    ];
+                }
+            }
+        }
 
         return $results;
     }
