@@ -39,7 +39,7 @@ class DevelopersController extends AbstractController
     #[Route('/tools/rest', name: 'tools_rest')]
     public function indexToolsRest(HttpClientInterface $client): Response
     {
-        $data = $this->developersService->testApiWithExamples();
+        $data = $this->developersService->getExampleLinks();
         return $this->render('tools/rest.html.twig', ["results" => $data]);
     }
 

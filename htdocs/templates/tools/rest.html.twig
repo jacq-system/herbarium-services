@@ -2,6 +2,60 @@
 {% block title %}RESTS service checkpoint{% endblock %}
 
 {% block body %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = Array.from(document.querySelectorAll('.item'));
+            const concurrency = 3;
+            let running = 0;
+            let index = 0;
+
+            function next() {
+                while (running < concurrency && index < items.length) {
+                    const item = items[index++];
+                    const url = item.getAttribute('data-url');
+                    const badge = item.querySelector('.badge');
+                    const para = item.querySelector('p');
+                    const h5 = item.querySelector('h5');
+
+                    running++;
+
+                    fetch(url)
+                        .then(response => {
+                            badge.textContent = response.status;
+
+                            // Nastav třídu podle status kódu
+                            h5.classList.remove('bg-success', 'bg-error', 'bg-primary');
+                            if (response.status === 200) {
+                                h5.classList.add('bg-success');
+                            } else if (response.status === 404) {
+                                h5.classList.add('bg-error');
+                            } else {
+                                h5.classList.add('bg-primary');
+                            }
+
+                            return response.text();
+                        })
+                        .then(body => {
+                            para.textContent = body;
+                        })
+                        .catch(err => {
+                            badge.textContent = 'ERR';
+                            para.textContent = err.message;
+
+                            h5.classList.remove('bg-success', 'bg-error', 'bg-primary');
+                            h5.classList.add('bg-error');
+                        })
+                        .finally(() => {
+                            running--;
+                            next();
+                        });
+                }
+            }
+
+            next();
+        });
+    </script>
+
     <div class="container-fluid">
         <h3>REST test</h3>
         <p>testing API of JACQ.org and the Symfony clone using example values in OpenApi definition (of the Symfony <a
@@ -11,16 +65,11 @@
             <div class="row">
                 <h5>{{ path }}</h5>
 
-                {% for server, item in domain %}
-                    <div class="col-6">
-                        <h5 class="bg-{% if item.code == 200 %}success{% elseif item.code == 404 %}danger{% else %}info{% endif %}">{{ server }}
-                            - {{ item.code }}</h5>
-                        <a href="{{ item.url }}">{{ item.url }}</a>
-
-                        {% if item.content is not null %}
-                            <p>{{ item.content }}</p>
-                        {% endif %}
-
+                {% for server, url in domain %}
+                    <div class="col-6 item" data-url="{{ url }}">
+                        <h5>{{ server }} <span class="badge"></span></h5>
+                        <a href="{{ url }}">{{ url }}</a>
+                        <p>- - waiting - -</p>
                     </div>
                 {% endfor %}
 
