@@ -6,7 +6,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const items = Array.from(document.querySelectorAll('.item'));
             const concurrency = 3;
-            const timeoutMs = 10000; // 10 sekund
+            const timeoutMs = 30 * 1000;
             let running = 0;
             let index = 0;
 
@@ -45,7 +45,7 @@
                         .catch(err => {
                             clearTimeout(timeoutId);
                             badge.textContent = 'ERR';
-                            para.textContent = err.name === 'AbortError' ? 'Timeout after 10s' : err.message;
+                            para.textContent = err.name === 'AbortError' ? 'Timeout after ' + timeoutMs/1000 + 's' : err.message;
 
                             h5.classList.remove('bg-success', 'bg-error', 'bg-primary');
                             h5.classList.add('bg-error');
