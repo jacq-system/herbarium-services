@@ -1708,12 +1708,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacq-system/orm-model.git",
-                "reference": "9dbcc9043f8376b00e0c388eb7a0a2afb7078517"
+                "reference": "a42df8ec4be89d383cd0436d811ecb9ed01a66d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/9dbcc9043f8376b00e0c388eb7a0a2afb7078517",
-                "reference": "9dbcc9043f8376b00e0c388eb7a0a2afb7078517",
+                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/a42df8ec4be89d383cd0436d811ecb9ed01a66d1",
+                "reference": "a42df8ec4be89d383cd0436d811ecb9ed01a66d1",
                 "shasum": ""
             },
             "require": {
@@ -1747,7 +1747,7 @@
                 "source": "https://github.com/jacq-system/orm-model/tree/main",
                 "issues": "https://github.com/jacq-system/orm-model/issues"
             },
-            "time": "2025-06-23T12:08:51+00:00"
+            "time": "2025-06-25T11:40:37+00:00"
         },
         {
             "name": "jms/metadata",

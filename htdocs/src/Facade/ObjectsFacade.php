@@ -2,19 +2,18 @@
 
 namespace App\Facade;
 
-
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use JACQ\Entity\Jacq\Herbarinput\Specimens;
 use JACQ\Service\SpeciesService;
 use JACQ\Service\SpecimenService;
-use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 readonly class ObjectsFacade
 {
-    //TODO refactored a little, but no much happy with the result :(
-    public function __construct(protected  EntityManagerInterface $entityManager, protected RouterInterface $router, protected  SpeciesService $taxonService, protected SpecimenService $specimenService)
+    public function __construct(protected EntityManagerInterface $entityManager, protected RouterInterface $router, protected SpeciesService $taxonService, protected SpecimenService $specimenService)
     {
     }
 
@@ -41,7 +40,6 @@ readonly class ObjectsFacade
      */
     public function resolveSpecimens(int $p, int $rpp, int $listOnly, string $term, string $sc, string $coll, int $type, string $sort, string $herbnr, string $nation, int $withImages, string $cltr): array
     {
-
         $taxonIDList = [];
         if (!empty($term)) {
             $taxa = $this->taxonService->fulltextSearch($term);
@@ -50,28 +48,16 @@ readonly class ObjectsFacade
                 $taxonIDList[] = $taxon['taxonID'];
             }
         }
-        $baseQuery = $this->buildSpecimensQuery($taxonIDList, $term, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort);
+        $dataQueryBuilder = $this->getQueryBuilder($taxonIDList, $term, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
+            ->setFirstResult($rpp * $p)
+            ->setMaxResults($rpp);
 
-        $query = $baseQuery . " LIMIT " . ($rpp * $p) . "," . $rpp;
-        /** providing all possible params to the query */
-        $params = [
-            "taxonIDList" => $taxonIDList,
-            "herbNr" => strtr($herbnr, '*', '%'),
-            "herbNrPure" => $herbnr,
-            "collNr" => strtr($coll, '*', '%'),
-            "collNrPure" => $coll,
-            "sc" => $sc,
-            "cltr" => $cltr . "%",
-            "cltrBothSide" => "%" . $cltr . "%",
-            "nation" => $nation,
-        ];
+        $list = $dataQueryBuilder->getQuery()->getResult();
 
-        $parameterTypes = [
-            "taxonIDList" => ArrayParameterType::INTEGER
-        ];
-
-        $list = $this->entityManager->getConnection()->executeQuery($query, $params, $parameterTypes)->fetchAllAssociative();
-        $nrRows = (int)$this->entityManager->getConnection()->executeQuery("SELECT FOUND_ROWS()")->fetchOne();
+        $countQueryBuilder = $this->getQueryBuilder($taxonIDList, $term, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
+            ->resetDQLPart('orderBy')
+            ->select('COUNT(DISTINCT s.id)');
+        $nrRows = (int)$countQueryBuilder->getQuery()->getSingleScalarResult();
 
         // get the number of pages and check the active page again
         $lastPage = floor(($nrRows - 1) / $rpp);
@@ -107,68 +93,92 @@ readonly class ObjectsFacade
             'totalPages' => $lastPage + 1,
             'result' => array()
         );
-        foreach ($list as $item) {
-            $specimen = $this->specimenService->findAccessibleForPublic($item['specimenID']);
-            $data['result'][] = (!empty($listOnly)) ? intval($item['specimenID']) : $this->resolveSpecimen($specimen);
+        foreach ($list as $specimen) {
+            $data['result'][] = (!empty($listOnly)) ? $specimen->getId() : $this->resolveSpecimen($specimen);
         }
 
         return $data;
     }
 
-    protected function buildSpecimensQuery(array $taxonIDList, string $term, string $herbnr, string $sc, string $cltr, string $nation, int $type, int $withImages, string $sort): string
+    protected function getQueryBuilder(array $taxonIDList, string $term, string $herbNumber, string $institutionCode, string $collectorName, string $nation, int $typus, int $withImages, string $sort, string $collectionNr): ?QueryBuilder
     {
-        // prepare the parts of the query string
-        $sql = "SELECT SQL_CALC_FOUND_ROWS s.specimen_ID AS specimenID
-            FROM tbl_specimens s ";
-        $joins = array();
-        $constraint = "WHERE s.accessible != '0' ";
-        $order = "ORDER BY ";
+        $qb = $this->entityManager->getRepository(Specimens::class)->createQueryBuilder('s');
+        $joins = [];
 
-        // what to search for
+        $qb->select('s')
+            ->where('s.accessibleForPublic = true');
         if ($term !== '') {
             if (count($taxonIDList) > 0) {
-                $constraint .= " AND s.taxonID IN (:taxonIDList)";
+                $qb->leftJoin('s.species', 'species')
+                    ->andWhere('species.id IN (:taxonIDList)')
+                    ->setParameter('taxonIDList', $taxonIDList, ArrayParameterType::INTEGER);
             } else { // there is no scientific name which fits the search criterea, so there can be no result
-                $constraint .= " AND 0 ";
+                return null;
             }
-        }
-        if (!empty($herbnr)) {
-            if (str_contains($herbnr, '*')) {
-                $constraint .= " AND s.HerbNummer LIKE :herbNr ";
-            } else {
-                $constraint .= " AND s.HerbNummer = :herbNrPure ";
-            }
-        }
-        if (!empty($collnr)) {
-            if (str_contains($collnr, '*')) {
-                $constraint .= " AND s.CollNummer LIKE :collNr ";
-            } else {
-                $constraint .= " AND s.CollNummer = :collNrPure";
-            }
-        }
-        if (!empty($sc)) {
-            $joins['m'] = true;
-            //TODO why LIKE?
-            $constraint .= " AND m.SourceInstitutionID LIKE :sc ";
-        }
-        if (!empty($cltr)) {
-            $joins['c'] = true;
-            $constraint .= " AND (c.Sammler LIKE :cltr OR c2.Sammler_2 LIKE :cltrBothSide) ";
-        }
-        if (!empty($nation)) {
-            $joins['gn'] = true;
-            //TODO why LIKE?
-            $constraint .= " AND (n.nation_engl LIKE :nation OR n.nation LIKE :nation OR n.nation_deutsch LIKE :nation) ";
-        }
-        if (!empty($type)) {
-            $joins['tst'] = true;
-            $constraint .= " AND tst.typusID IS NOT NULL ";
-        }
-        if (!empty($withImages)) {
-            $constraint .= " AND (s.digital_image = 1 OR s.digital_image_obs = 1) ";
         }
 
-        // order the result
+        if (!empty($herbNumber)) {
+            if (str_contains($herbNumber, '*')) {
+                $qb->andWhere('s.herbNumber LIKE :herbNr')
+                    ->setParameter('herbNr', strtr($herbNumber, '*', '%'));
+            } else {
+                $qb->andWhere('s.herbNumber LIKE :herbNrPure')
+                    ->setParameter('herbNrPure', $herbNumber);
+            }
+        }
+        if (!empty($collectionNr)) {
+            if (str_contains($collectionNr, '*')) {
+                $qb->andWhere('s.collectionNumber LIKE :collNr')
+                    ->setParameter('collNr', strtr($collectionNr, '*', '%'));
+            } else {
+                $qb->andWhere('s.collectionNumber = :collNrPure')
+                    ->setParameter('collNrPure', $collectionNr);
+            }
+        }
+        if (!empty($institutionCode)) {
+            $joins[] = 'herbCollection';
+            $joins[] = 'institution';
+            $qb->leftJoin('s.herbCollection', 'herbCollection')
+                ->leftJoin('herbCollection.institution', 'institution')
+                ->andWhere('institution.code = :sc')
+                ->setParameter('sc', $institutionCode);
+        }
+        if (!empty($collectorName)) {
+            $joins[] = 'collector';
+            $qb->leftJoin('s.collector', 'collector')
+                ->leftJoin('s.collector2', 'collector2')
+                ->andWhere('collector.name LIKE :cltr')
+                ->andWhere('collector2.name LIKE :cltrBothSide')
+                ->setParameter('cltr', $collectorName . "%")
+                ->setParameter('cltrBothSide', "%" . $collectorName . "%");
+        }
+        if (!empty($nation)) {
+            $joins[] = 'country';
+            $qb->leftJoin('s.country', 'country')
+                ->andWhere($qb->expr()->orX(
+                    $qb->expr()->eq('country.name', ':nation'),
+                    $qb->expr()->eq('country.nameEng', ':nation'),
+                    $qb->expr()->eq('country.nameDe', ':nation'),
+
+                ))
+                ->setParameter('nation', $nation);
+            ;
+        }
+        if (!empty($typus)) {
+            $joins[] = 'typus';
+            $qb->join('s.typus', 'typus');
+        }
+        if (!empty($withImages)) {
+            $qb->andWhere($qb->expr()->orX(
+                $qb->expr()->eq('s.image', '1'),
+                $qb->expr()->eq('s.imageObservation', '1')
+            ));
+        }
+        return $this->sortQuery($qb, $sort, $joins);
+    }
+
+    protected function sortQuery(QueryBuilder $queryBuilder, string $sort, array $joins): QueryBuilder
+    {
         $parts = explode(',', $sort);
         foreach ($parts as $part) {
             $t_part = trim($part);
@@ -183,62 +193,44 @@ readonly class ObjectsFacade
                 $orderSequence = '';
             }
             switch ($key) {
-                case 'sciname':
-                    $joins['sn'] = true;
-                    $order .= "sn.scientificName{$orderSequence},";
-                    break;
+                // TODO this sort is off, as the database is crazy. tbl_tax_sciname should be only two columns in tbl_tax_species but is as separate table which is unpossible to model with ORM. When fixed, also the route anotations shoudl be changed (include example and default by sciname sort e.g.)
+//                case 'sciname':
+//                    if(empty($joins['unavailable'])) {
+//                        $queryBuilder->join('s.xx', 'species');
+//                    }
+//                        $queryBuilder->addOrderBy('species.scientificName', $orderSequence);
+//                    break;
                 case 'cltr':
-                    $joins['c'] = true;
-                    $order .= "c.Sammler{$orderSequence},c2.Sammler_2{$orderSequence},";
+                    if (empty($joins['collector'])) {
+                        $queryBuilder->leftJoin('s.collector', 'collector')
+                            ->leftJoin('s.collector2', 'collector2');
+                    }
+                    $queryBuilder
+                        ->addOrderBy('collector.name', $orderSequence)
+                        ->addOrderBy('collector2.name', $orderSequence);
                     break;
                 case 'ser':
-                    $joins['ss'] = true;
-                    $order .= "ss.series{$orderSequence},";
+                    $queryBuilder->leftJoin('s.series', 'series')
+                        ->addOrderBy('series.name', $orderSequence);
                     break;
                 case 'num':
-                    $order .= "s.Nummer{$orderSequence},";
+                    $queryBuilder
+                        ->addOrderBy('s.number', $orderSequence);
                     break;
                 case 'herbnr':
-                    $order .= "s.HerbNummer{$orderSequence},";
+                    $queryBuilder
+                        ->addOrderBy('s.herbNumber', $orderSequence);
                     break;
             }
         }
-        $order .= "s.specimen_ID";  // as last resort, order according to specimen-ID
 
-        // add all activated joins
-        foreach ($joins as $join => $val) {
-            if ($val) {
-                switch ($join) {
-                    case 'tst':
-                        $sql .= " LEFT JOIN tbl_specimens_types tst       ON tst.specimenID  = s.specimen_ID ";
-                        break;
-                    case 'm':
-                        $sql .= " LEFT JOIN tbl_management_collections mc ON mc.collectionID = s.collectionID
-                                      LEFT JOIN metadata m                        ON m.MetadataID     = mc.source_ID ";
-                        break;
-                    case 'gn':
-                        $sql .= " LEFT JOIN tbl_geo_nation n              ON n.nationID      = s.NationID ";
-                        break;
-                    case 'c':
-                        $sql .= " LEFT JOIN tbl_collector c               ON c.SammlerID     = s.SammlerID
-                                      LEFT JOIN tbl_collector_2 c2            ON c2.Sammler_2ID  = s.Sammler_2ID ";
-                        break;
-                    case 'sn':
-                        $sql .= " LEFT JOIN tbl_tax_sciname sn            ON sn.taxonID      = s.taxonID ";
-                        break;
-                    case 'ss':
-                        $sql .= " LEFT JOIN tbl_specimens_series ss       ON ss.seriesID     = s.seriesID ";
-                        break;
-                }
-            }
-        }
-        return $sql . $constraint . $order;
+        return $queryBuilder->addOrderBy('s.id');
     }
 
     /**
      * get all or some properties of a specimen with given ID
      *
-     * @param int $specimenID ID of specimen
+     * @param Specimens $specimen specimen
      * @param string $fieldGroups which groups should be returned (dc, dwc, jacq), defaults to all
      * @return array properties (dc, dwc and jacq)
      */
