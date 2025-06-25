@@ -60,7 +60,7 @@ readonly class ObjectsFacade
         $nrRows = (int)$countQueryBuilder->getQuery()->getSingleScalarResult();
 
         // get the number of pages and check the active page again
-        $lastPage = floor(($nrRows - 1) / $rpp);
+        $lastPage = (int) floor(($nrRows - 1) / $rpp);
         if ($p > $lastPage) {   // if the page number was wrongly set to a too large value
             $p = $lastPage + 1; // reset it to the page after the last page
         }
