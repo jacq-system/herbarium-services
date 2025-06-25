@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use JACQ\Exception\NotFoundException;
 use JACQ\Repository\Herbarinput\SpeciesRepository;
 use JACQ\Service\SpeciesService;
 use JACQ\Service\UuidService;
@@ -220,13 +221,16 @@ class ScinamesController extends AbstractFOSRestController
     #[Route('/services/rest/JACQscinames/resolve/{uuid}', name: "services_rest_scinames_resolve", methods: ['GET'])]
     public function resolve(string $uuid): Response
     {
+        $data=[];
         $taxonID = $this->uuidService->getTaxonFromUuid($uuid);
-        $data = array(
-            'uuid' => $uuid,
-            'url' => $this->uuidService->getResolvableUri($uuid),
-            'taxonID' => $taxonID,
-            'scientificName' => $this->taxaNamesService->getScientificName($taxonID),
-            'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
+        if (!empty($taxonID)) {
+            $data = array(
+                'uuid' => $uuid,
+                'url' => $this->uuidService->getResolvableUri($uuid),
+                'taxonID' => $taxonID,
+                'scientificName' => $this->taxaNamesService->getScientificName($taxonID),
+                'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
+        }
         $view = $this->view($data, 200);
         return $this->handleView($view);
     }
