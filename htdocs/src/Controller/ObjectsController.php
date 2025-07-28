@@ -109,7 +109,7 @@ class ObjectsController extends AbstractFOSRestController
             ),
             new QueryParameter(
                 name: 'term',
-                description: 'ptional search term for scientific names, use * as a wildcard, multiple terms seperated by \',\'',
+                description: 'optional search term for scientific names, use * as a wildcard, multiple terms seperated by \',\'',
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string'),

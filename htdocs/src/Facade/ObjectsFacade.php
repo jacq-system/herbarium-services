@@ -42,19 +42,25 @@ readonly class ObjectsFacade
     {
         $taxonIDList = [];
         if (!empty($term)) {
-            $taxa = $this->taxonService->fulltextSearch($term);
+            $names = explode(',', $term);
+            foreach ($names as $name) {
+                $taxa = $this->taxonService->fulltextSearch($name);
 
-            foreach ($taxa as $taxon) {
-                $taxonIDList[] = $taxon['taxonID'];
+                foreach ($taxa as $taxon) {
+                    $taxonIDList[] = $taxon['taxonID'];
+                }
+            }
+            if (count($taxonIDList) === 0) {
+                return [];
             }
         }
-        $dataQueryBuilder = $this->getQueryBuilder($taxonIDList, $term, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
+        $dataQueryBuilder = $this->getQueryBuilder($taxonIDList, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
             ->setFirstResult($rpp * $p)
             ->setMaxResults($rpp);
 
         $list = $dataQueryBuilder->getQuery()->getResult();
 
-        $countQueryBuilder = $this->getQueryBuilder($taxonIDList, $term, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
+        $countQueryBuilder = $this->getQueryBuilder($taxonIDList, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
             ->resetDQLPart('orderBy')
             ->select('COUNT(DISTINCT s.id)');
         $nrRows = (int)$countQueryBuilder->getQuery()->getSingleScalarResult();
@@ -100,21 +106,18 @@ readonly class ObjectsFacade
         return $data;
     }
 
-    protected function getQueryBuilder(array $taxonIDList, string $term, string $herbNumber, string $institutionCode, string $collectorName, string $nation, int $typus, int $withImages, string $sort, string $collectionNr): ?QueryBuilder
+    protected function getQueryBuilder(array $taxonIDList, string $herbNumber, string $institutionCode, string $collectorName, string $nation, int $typus, int $withImages, string $sort, string $collectionNr): QueryBuilder
     {
         $qb = $this->entityManager->getRepository(Specimens::class)->createQueryBuilder('s');
         $joins = [];
 
         $qb->select('s')
             ->where('s.accessibleForPublic = true');
-        if ($term !== '') {
-            if (count($taxonIDList) > 0) {
-                $qb->leftJoin('s.species', 'species')
-                    ->andWhere('species.id IN (:taxonIDList)')
-                    ->setParameter('taxonIDList', $taxonIDList, ArrayParameterType::INTEGER);
-            } else { // there is no scientific name which fits the search criterea, so there can be no result
-                return null;
-            }
+
+        if (count($taxonIDList) > 0) {
+            $qb->leftJoin('s.species', 'species')
+                ->andWhere('species.id IN (:taxonIDList)')
+                ->setParameter('taxonIDList', $taxonIDList, ArrayParameterType::INTEGER);
         }
 
         if (!empty($herbNumber)) {
