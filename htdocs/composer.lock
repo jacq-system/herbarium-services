@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4bd81013db1fad7a78ab20bf48263091",
+    "content-hash": "f6d0ac6a3ad00e698c5c8be6419706b0",
     "packages": [
         {
             "name": "composer/pcre",
@@ -240,21 +240,21 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "4.2.4",
+            "version": "4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "b37d160498ea91a2382a2ebe825c4ea6254fc0ec"
+                "reference": "ac336c95ea9e13433d56ca81c308b39db0e1a2a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/b37d160498ea91a2382a2ebe825c4ea6254fc0ec",
-                "reference": "b37d160498ea91a2382a2ebe825c4ea6254fc0ec",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/ac336c95ea9e13433d56ca81c308b39db0e1a2a7",
+                "reference": "ac336c95ea9e13433d56ca81c308b39db0e1a2a7",
                 "shasum": ""
             },
             "require": {
-                "doctrine/deprecations": "^0.5.3|^1",
-                "php": "^8.1",
+                "doctrine/deprecations": "^1.1.5",
+                "php": "^8.2",
                 "psr/cache": "^1|^2|^3",
                 "psr/log": "^1|^2|^3"
             },
@@ -265,7 +265,7 @@
                 "phpstan/phpstan": "2.1.17",
                 "phpstan/phpstan-phpunit": "2.0.6",
                 "phpstan/phpstan-strict-rules": "^2",
-                "phpunit/phpunit": "10.5.46",
+                "phpunit/phpunit": "11.5.23",
                 "slevomat/coding-standard": "8.16.2",
                 "squizlabs/php_codesniffer": "3.13.1",
                 "symfony/cache": "^6.3.8|^7.0",
@@ -326,7 +326,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/dbal/issues",
-                "source": "https://github.com/doctrine/dbal/tree/4.2.4"
+                "source": "https://github.com/doctrine/dbal/tree/4.3.1"
             },
             "funding": [
                 {
@@ -342,7 +342,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-06-15T23:15:01+00:00"
+            "time": "2025-07-22T10:09:51+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -930,16 +930,16 @@
         },
         {
             "name": "doctrine/migrations",
-            "version": "3.9.0",
+            "version": "3.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/migrations.git",
-                "reference": "325b61e41d032f5f7d7e2d11cbefff656eadc9ab"
+                "reference": "0f1e0c960ac29866d648a4f50142a74fe1cb6999"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/migrations/zipball/325b61e41d032f5f7d7e2d11cbefff656eadc9ab",
-                "reference": "325b61e41d032f5f7d7e2d11cbefff656eadc9ab",
+                "url": "https://api.github.com/repos/doctrine/migrations/zipball/0f1e0c960ac29866d648a4f50142a74fe1cb6999",
+                "reference": "0f1e0c960ac29866d648a4f50142a74fe1cb6999",
                 "shasum": ""
             },
             "require": {
@@ -1013,7 +1013,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/migrations/issues",
-                "source": "https://github.com/doctrine/migrations/tree/3.9.0"
+                "source": "https://github.com/doctrine/migrations/tree/3.9.1"
             },
             "funding": [
                 {
@@ -1029,20 +1029,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-03-26T06:48:45+00:00"
+            "time": "2025-06-27T07:19:23+00:00"
         },
         {
             "name": "doctrine/orm",
-            "version": "3.4.1",
+            "version": "3.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "92e2f6db831be44bc041fdfbc49402a063ec33cc"
+                "reference": "6deec3655ba3e8f15280aac11e264225854d2369"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/92e2f6db831be44bc041fdfbc49402a063ec33cc",
-                "reference": "92e2f6db831be44bc041fdfbc49402a063ec33cc",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/6deec3655ba3e8f15280aac11e264225854d2369",
+                "reference": "6deec3655ba3e8f15280aac11e264225854d2369",
                 "shasum": ""
             },
             "require": {
@@ -1117,9 +1117,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/orm/issues",
-                "source": "https://github.com/doctrine/orm/tree/3.4.1"
+                "source": "https://github.com/doctrine/orm/tree/3.5.0"
             },
-            "time": "2025-06-21T10:44:26+00:00"
+            "time": "2025-07-01T17:40:53+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -1708,12 +1708,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacq-system/orm-model.git",
-                "reference": "b8dd0e6b9e7765c02319130aaffd195c7846629c"
+                "reference": "889497129aeacc309ba976c24fd547ea4cd5da38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/b8dd0e6b9e7765c02319130aaffd195c7846629c",
-                "reference": "b8dd0e6b9e7765c02319130aaffd195c7846629c",
+                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/889497129aeacc309ba976c24fd547ea4cd5da38",
+                "reference": "889497129aeacc309ba976c24fd547ea4cd5da38",
                 "shasum": ""
             },
             "require": {
@@ -1722,6 +1722,7 @@
                 "ext-simplexml": "*",
                 "guzzlehttp/guzzle": "^7.9",
                 "league/oauth2-server-bundle": "^0.9",
+                "mjaschen/phpgeo": "^6",
                 "nyholm/psr7": "^1.8",
                 "php": "^8.4",
                 "symfony/http-client": "7.1.*"
@@ -1747,7 +1748,7 @@
                 "source": "https://github.com/jacq-system/orm-model/tree/main",
                 "issues": "https://github.com/jacq-system/orm-model/issues"
             },
-            "time": "2025-06-25T12:21:36+00:00"
+            "time": "2025-07-28T09:09:14+00:00"
         },
         {
             "name": "jms/metadata",
@@ -2546,6 +2547,89 @@
             "time": "2024-12-08T08:18:47+00:00"
         },
         {
+            "name": "mjaschen/phpgeo",
+            "version": "6.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mjaschen/phpgeo.git",
+                "reference": "71074ce618dbaa4f048c8ee6b4e0c2d0e51a0931"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mjaschen/phpgeo/zipball/71074ce618dbaa4f048c8ee6b4e0c2d0e51a0931",
+                "reference": "71074ce618dbaa4f048c8ee6b4e0c2d0e51a0931",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^11.0",
+                "squizlabs/php_codesniffer": "^3.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Location\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Marcus Jaschen",
+                    "email": "mjaschen@gmail.com",
+                    "homepage": "https://www.marcusjaschen.de/"
+                }
+            ],
+            "description": "Simple Yet Powerful Geo Library",
+            "homepage": "https://phpgeo.marcusjaschen.de/",
+            "keywords": [
+                "Polygon",
+                "area",
+                "bearing",
+                "bounds",
+                "calculation",
+                "coordinate",
+                "distance",
+                "earth",
+                "ellipsoid",
+                "geo",
+                "geofence",
+                "gis",
+                "gps",
+                "haversine",
+                "length",
+                "perpendicular",
+                "point",
+                "polyline",
+                "projection",
+                "simplify",
+                "track",
+                "vincenty"
+            ],
+            "support": {
+                "docs": "https://phpgeo.marcusjaschen.de/Installation.html",
+                "email": "mjaschen@gmail.com",
+                "issues": "https://github.com/mjaschen/phpgeo/issues",
+                "source": "https://github.com/mjaschen/phpgeo/tree/6.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://www.paypal.com/paypalme/mjaschen",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/mjaschen",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-01-12T09:09:15+00:00"
+        },
+        {
             "name": "monolog/monolog",
             "version": "3.9.0",
             "source": {
@@ -2834,16 +2918,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.5.0",
+            "version": "v5.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "ae59794362fe85e051a58ad36b289443f57be7a9"
+                "reference": "221b0d0fdf1369c71047ad1d18bb5880017bbc56"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/ae59794362fe85e051a58ad36b289443f57be7a9",
-                "reference": "ae59794362fe85e051a58ad36b289443f57be7a9",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/221b0d0fdf1369c71047ad1d18bb5880017bbc56",
+                "reference": "221b0d0fdf1369c71047ad1d18bb5880017bbc56",
                 "shasum": ""
             },
             "require": {
@@ -2886,9 +2970,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.5.0"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.6.0"
             },
-            "time": "2025-05-31T08:24:38+00:00"
+            "time": "2025-07-27T20:03:57+00:00"
         },
         {
             "name": "nyholm/psr7",
@@ -3488,16 +3572,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "2.1.0",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "9b30d6fd026b2c132b3985ce6b23bec09ab3aa68"
+                "reference": "b9e61a61e39e02dd90944e9115241c7f7e76bfd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/9b30d6fd026b2c132b3985ce6b23bec09ab3aa68",
-                "reference": "9b30d6fd026b2c132b3985ce6b23bec09ab3aa68",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/b9e61a61e39e02dd90944e9115241c7f7e76bfd8",
+                "reference": "b9e61a61e39e02dd90944e9115241c7f7e76bfd8",
                 "shasum": ""
             },
             "require": {
@@ -3529,9 +3613,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.1.0"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.2.0"
             },
-            "time": "2025-02-19T13:28:12+00:00"
+            "time": "2025-07-13T07:04:09+00:00"
         },
         {
             "name": "psr/cache",
@@ -5276,16 +5360,16 @@
         },
         {
             "name": "symfony/flex",
-            "version": "v2.7.1",
+            "version": "v2.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/flex.git",
-                "reference": "4ae50d368415a06820739e54d38a4a29d6df9155"
+                "reference": "423c36e369361003dc31ef11c5f15fb589e52c01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/flex/zipball/4ae50d368415a06820739e54d38a4a29d6df9155",
-                "reference": "4ae50d368415a06820739e54d38a4a29d6df9155",
+                "url": "https://api.github.com/repos/symfony/flex/zipball/423c36e369361003dc31ef11c5f15fb589e52c01",
+                "reference": "423c36e369361003dc31ef11c5f15fb589e52c01",
                 "shasum": ""
             },
             "require": {
@@ -5324,7 +5408,7 @@
             "description": "Composer plugin for Symfony",
             "support": {
                 "issues": "https://github.com/symfony/flex/issues",
-                "source": "https://github.com/symfony/flex/tree/v2.7.1"
+                "source": "https://github.com/symfony/flex/tree/v2.8.1"
             },
             "funding": [
                 {
@@ -5340,7 +5424,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-05-28T14:22:54+00:00"
+            "time": "2025-07-05T07:45:19+00:00"
         },
         {
             "name": "symfony/framework-bundle",
@@ -8243,16 +8327,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "5.1.3",
+            "version": "5.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "b8ba6bd99805c0ae09a38d1b26c1c92820509bd0"
+                "reference": "471f2e7c24c9508a2ee08df245cab64b62dbf721"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/b8ba6bd99805c0ae09a38d1b26c1c92820509bd0",
-                "reference": "b8ba6bd99805c0ae09a38d1b26c1c92820509bd0",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/471f2e7c24c9508a2ee08df245cab64b62dbf721",
+                "reference": "471f2e7c24c9508a2ee08df245cab64b62dbf721",
                 "shasum": ""
             },
             "require": {
@@ -8323,24 +8407,24 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/5.1.3"
+                "source": "https://github.com/zircote/swagger-php/tree/5.1.4"
             },
-            "time": "2025-05-20T03:35:10+00:00"
+            "time": "2025-07-15T23:54:13+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "masterminds/html5",
-            "version": "2.9.0",
+            "version": "2.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Masterminds/html5-php.git",
-                "reference": "f5ac2c0b0a2eefca70b2ce32a5809992227e75a6"
+                "reference": "fcf91eb64359852f00d921887b219479b4f21251"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/f5ac2c0b0a2eefca70b2ce32a5809992227e75a6",
-                "reference": "f5ac2c0b0a2eefca70b2ce32a5809992227e75a6",
+                "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/fcf91eb64359852f00d921887b219479b4f21251",
+                "reference": "fcf91eb64359852f00d921887b219479b4f21251",
                 "shasum": ""
             },
             "require": {
@@ -8392,22 +8476,22 @@
             ],
             "support": {
                 "issues": "https://github.com/Masterminds/html5-php/issues",
-                "source": "https://github.com/Masterminds/html5-php/tree/2.9.0"
+                "source": "https://github.com/Masterminds/html5-php/tree/2.10.0"
             },
-            "time": "2024-03-31T07:05:07+00:00"
+            "time": "2025-07-25T09:04:22+00:00"
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.13.1",
+            "version": "1.13.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "1720ddd719e16cf0db4eb1c6eca108031636d46c"
+                "reference": "faed855a7b5f4d4637717c2b3863e277116beb36"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/1720ddd719e16cf0db4eb1c6eca108031636d46c",
-                "reference": "1720ddd719e16cf0db4eb1c6eca108031636d46c",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/faed855a7b5f4d4637717c2b3863e277116beb36",
+                "reference": "faed855a7b5f4d4637717c2b3863e277116beb36",
                 "shasum": ""
             },
             "require": {
@@ -8446,7 +8530,7 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.1"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.3"
             },
             "funding": [
                 {
@@ -8454,7 +8538,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-04-29T12:36:36+00:00"
+            "time": "2025-07-05T12:25:42+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -10169,16 +10253,16 @@
         },
         {
             "name": "symfony/maker-bundle",
-            "version": "v1.63.0",
+            "version": "v1.64.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/maker-bundle.git",
-                "reference": "69478ab39bc303abfbe3293006a78b09a8512425"
+                "reference": "c86da84640b0586e92aee2b276ee3638ef2f425a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/69478ab39bc303abfbe3293006a78b09a8512425",
-                "reference": "69478ab39bc303abfbe3293006a78b09a8512425",
+                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/c86da84640b0586e92aee2b276ee3638ef2f425a",
+                "reference": "c86da84640b0586e92aee2b276ee3638ef2f425a",
                 "shasum": ""
             },
             "require": {
@@ -10206,6 +10290,7 @@
                 "symfony/http-client": "^6.4|^7.0",
                 "symfony/phpunit-bridge": "^6.4.1|^7.0",
                 "symfony/security-core": "^6.4|^7.0",
+                "symfony/security-http": "^6.4|^7.0",
                 "symfony/yaml": "^6.4|^7.0",
                 "twig/twig": "^3.0|^4.x-dev"
             },
@@ -10241,7 +10326,7 @@
             ],
             "support": {
                 "issues": "https://github.com/symfony/maker-bundle/issues",
-                "source": "https://github.com/symfony/maker-bundle/tree/v1.63.0"
+                "source": "https://github.com/symfony/maker-bundle/tree/v1.64.0"
             },
             "funding": [
                 {
@@ -10257,20 +10342,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-04-26T01:41:37+00:00"
+            "time": "2025-06-23T16:12:08+00:00"
         },
         {
             "name": "symfony/phpunit-bridge",
-            "version": "v7.3.0",
+            "version": "v7.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/phpunit-bridge.git",
-                "reference": "2eabda563921f21cbce1d1e3247b3c36568905e6"
+                "reference": "71624984d8bcad6acf7a790d4e3ceafe04bc2485"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/2eabda563921f21cbce1d1e3247b3c36568905e6",
-                "reference": "2eabda563921f21cbce1d1e3247b3c36568905e6",
+                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/71624984d8bcad6acf7a790d4e3ceafe04bc2485",
+                "reference": "71624984d8bcad6acf7a790d4e3ceafe04bc2485",
                 "shasum": ""
             },
             "require": {
@@ -10322,8 +10407,11 @@
             ],
             "description": "Provides utilities for PHPUnit, especially user deprecation notices management",
             "homepage": "https://symfony.com",
+            "keywords": [
+                "testing"
+            ],
             "support": {
-                "source": "https://github.com/symfony/phpunit-bridge/tree/v7.3.0"
+                "source": "https://github.com/symfony/phpunit-bridge/tree/v7.3.1"
             },
             "funding": [
                 {
@@ -10339,7 +10427,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-05-23T07:26:30+00:00"
+            "time": "2025-06-04T10:09:06+00:00"
         },
         {
             "name": "symfony/process",
