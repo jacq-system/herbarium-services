@@ -68,11 +68,12 @@ class ScinamesController extends AbstractFOSRestController
     public function uuid(int $taxonID): Response
     {
         $uuid = $this->uuidService->getUuid('scientific_name', $taxonID);
+        $taxon = $this->speciesRepository->find($taxonID);
         $data = array(
             'uuid' => $uuid,
             'url' => $this->uuidService->getResolvableUri($uuid),
             'taxonID' => $taxonID,
-            'scientificName' => $this->taxaNamesService->getScientificName($taxonID),
+            'scientificName' => $this->speciesRepository->getScientificName($taxon),
             'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
         $view = $this->view($data, 200);
         return $this->handleView($view);
@@ -224,11 +225,12 @@ class ScinamesController extends AbstractFOSRestController
         $data=[];
         $taxonID = $this->uuidService->getTaxonFromUuid($uuid);
         if (!empty($taxonID)) {
+            $taxon = $this->speciesRepository->find($taxonID);
             $data = array(
                 'uuid' => $uuid,
                 'url' => $this->uuidService->getResolvableUri($uuid),
                 'taxonID' => $taxonID,
-                'scientificName' => $this->taxaNamesService->getScientificName($taxonID),
+                'scientificName' => $this->speciesRepository->getScientificName($taxon),
                 'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
         }
         $view = $this->view($data, 200);
