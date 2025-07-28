@@ -26,29 +26,6 @@ class ObjectsController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/objects/specimens/search',
-        summary: '"/specimens/search" is deprecated, use "/specimens" instead',
-        tags: ['objects'],
-        responses: [
-            new \OpenApi\Attributes\Response(
-                response: 307,
-                description: 'Deprecated'
-            ),
-            new \OpenApi\Attributes\Response(
-                response: 400,
-                description: 'Bad Request'
-            )
-        ],
-        deprecated: true
-    )]
-    #[Route('/jacq-services/rest/objects/specimens/search', methods: ['GET'])]
-    public function results(Request $request): Response
-    {
-        $this->logger->warning('used deprecated "/specimens/search" endpoint');
-        return $this->redirectToRoute('services_rest_objects_specimens', $request->query->all(), 307);
-    }
-
-    #[Get(
         path: '/jacq-services/rest/objects/specimens/{specimenID}',
         summary: 'get the properties of a specimen',
         tags: ['objects'],
