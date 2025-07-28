@@ -136,7 +136,7 @@ class GeoController extends AbstractFOSRestController
                 example: 70
             ),
             new QueryParameter(
-                name: 'province',
+                name: 'provinceID',
                 description: 'province ID',
                 in: 'query',
                 required: false,
@@ -176,12 +176,12 @@ class GeoController extends AbstractFOSRestController
         ]
     )]
     #[Route('/jacq-services/rest/geo/checkBoundaries', name: "services_rest_geo_checkBoundaries", methods: ['GET'])]
-    public function checkBoundaries(#[MapQueryParameter] float $lat, #[MapQueryParameter] float $lon, #[MapQueryParameter] int $nationID, #[MapQueryParameter] ?int $province): Response
+    public function checkBoundaries(#[MapQueryParameter] float $lat, #[MapQueryParameter] float $lon, #[MapQueryParameter] int $nationID, #[MapQueryParameter] ?int $provinceID): Response
     {
         $data = array();
         $data['nation'] = $this->coordinateBoundaryService->nationBoundaries($nationID, $lat, $lon);
-        if (isset($province)) {
-            $data['province'] = $this->coordinateBoundaryService->provinceBoundaries($province, $lat, $lon);
+        if (isset($provinceID)) {
+            $data['province'] = $this->coordinateBoundaryService->provinceBoundaries($provinceID, $lat, $lon);
         }
         //TODO better to use http codes, left for backward compatibility
         $data['error'] = (empty($data)) ? "nothing to do" : '';
