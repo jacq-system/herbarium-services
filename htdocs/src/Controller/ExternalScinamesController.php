@@ -20,7 +20,7 @@ class ExternalScinamesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/externalScinames/find/{term}',
+        path: '/jacq-services/rest/externalScinames/find/{term}',
         summary: 'search for scientific names; get IDs and scientific names of search result',
         tags: ['externalScinames'],
         parameters: [
@@ -61,7 +61,7 @@ class ExternalScinamesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/externalScinames/find/{term}', name: "services_rest_externalScinames_find", methods: ['GET'])]
+    #[Route('/jacq-services/rest/externalScinames/find/{term}', name: "services_rest_externalScinames_find", methods: ['GET'])]
     public function search(string $term): Response
     {
         $results = $this->scinamesService->searchAll($term);

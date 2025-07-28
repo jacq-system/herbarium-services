@@ -23,7 +23,7 @@ class ScinamesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/JACQscinames/uuid/{taxonID}',
+        path: '/jacq-services/rest/JACQscinames/uuid/{taxonID}',
         summary: 'Get scientific name, uuid and uuid-url of a given taxonID',
         tags: ['scinames'],
         parameters: [
@@ -64,7 +64,7 @@ class ScinamesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/JACQscinames/uuid/{taxonID}', name: "services_rest_scinames_uuid", methods: ['GET'])]
+    #[Route('/jacq-services/rest/JACQscinames/uuid/{taxonID}', name: "services_rest_scinames_uuid", methods: ['GET'])]
     public function uuid(int $taxonID): Response
     {
         $uuid = $this->uuidService->getUuid('scientific_name', $taxonID);
@@ -79,7 +79,7 @@ class ScinamesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/JACQscinames/name/{taxonID}',
+        path: '/jacq-services/rest/JACQscinames/name/{taxonID}',
         summary: 'Get scientific name, uuid and uuid-url of a given taxonID',
         tags: ['scinames'],
         parameters: [
@@ -120,7 +120,7 @@ class ScinamesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/JACQscinames/name/{taxonID}', name: "services_rest_scinames_name", methods: ['GET'])]
+    #[Route('/jacq-services/rest/JACQscinames/name/{taxonID}', name: "services_rest_scinames_name", methods: ['GET'])]
     public function name(int $taxonID): Response
     {
         //TODO this service is just a synonym to $this->uuid()
@@ -128,7 +128,7 @@ class ScinamesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/JACQscinames/find/{term}',
+        path: '/jacq-services/rest/JACQscinames/find/{term}',
         summary: 'fulltext search for scientific names and taxon names and also get their taxonIDs; all parts of the search term are mandatory for the search',
         tags: ['scinames'],
         parameters: [
@@ -167,7 +167,7 @@ class ScinamesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/JACQscinames/find/{term}', name: "services_rest_scinames_find", methods: ['GET'])]
+    #[Route('/jacq-services/rest/JACQscinames/find/{term}', name: "services_rest_scinames_find", methods: ['GET'])]
     public function find(string $term): Response
     {
         $data = $this->taxaNamesService->fulltextSearch($term);
@@ -177,7 +177,7 @@ class ScinamesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/JACQscinames/resolve/{uuid}',
+        path: '/jacq-services/rest/JACQscinames/resolve/{uuid}',
         summary: 'Get scientific name, uuid-url and taxon-ID of a given uuid',
         tags: ['scinames'],
         parameters: [
@@ -218,7 +218,7 @@ class ScinamesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/JACQscinames/resolve/{uuid}', name: "services_rest_scinames_resolve", methods: ['GET'])]
+    #[Route('/jacq-services/rest/JACQscinames/resolve/{uuid}', name: "services_rest_scinames_resolve", methods: ['GET'])]
     public function resolve(string $uuid): Response
     {
         $data=[];

@@ -21,7 +21,7 @@ class IiifController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/iiif/manifestUri/{specimenID}',
+        path: '/jacq-services/rest/iiif/manifestUri/{specimenID}',
         summary: 'get the manifest URI for a given specimen-ID',
         tags: ['iiif'],
         parameters: [
@@ -54,7 +54,7 @@ class IiifController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/iiif/manifestUri/{specimenID}', name: "services_rest_iiif_manifest_uri", methods: ['GET'])]
+    #[Route('/jacq-services/rest/iiif/manifestUri/{specimenID}', name: "services_rest_iiif_manifest_uri", methods: ['GET'])]
     public function manifestUri(int $specimenID): Response
     {
         try {
@@ -72,7 +72,7 @@ class IiifController extends AbstractFOSRestController
 
 
     #[Get(
-        path: '/services/rest/iiif/manifest/{specimenID}',
+        path: '/jacq-services/rest/iiif/manifest/{specimenID}',
         summary: 'act as a proxy and get the manifest for a given specimen-ID from a backend, supplemented by some additional information.
 If no backend is configured, the webservice tries to get the manifest from the actual target-uri.',
         tags: ['iiif'],
@@ -110,7 +110,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
             )
         ]
     )]
-    #[Route('/services/rest/iiif/manifest/{specimenID}', name: "services_rest_iiif_manifest", methods: ['GET'])]
+    #[Route('/jacq-services/rest/iiif/manifest/{specimenID}', name: "services_rest_iiif_manifest", methods: ['GET'])]
     public function manifest(int $specimenID): Response
     {
         try {
@@ -127,7 +127,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
     }
 
 //    #[Get(
-//        path: '/services/rest/iiif/createManifest/{serverID}/{imageIdentifier}',
+//        path: '/jacq-services/rest/iiif/createManifest/{serverID}/{imageIdentifier}',
 //        summary: 'create a manifest for an image server with a given image filename',
 //        tags: ['iiif'],
 //        parameters: [
@@ -172,7 +172,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
 //            )
 //        ]
 //    )]
-//    #[Route('/services/rest/iiif/createManifest/{serverID}/{imageIdentifier}', name: "services_rest_iiif_createManifest", methods: ['GET'])]
+//    #[Route('/jacq-services/rest/iiif/createManifest/{serverID}/{imageIdentifier}', name: "services_rest_iiif_createManifest", methods: ['GET'])]
 //    public function createManifest(int $serverID, string $imageIdentifier): Response
 //    {
 //        $manifest = $this->iiifFacade->createManifestFromExtendedCantaloupeImage($serverID, $imageIdentifier);

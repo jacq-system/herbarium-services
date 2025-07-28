@@ -19,7 +19,7 @@ class ImagesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/images/show/{specimenID}/{imageNr}',
+        path: '/jacq-services/rest/images/show/{specimenID}/{imageNr}',
         summary: 'get the uri to show the first image of a given specimen-ID',
         tags: ['images'],
         parameters: [
@@ -60,7 +60,7 @@ class ImagesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/images/show/{specimenID}/{imageNr}', name: "services_rest_images_show", methods: ['GET'])]
+    #[Route('/jacq-services/rest/images/show/{specimenID}/{imageNr}', name: "services_rest_images_show", methods: ['GET'])]
     public function show(int $specimenID, int $imageNr = 0): Response
     {
         //todo ignoring "withredirect" param
@@ -73,7 +73,7 @@ class ImagesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/images/download/{specimenID}/{imageNr}',
+        path: '/jacq-services/rest/images/download/{specimenID}/{imageNr}',
         summary: 'et the uri to show the first image of a given specimen-ID',
         tags: ['images'],
         parameters: [
@@ -114,7 +114,7 @@ class ImagesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/images/download/{specimenID}/{imageNr}', name: "services_rest_images_download", methods: ['GET'])]
+    #[Route('/jacq-services/rest/images/download/{specimenID}/{imageNr}', name: "services_rest_images_download", methods: ['GET'])]
     public function download(int $specimenID, int $imageNr = 0): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
@@ -126,7 +126,7 @@ class ImagesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/images/europeana/{specimenID}/{imageNr}',
+        path: '/jacq-services/rest/images/europeana/{specimenID}/{imageNr}',
         summary: 'get the uri to download the first image of a given specimen-ID with resolution 1200',
         tags: ['images'],
         parameters: [
@@ -167,7 +167,7 @@ class ImagesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/images/europeana/{specimenID}/{imageNr}', name: "services_rest_images_europeana", methods: ['GET'])]
+    #[Route('/jacq-services/rest/images/europeana/{specimenID}/{imageNr}', name: "services_rest_images_europeana", methods: ['GET'])]
     public function europeana(int $specimenID, int $imageNr = 0): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
@@ -179,7 +179,7 @@ class ImagesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/images/thumb/{specimenID}/{imageNr}',
+        path: '/jacq-services/rest/images/thumb/{specimenID}/{imageNr}',
         summary: 'get the uri to download the first image of a given specimen-ID with resolution 160',
         tags: ['images'],
         parameters: [
@@ -220,7 +220,7 @@ class ImagesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/images/thumb/{specimenID}/{imageNr}', name: "services_rest_images_thumb", methods: ['GET'])]
+    #[Route('/jacq-services/rest/images/thumb/{specimenID}/{imageNr}', name: "services_rest_images_thumb", methods: ['GET'])]
     public function thumb(int $specimenID, int $imageNr = 0): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
@@ -232,7 +232,7 @@ class ImagesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/images/list/{specimenID}',
+        path: '/jacq-services/rest/images/list/{specimenID}',
         summary: 'get a list of all image-uris of a given specimen-ID',
         tags: ['images'],
         parameters: [
@@ -265,7 +265,7 @@ class ImagesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/images/list/{specimenID}', name: "services_rest_images_list", methods: ['GET'])]
+    #[Route('/jacq-services/rest/images/list/{specimenID}', name: "services_rest_images_list", methods: ['GET'])]
     public function list(int $specimenID, int $imageNr = 0): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);

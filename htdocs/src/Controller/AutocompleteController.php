@@ -21,7 +21,7 @@ class AutocompleteController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/autocomplete/scientificNames/{term}',
+        path: '/jacq-services/rest/autocomplete/scientificNames/{term}',
         summary: 'Search for fitting scientific names and return them',
         tags: ['autocomplete'],
         parameters: [
@@ -61,7 +61,7 @@ class AutocompleteController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/autocomplete/scientificNames/{term}', methods: ['GET'])]
+    #[Route('/jacq-services/rest/autocomplete/scientificNames/{term}', methods: ['GET'])]
     public function scientificNames(string $term): Response
     {
         $results = [];

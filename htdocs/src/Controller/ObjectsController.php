@@ -26,7 +26,7 @@ class ObjectsController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/objects/specimens/search',
+        path: '/jacq-services/rest/objects/specimens/search',
         summary: '"/specimens/search" is deprecated, use "/specimens" instead',
         tags: ['objects'],
         responses: [
@@ -41,7 +41,7 @@ class ObjectsController extends AbstractFOSRestController
         ],
         deprecated: true
     )]
-    #[Route('/services/rest/objects/specimens/search', methods: ['GET'])]
+    #[Route('/jacq-services/rest/objects/specimens/search', methods: ['GET'])]
     public function results(Request $request): Response
     {
         $this->logger->warning('used deprecated "/specimens/search" endpoint');
@@ -49,7 +49,7 @@ class ObjectsController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/objects/specimens/{specimenID}',
+        path: '/jacq-services/rest/objects/specimens/{specimenID}',
         summary: 'get the properties of a specimen',
         tags: ['objects'],
         parameters: [
@@ -86,7 +86,7 @@ class ObjectsController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/objects/specimens/{specimenID}', name: "services_rest_objects_specimen", methods: ['GET'])]
+    #[Route('/jacq-services/rest/objects/specimens/{specimenID}', name: "services_rest_objects_specimen", methods: ['GET'])]
     public function specimen(int $specimenID): Response
     {
         try {
@@ -102,7 +102,7 @@ class ObjectsController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/services/rest/objects/specimens',
+        path: '/jacq-services/rest/objects/specimens',
         summary: 'search for all specimens which fit given criteria',
         tags: ['objects'],
         parameters: [
@@ -223,7 +223,7 @@ class ObjectsController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/services/rest/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
+    #[Route('/jacq-services/rest/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
     public function specimens(#[MapQueryParameter] ?int $p = 0,#[MapQueryParameter] ?int $rpp = 50,#[MapQueryParameter] ?int $list = 1,#[MapQueryParameter] ?string $term = '',#[MapQueryParameter] ?string $sc = '',#[MapQueryParameter] ?string $coll = '',#[MapQueryParameter] ?int $type = 0,#[MapQueryParameter] ?string $sort = '',#[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
     {
         ($rpp > 100) ? $rpp = 100 : null;
