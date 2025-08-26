@@ -146,8 +146,9 @@ readonly class CoordinateConversionService
         // 33UXP0177940548
         $mgrsString = str_replace(' ', '', trim($text));  // erase all blanks
         $pointerRun = $pointerStart = 0;
+        $mgrsLen = strlen($mgrsString);
 
-        while (is_numeric($mgrsString[$pointerRun])) {
+        while ($pointerRun < $mgrsLen && is_numeric($mgrsString[$pointerRun])) {
             $pointerRun++;
         }
         $num_digits = $pointerRun - $pointerStart;
@@ -162,7 +163,7 @@ readonly class CoordinateConversionService
         }
         $pointerStart = $pointerRun;
 
-        while (ctype_alpha($mgrsString[$pointerRun])) {
+        while ($pointerRun < $mgrsLen && ctype_alpha($mgrsString[$pointerRun])) {
             $pointerRun++;
         }
         $num_letters = $pointerRun - $pointerStart;
@@ -179,7 +180,7 @@ readonly class CoordinateConversionService
         }
         $pointerStart = $pointerRun;
 
-        while (is_numeric($mgrsString[$pointerRun])) {
+        while ($pointerRun < $mgrsLen && is_numeric($mgrsString[$pointerRun])) {
             $pointerRun++;
         }
         $num_digits = $pointerRun - $pointerStart;
