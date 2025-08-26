@@ -96,8 +96,12 @@ class GeoController extends AbstractFOSRestController
             $data = array('latlon' => $this->coordinateConversionService->utm2latlon($utm));
         } elseif (isset($mgrs)) {                     // from MGRS
             $conv = $this->coordinateConversionService->mgrs2utm($mgrs);
-            $data = array('utm' => $conv,
-                'latlon' => $this->coordinateConversionService->utm2latlon($conv['string']));
+            if (empty($conv['error'])) {
+                $data = array('utm' => $conv,
+                    'latlon' => $this->coordinateConversionService->utm2latlon($conv['string']));
+            } else {
+                $data = array('error' => $conv['error']);
+            }
         } else {
             $data = array('error' => "nothing to do");
         }
