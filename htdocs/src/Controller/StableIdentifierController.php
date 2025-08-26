@@ -157,11 +157,12 @@ class StableIdentifierController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/stableIdentifier/resolve/{sid}', requirements: ['sid' => '^https:\/\/(?:[a-zA-Z0-9.-]+\.)?jacq\.org\/[A-Za-z0-9\-]+$'], methods: ['GET'])]
+    #[Route('/jacq-services/rest/stableIdentifier/resolve/{sid<.+>}', methods: ['GET'])]
     public function resolve(string $sid): Response
     {
         //TODO removed the "withRedirect" option in OPenApi, solving by "nonvisible" forward inside the framework
         $sid = urldecode($sid);
+        $sid = $this->fixSchemeSlashes($sid);
         return $this->forward(self::class . '::sid', ['specimenID' => $this->specimenService->findSpecimenUsingSid($sid)?->getId()]);
     }
 
@@ -360,5 +361,15 @@ class StableIdentifierController extends AbstractFOSRestController
         $view = $this->view($results, 200);
 
         return $this->handleView($view);
+    }
+
+    private function fixSchemeSlashes(string $sid): string
+    {
+        //add slash
+        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
+        //reduce to exactly two
+        $sid = preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
+
+        return $sid;
     }
 }
