@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\V1;
 
 use App\Facade\ObjectsFacade;
 use Exception;
-use JACQ\Service\SpecimenService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use JACQ\Service\SpecimenService;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\MediaType;
@@ -14,7 +14,6 @@ use OpenApi\Attributes\Property;
 use OpenApi\Attributes\QueryParameter;
 use OpenApi\Attributes\Schema;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,7 +25,7 @@ class ObjectsController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/objects/specimens/{specimenID}',
+        path: '/v1/objects/specimens/{specimenID}',
         summary: 'get the properties of a specimen',
         tags: ['objects'],
         parameters: [
@@ -63,7 +62,7 @@ class ObjectsController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/objects/specimens/{specimenID}', name: "services_rest_objects_specimen", methods: ['GET'])]
+    #[Route('/v1/objects/specimens/{specimenID}', name: "services_rest_objects_specimen", methods: ['GET'])]
     public function specimen(int $specimenID): Response
     {
         try {
@@ -79,7 +78,7 @@ class ObjectsController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/objects/specimens',
+        path: '/v1/objects/specimens',
         summary: 'search for all specimens which fit given criteria',
         tags: ['objects'],
         parameters: [
@@ -200,7 +199,7 @@ class ObjectsController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
+    #[Route('/v1/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
     public function specimens(#[MapQueryParameter] ?int $p = 0,#[MapQueryParameter] ?int $rpp = 50,#[MapQueryParameter] ?int $list = 1,#[MapQueryParameter] ?string $term = '',#[MapQueryParameter] ?string $sc = '',#[MapQueryParameter] ?string $coll = '',#[MapQueryParameter] ?int $type = 0,#[MapQueryParameter] ?string $sort = '',#[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
     {
         ($rpp > 100) ? $rpp = 100 : null;

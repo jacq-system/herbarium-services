@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace App\Controller;
+namespace App\Controller\V1;
 
 use App\Service\ExternalScientificNamesService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -20,7 +20,7 @@ class ExternalScinamesController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/externalScinames/find/{term}',
+        path: '/v1/externalScinames/find/{term}',
         summary: 'search for scientific names; get IDs and scientific names of search result',
         tags: ['externalScinames'],
         parameters: [
@@ -61,7 +61,7 @@ class ExternalScinamesController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/externalScinames/find/{term}', name: "services_rest_externalScinames_find", methods: ['GET'])]
+    #[Route('/v1/externalScinames/find/{term}', name: "services_rest_externalScinames_find", methods: ['GET'])]
     public function search(string $term): Response
     {
         $results = $this->scinamesService->searchAll($term);

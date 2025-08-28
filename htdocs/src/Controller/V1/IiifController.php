@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\V1;
 
 use Exception;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JACQ\Service\Legacy\IiifFacade;
 use JACQ\Service\SpecimenService;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\PathParameter;
@@ -21,7 +21,7 @@ class IiifController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/iiif/manifestUri/{specimenID}',
+        path: '/v1/iiif/manifestUri/{specimenID}',
         summary: 'get the manifest URI for a given specimen-ID',
         tags: ['iiif'],
         parameters: [
@@ -42,7 +42,7 @@ class IiifController extends AbstractFOSRestController
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'uri', description: 'uri of specimen', type: 'string', example: 'https://services.jacq.org/jacq-services/rest/iiif/manifest/1739342')
+                            new Property(property: 'uri', description: 'uri of specimen', type: 'string', example: 'https://api.jacq.org/v1/iiif/manifest/1739342')
                         ]
                     )
                 )
@@ -54,7 +54,7 @@ class IiifController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/iiif/manifestUri/{specimenID}', name: "services_rest_iiif_manifest_uri", methods: ['GET'])]
+    #[Route('/v1/iiif/manifestUri/{specimenID}', name: "services_rest_iiif_manifest_uri", methods: ['GET'])]
     public function manifestUri(int $specimenID): Response
     {
         try {
@@ -72,7 +72,7 @@ class IiifController extends AbstractFOSRestController
 
 
     #[Get(
-        path: '/jacq-services/rest/iiif/manifest/{specimenID}',
+        path: '/v1/iiif/manifest/{specimenID}',
         summary: 'act as a proxy and get the manifest for a given specimen-ID from a backend, supplemented by some additional information.
 If no backend is configured, the webservice tries to get the manifest from the actual target-uri.',
         tags: ['iiif'],
@@ -110,7 +110,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
             )
         ]
     )]
-    #[Route('/jacq-services/rest/iiif/manifest/{specimenID}', name: "services_rest_iiif_manifest", methods: ['GET'])]
+    #[Route('/v1/iiif/manifest/{specimenID}', name: "services_rest_iiif_manifest", methods: ['GET'])]
     public function manifest(int $specimenID): Response
     {
         try {
@@ -127,7 +127,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
     }
 
     #[Get(
-        path: '/jacq-services/rest/iiif/createManifest/{serverID}/{imageIdentifier}',
+        path: '/v1/iiif/createManifest/{serverID}/{imageIdentifier}',
         description: "create a manifest for an image with a given image identifer and a given image server. Uses the jacq-servlet interface of an extended cantaloupe image server. ",
         summary: 'create a manifest for an image server with a given image filename',
         tags: ['iiif'],
@@ -173,7 +173,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
             )
         ]
     )]
-    #[Route('/jacq-services/rest/iiif/createManifest/{serverID}/{imageIdentifier}', name: "services_rest_iiif_createManifest", methods: ['GET'])]
+    #[Route('/v1/iiif/createManifest/{serverID}/{imageIdentifier}', name: "services_rest_iiif_createManifest", methods: ['GET'])]
     public function createManifest(int $serverID, string $imageIdentifier): Response
     {
         $manifest = $this->iiifFacade->createManifestFromExtendedCantaloupeImage($serverID, $imageIdentifier);

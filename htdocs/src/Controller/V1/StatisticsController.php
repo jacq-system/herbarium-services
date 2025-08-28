@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\V1;
 
+use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JACQ\Enum\CoreObjectsEnum;
 use JACQ\Enum\TimeIntervalEnum;
 use JACQ\Service\StatisticsService;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\MediaType;
@@ -22,7 +22,7 @@ class StatisticsController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/statistics/results/{periodStart}/{periodEnd}/{updated}/{type}/{interval}',
+        path: '/v1/statistics/results/{periodStart}/{periodEnd}/{updated}/{type}/{interval}',
         summary: 'Get statistics result for given type, interval and period',
         tags: ['statistics'],
         parameters: [
@@ -103,7 +103,7 @@ class StatisticsController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/statistics/results/{periodStart}/{periodEnd}/{updated}/{type}/{interval}', name: "services_rest_statistics_results", methods: ['GET'])]
+    #[Route('/v1/statistics/results/{periodStart}/{periodEnd}/{updated}/{type}/{interval}', name: "services_rest_statistics_results", methods: ['GET'])]
     public function results(string $periodStart, string $periodEnd, int $updated, CoreObjectsEnum $type, TimeIntervalEnum $interval): Response
     {
         $data = $this->statisticsService->getResults($periodStart, $periodEnd, $updated, $type, $interval);

@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\V1;
 
 use Exception;
-use JACQ\Service\SpecimenService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use JACQ\Service\SpecimenService;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\MediaType;
@@ -23,7 +23,7 @@ class StableIdentifierController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/stableIdentifier/sid/{specimenID}',
+        path: '/v1/stableIdentifier/sid/{specimenID}',
         summary: 'Get specimen-id, valid stable identifier and all stable identifiers of a given specimen-id',
         tags: ['stable identifier'],
         parameters: [
@@ -78,7 +78,7 @@ class StableIdentifierController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/stableIdentifier/sid/{specimenID}', methods: ['GET'])]
+    #[Route('/v1/stableIdentifier/sid/{specimenID}', methods: ['GET'])]
     public function sid(int $specimenID): Response
     {
         $results = [];
@@ -102,7 +102,7 @@ class StableIdentifierController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/stableIdentifier/resolve/{sid}',
+        path: '/v1/stableIdentifier/resolve/{sid}',
         summary: 'Get specimen-id, valid stable identifier and all stable identifiers of a given stable identifier. ',
         tags: ['stable identifier'],
         parameters: [
@@ -157,7 +157,7 @@ class StableIdentifierController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/stableIdentifier/resolve/{sid<.+>}', methods: ['GET'])]
+    #[Route('/v1/stableIdentifier/resolve/{sid<.+>}', methods: ['GET'])]
     public function resolve(string $sid): Response
     {
         //TODO removed the "withRedirect" option in OPenApi, solving by "nonvisible" forward inside the framework
@@ -167,7 +167,7 @@ class StableIdentifierController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/stableIdentifier/errors',
+        path: '/v1/stableIdentifier/errors',
         summary: 'get a list of all errors which prevent the generation of stable identifier',
         tags: ['stable identifier'],
         parameters: [
@@ -263,7 +263,7 @@ class StableIdentifierController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/stableIdentifier/errors', methods: ['GET'])]
+    #[Route('/v1/stableIdentifier/errors', methods: ['GET'])]
     public function errors(#[MapQueryParameter] ?int $sourceID = null): Response
     {
         $results = $this->specimenService->getEntriesWithErrors($sourceID);
@@ -272,7 +272,7 @@ class StableIdentifierController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/stableIdentifier/multi',
+        path: '/v1/stableIdentifier/multi',
         summary: 'Get all entries with more than one stable identifier per specimen-ID',
         tags: ['stable identifier'],
         parameters: [
@@ -349,7 +349,7 @@ class StableIdentifierController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/stableIdentifier/multi', name: "services_rest_sid_multi", methods: ['GET'])]
+    #[Route('/v1/stableIdentifier/multi', name: "services_rest_sid_multi", methods: ['GET'])]
     public function multi(#[MapQueryParameter] int $page = 1, #[MapQueryParameter] int $entriesPerPage = 6, #[MapQueryParameter]  ?int $sourceID = null): Response
     {
         if ($sourceID !== null) {

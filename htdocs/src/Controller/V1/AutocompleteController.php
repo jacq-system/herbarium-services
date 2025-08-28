@@ -1,9 +1,9 @@
 <?php declare(strict_types = 1);
 
-namespace App\Controller;
+namespace App\Controller\V1;
 
-use JACQ\Repository\Herbarinput\SpeciesRepository;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use JACQ\Repository\Herbarinput\SpeciesRepository;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\MediaType;
@@ -21,7 +21,7 @@ class AutocompleteController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/autocomplete/scientificNames/{term}',
+        path: '/v1/autocomplete/scientificNames/{term}',
         summary: 'Search for fitting scientific names and return them',
         tags: ['autocomplete'],
         parameters: [
@@ -61,7 +61,7 @@ class AutocompleteController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/autocomplete/scientificNames/{term}', methods: ['GET'])]
+    #[Route('/v1/autocomplete/scientificNames/{term}', methods: ['GET'])]
     public function scientificNames(string $term): Response
     {
         $results = [];

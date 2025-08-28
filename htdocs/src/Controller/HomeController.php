@@ -15,16 +15,4 @@ HomeController extends AbstractController
     {
         return $this->json($this->getParameter('app.version'));
     }
-
-    #[Route('/jacq-services/rest/openapi', name: 'swaggerJsonJacqPath')]
-    public function openapiJson(): Response
-    {
-       return  $this->redirectToRoute('app.swagger');
-    }
-
-        #[Route('/jacq-services/rest/description', name: 'swaggerJacqPath')]
-    public function openapiDescription(): Response
-    {
-        return  $this->redirectToRoute('app.swagger_ui');
-    }
 }

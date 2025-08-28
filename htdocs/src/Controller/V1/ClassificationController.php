@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\V1;
 
 use App\Facade\ClassificationFacade;
 use App\Service\ClassificationDownloadService;
@@ -23,7 +23,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/download/{referenceType}/{referenceID}',
+        path: '/v1/classification/download/{referenceType}/{referenceID}',
         summary: 'Get an array, filled with header and data for download',
         tags: ['classification'],
         parameters: [
@@ -75,7 +75,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/download/{referenceType}/{referenceID}', name: "services_rest_classification_download", methods: ['GET'])]
+    #[Route('/v1/classification/download/{referenceType}/{referenceID}', name: "services_rest_classification_download", methods: ['GET'])]
     public function download(string $referenceType, int $referenceID, #[MapQueryParameter] ?int $scientificNameId, #[MapQueryParameter] ?int $hideScientificNameAuthors): Response
     {
         $data = $this->downloadService->getDownload($referenceType, $referenceID, $scientificNameId, $hideScientificNameAuthors);
@@ -85,7 +85,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/children/{referenceType}/{referenceID}',
+        path: '/v1/classification/children/{referenceType}/{referenceID}',
         summary: 'Get classification children of a given taxonID according to a given reference',
         tags: ['classification'],
         parameters: [
@@ -154,7 +154,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/children/{referenceType}/{referenceID}', name: "services_rest_classification_children", methods: ['GET'])]
+    #[Route('/v1/classification/children/{referenceType}/{referenceID}', name: "services_rest_classification_children", methods: ['GET'])]
     public function children(string $referenceType, int $referenceID, #[MapQueryParameter] ?int $taxonID = 0, #[MapQueryParameter] ?int $insertSeries = 0): Response
     {
         $data = $this->classificationFacade->resolveChildren($referenceType, $referenceID, $taxonID, $insertSeries);
@@ -164,7 +164,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/nameReferences/{taxonID}',
+        path: '/v1/classification/nameReferences/{taxonID}',
         summary: '	Return (other) references for this name which include them in their classification',
         tags: ['classification'],
         parameters: [
@@ -225,7 +225,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/nameReferences/{taxonID}', name: "services_rest_classification_nameReferences", methods: ['GET'])]
+    #[Route('/v1/classification/nameReferences/{taxonID}', name: "services_rest_classification_nameReferences", methods: ['GET'])]
     public function nameReferences(int $taxonID, #[MapQueryParameter] ?int $excludeReferenceId = 0, #[MapQueryParameter] ?int $insertSeries = 0): Response
     {
         $data = $this->classificationFacade->resolveNameReferences($taxonID, $excludeReferenceId, $insertSeries);
@@ -235,7 +235,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/numberOfChildrenWithChildrenCitation/{referenceID}',
+        path: '/v1/classification/numberOfChildrenWithChildrenCitation/{referenceID}',
         summary: 'Get number of classification children who have children themselves of a given taxonID according to a given reference of type citation',
         tags: ['classification'],
         parameters: [
@@ -275,7 +275,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/numberOfChildrenWithChildrenCitation/{referenceID}', name: "services_rest_classification_numberOfChildrenWithChildrenCitation", methods: ['GET'])]
+    #[Route('/v1/classification/numberOfChildrenWithChildrenCitation/{referenceID}', name: "services_rest_classification_numberOfChildrenWithChildrenCitation", methods: ['GET'])]
     public function numberOfChildrenWithChildrenCitation(int $referenceID, #[MapQueryParameter] ?int $taxonID = 0): Response
     {
         $data = $this->classificationFacade->resolveNumberOfChildrenWithChildrenCitation($referenceID, $taxonID);
@@ -285,7 +285,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/parent/{referenceType}/{referenceID}/{taxonID}',
+        path: '/v1/classification/parent/{referenceType}/{referenceID}/{taxonID}',
         summary: 'Get the parent entry of a given reference',
         tags: ['classification'],
         parameters: [
@@ -345,7 +345,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/parent/{referenceType}/{referenceID}/{taxonID}', name: "services_rest_classification_parent", methods: ['GET'])]
+    #[Route('/v1/classification/parent/{referenceType}/{referenceID}/{taxonID}', name: "services_rest_classification_parent", methods: ['GET'])]
     public function parent(string $referenceType, int $referenceID, int $taxonID): Response
     {
         $data = $this->classificationFacade->resolveParent($referenceType, $referenceID, $taxonID);
@@ -355,7 +355,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/periodicalStatistics/{referenceID}',
+        path: '/v1/classification/periodicalStatistics/{referenceID}',
         summary: 'Get statistics information of a given reference',
         tags: ['classification'],
         parameters: [
@@ -401,7 +401,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/periodicalStatistics/{referenceID}', name: "services_rest_classification_periodicalStatistics", methods: ['GET'])]
+    #[Route('/v1/classification/periodicalStatistics/{referenceID}', name: "services_rest_classification_periodicalStatistics", methods: ['GET'])]
     public function periodicalStatistics(int $referenceID): Response
     {
         $data = $this->classificationFacade->resolvePeriodicalStatistics($referenceID);
@@ -411,7 +411,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/references/{referenceType}/{referenceID}',
+        path: '/v1/classification/references/{referenceType}/{referenceID}',
         summary: 'Fetch a list of all references (which have a classification attached) or a single reference',
         tags: ['classification'],
         parameters: [
@@ -457,7 +457,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/references/{referenceType}/{referenceID}', name: "services_rest_classification_references", methods: ['GET'])]
+    #[Route('/v1/classification/references/{referenceType}/{referenceID}', name: "services_rest_classification_references", methods: ['GET'])]
     public function references(string $referenceType, ?int $referenceID = null): Response
     {
         $data = $this->classificationFacade->resolveByType($referenceType, $referenceID);
@@ -467,7 +467,7 @@ class ClassificationController extends AbstractFOSRestController
     }
 
     #[Get(
-        path: '/jacq-services/rest/classification/synonyms/{referenceType}/{referenceID}/{taxonID}',
+        path: '/v1/classification/synonyms/{referenceType}/{referenceID}/{taxonID}',
         summary: 'Fetch synonyms (and basionym) for a given taxonID, according to a given reference',
         tags: ['classification'],
         parameters: [
@@ -535,7 +535,7 @@ class ClassificationController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/jacq-services/rest/classification/synonyms/{referenceType}/{referenceID}/{taxonID}', name: "services_rest_classification_synonyms", methods: ['GET'])]
+    #[Route('/v1/classification/synonyms/{referenceType}/{referenceID}/{taxonID}', name: "services_rest_classification_synonyms", methods: ['GET'])]
     public function synonyms(string $referenceType, int $referenceID, int $taxonID, #[MapQueryParameter] ?int $insertSeries = 0): Response
     {
         $data = $this->classificationFacade->resolveSynonyms($referenceType, $referenceID, $taxonID, $insertSeries);
