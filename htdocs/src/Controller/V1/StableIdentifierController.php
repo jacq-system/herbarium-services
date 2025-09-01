@@ -84,16 +84,15 @@ class StableIdentifierController extends AbstractFOSRestController
         $results = [];
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        }
-        catch (Exception $e){
+        } catch (Exception $e) {
             $view = $this->view([], 404);
             return $this->handleView($view);
         }
-        if (!empty($specimen->getStableIdentifiers())){
+        if (!empty($specimen->getStableIdentifiers())) {
             $results['specimenID'] = $specimen->getId();
             $results['stableIdentifierLatest'] = $this->specimenService->sid2array($specimen);
             $results['stableIdentifierList'] = $this->specimenService->sids2array($specimen);
-        }else{
+        } else {
             $view = $this->view("Stable Identifier does not exist", 404);
             return $this->handleView($view);
         }
@@ -113,6 +112,12 @@ class StableIdentifierController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: 'https://wu.jacq.org/WU-0000264'
+            ),
+            new QueryParameter(
+                name: 'withredirect',
+                description: 'returns http 303 and redirects to the link immediately',
+                required: false,
+                schema: new Schema(type: 'boolean'),
             )
         ],
         responses: [
@@ -158,12 +163,35 @@ class StableIdentifierController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/stableIdentifier/resolve/{sid<.+>}', methods: ['GET'])]
-    public function resolve(string $sid): Response
+    public function resolve(string $sid, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
-        //TODO removed the "withRedirect" option in OPenApi, solving by "nonvisible" forward inside the framework
         $sid = urldecode($sid);
         $sid = $this->fixSchemeSlashes($sid);
-        return $this->forward(self::class . '::sid', ['specimenID' => $this->specimenService->findSpecimenUsingSid($sid)?->getId()]);
+
+        $specimen = $this->specimenService->findSpecimenUsingSid($sid);
+
+        if ($specimen === null) {
+            $view = $this->view([], 404);
+            return $this->handleView($view);
+        }
+
+        if ($withredirect) {
+            return $this->redirect($this->specimenService->getStableIdentifier($specimen), 303);
+
+        } else {
+            return $this->forward(self::class . '::sid', ['specimenID' => $specimen->getId()]);
+        }
+
+    }
+
+    private function fixSchemeSlashes(string $sid): string
+    {
+        //add slash
+        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
+        //reduce to exactly two
+        $sid = preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
+
+        return $sid;
     }
 
     #[Get(
@@ -314,20 +342,20 @@ class StableIdentifierController extends AbstractFOSRestController
                                 new Property(property: 'page', description: 'Page currently displayed', type: 'integer'),
                                 new Property(property: 'previousPage', description: 'Link to the previous page', type: 'string', format: 'uri', nullable: true),
                                 new Property(property: 'nextPage', description: 'Link to the next page', type: 'string', format: 'uri', nullable: true),
-                                new Property(property: 'firstPage',description: 'Link to the first page',type: 'string',format: 'uri'),
-                                new Property(property: 'lastPage',description: 'Link to the last page',type: 'string',format: 'uri'),
-                                new Property(property: 'totalPages',description: 'Total number of pages',type: 'integer'),
-                                new Property(property: 'total',description: 'Total number of records found',type: 'integer'),
-                                new Property(property: 'result',description: 'List of found entries',type: 'array',
+                                new Property(property: 'firstPage', description: 'Link to the first page', type: 'string', format: 'uri'),
+                                new Property(property: 'lastPage', description: 'Link to the last page', type: 'string', format: 'uri'),
+                                new Property(property: 'totalPages', description: 'Total number of pages', type: 'integer'),
+                                new Property(property: 'total', description: 'Total number of records found', type: 'integer'),
+                                new Property(property: 'result', description: 'List of found entries', type: 'array',
                                     items: new Items(
                                         properties: array(
-                                            new Property(property: 'specimenID',description: 'ID of the specimen',type: 'integer'),
-                                            new Property(property: 'numberOfEntries',description: 'Number of records found for this specimen ID',type: 'integer'),
-                                            new Property(property: 'stableIdentifierList',description: 'List of stable identifiers for this specimen ID',type: 'array',
+                                            new Property(property: 'specimenID', description: 'ID of the specimen', type: 'integer'),
+                                            new Property(property: 'numberOfEntries', description: 'Number of records found for this specimen ID', type: 'integer'),
+                                            new Property(property: 'stableIdentifierList', description: 'List of stable identifiers for this specimen ID', type: 'array',
                                                 items: new Items(
                                                     properties: array(
-                                                        new Property(property: 'stableIdentifier',description: 'Stable identifier',type: 'string'),
-                                                        new Property(property: 'timestamp',description: 'Timestamp associated with the stable identifier',type: 'string',format: 'date-time'),
+                                                        new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
+                                                        new Property(property: 'timestamp', description: 'Timestamp associated with the stable identifier', type: 'string', format: 'date-time'),
                                                     ),
                                                     type: 'object'
                                                 )
@@ -350,26 +378,16 @@ class StableIdentifierController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/stableIdentifier/multi', name: "services_rest_sid_multi", methods: ['GET'])]
-    public function multi(#[MapQueryParameter] int $page = 1, #[MapQueryParameter] int $entriesPerPage = 6, #[MapQueryParameter]  ?int $sourceID = null): Response
+    public function multi(#[MapQueryParameter] int $page = 1, #[MapQueryParameter] int $entriesPerPage = 6, #[MapQueryParameter] ?int $sourceID = null): Response
     {
         if ($sourceID !== null) {
             $results = $this->specimenService->getMultipleEntriesFromSource($sourceID);
-        }else{
+        } else {
             $results = $this->specimenService->getMultipleEntries($page, $entriesPerPage);
         }
 
         $view = $this->view($results, 200);
 
         return $this->handleView($view);
-    }
-
-    private function fixSchemeSlashes(string $sid): string
-    {
-        //add slash
-        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
-        //reduce to exactly two
-        $sid = preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
-
-        return $sid;
     }
 }

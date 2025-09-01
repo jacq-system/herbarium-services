@@ -8,8 +8,10 @@ use OpenApi\Attributes\Get;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\PathParameter;
 use OpenApi\Attributes\Property;
+use OpenApi\Attributes\QueryParameter;
 use OpenApi\Attributes\Schema;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ImagesController extends AbstractFOSRestController
@@ -38,6 +40,12 @@ class ImagesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 1
+            ),
+            new QueryParameter(
+                name: 'withredirect',
+                description: 'returns http 303 and redirects to the link immediately',
+                required: false,
+                schema: new Schema(type: 'boolean'),
             )
         ],
         responses: [
@@ -61,14 +69,15 @@ class ImagesController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/images/show/{specimenID}/{imageNr}', name: "services_rest_images_show", methods: ['GET'])]
-    public function show(int $specimenID, int $imageNr = 0): Response
+    public function show(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
-        //todo ignoring "withredirect" param
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getShowLink($imageNr);
+        if ($withredirect) {
+            return $this->redirect($results['link'], 303);
+        }
 
         $view = $this->view($results, 200);
-
         return $this->handleView($view);
     }
 
@@ -92,6 +101,12 @@ class ImagesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 1
+            ),
+            new QueryParameter(
+                name: 'withredirect',
+                description: 'returns http 303 and redirects to the link immediately',
+                required: false,
+                schema: new Schema(type: 'boolean'),
             )
         ],
         responses: [
@@ -115,10 +130,14 @@ class ImagesController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/images/download/{specimenID}/{imageNr}', name: "services_rest_images_download", methods: ['GET'])]
-    public function download(int $specimenID, int $imageNr = 0): Response
+    public function download(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getDownloadLink($imageNr);
+
+        if ($withredirect) {
+            return $this->redirect($results['link'], 303);
+        }
 
         $view = $this->view($results, 200);
 
@@ -145,6 +164,12 @@ class ImagesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 1
+            ),
+            new QueryParameter(
+                name: 'withredirect',
+                description: 'returns http 303 and redirects to the link immediately',
+                required: false,
+                schema: new Schema(type: 'boolean'),
             )
         ],
         responses: [
@@ -168,10 +193,14 @@ class ImagesController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/images/europeana/{specimenID}/{imageNr}', name: "services_rest_images_europeana", methods: ['GET'])]
-    public function europeana(int $specimenID, int $imageNr = 0): Response
+    public function europeana(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getEuropeanaLink($imageNr);
+
+        if ($withredirect) {
+            return $this->redirect($results['link'], 303);
+        }
 
         $view = $this->view($results, 200);
 
@@ -198,6 +227,12 @@ class ImagesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 1
+            ),
+            new QueryParameter(
+                name: 'withredirect',
+                description: 'returns http 303 and redirects to the link immediately',
+                required: false,
+                schema: new Schema(type: 'boolean'),
             )
         ],
         responses: [
@@ -221,10 +256,14 @@ class ImagesController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/images/thumb/{specimenID}/{imageNr}', name: "services_rest_images_thumb", methods: ['GET'])]
-    public function thumb(int $specimenID, int $imageNr = 0): Response
+    public function thumb(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getThumbLink($imageNr);
+
+        if ($withredirect) {
+            return $this->redirect($results['link'], 303);
+        }
 
         $view = $this->view($results, 200);
 
