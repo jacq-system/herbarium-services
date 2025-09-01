@@ -160,12 +160,12 @@ readonly class ClassificationFacade
 
             $sql.= " GROUP BY ts.taxonID";
 
-            $query = $this->entityManager->getConnection()->prepare($sql);
-            $query->bindValue('referenceID', $referenceID);
+            $connection = $this->entityManager->getConnection();
+            $params = ['referenceID' => $referenceID];
             if (!empty($taxonID)) {
-                $query->bindValue('taxonID', $taxonID);
+               $params['taxonID'] =$taxonID;
             }
-            $dbRows = $query->executeQuery()->fetchAllAssociative();
+            $dbRows = $connection->executeQuery($sql,$params)->fetchAllAssociative();
 
             // process all results and create response from it
             foreach ($dbRows as $dbRow) {
