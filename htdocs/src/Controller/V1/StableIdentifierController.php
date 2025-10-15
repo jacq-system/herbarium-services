@@ -60,7 +60,16 @@ class StableIdentifierController extends AbstractFOSRestController
                                     items: new Items(
                                         properties: [
                                             new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
-                                            new Property(property: 'timestamp', description: 'Timestamp of the stable identifier', type: 'string', format: 'date-time'),
+                                            new Property(property: 'timestamp', description: 'Timestamp associated with the stable identifier', type: 'string', format: 'date-time'),
+                                            new Property(property: 'link', description: 'Link to specimen detail', type: 'string'),
+                                            new Property(property: 'visible', description: 'visibility of the SID', type: 'boolean'),
+                                            new Property(property: 'error', description: 'Error message, present only if an error documented', type: 'string', nullable: true),
+                                            new Property(
+                                                property: 'blockedBy',
+                                                description: 'ID of JACQ of the blocking specimen (if present)',
+                                                type: 'integer',
+                                                nullable: true
+                                            ),
                                         ],
                                         type: 'object'
                                     )
@@ -144,7 +153,16 @@ class StableIdentifierController extends AbstractFOSRestController
                                     items: new Items(
                                         properties: [
                                             new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
-                                            new Property(property: 'timestamp', description: 'Timestamp of the stable identifier', type: 'string', format: 'date-time'),
+                                            new Property(property: 'timestamp', description: 'Timestamp associated with the stable identifier', type: 'string', format: 'date-time'),
+                                            new Property(property: 'link', description: 'Link to specimen detail', type: 'string'),
+                                            new Property(property: 'visible', description: 'visibility of the SID', type: 'boolean'),
+                                            new Property(property: 'error', description: 'Error message, present only if an error documented', type: 'string', nullable: true),
+                                            new Property(
+                                                property: 'blockedBy',
+                                                description: 'ID of JACQ of the blocking specimen (if present)',
+                                                type: 'integer',
+                                                nullable: true
+                                            ),
                                         ],
                                         type: 'object'
                                     )
@@ -259,15 +277,27 @@ class StableIdentifierController extends AbstractFOSRestController
                                                             format: 'date-time'
                                                         ),
                                                         new Property(
-                                                            property: 'error',
-                                                            description: 'The error description',
-                                                            type: 'string'
-                                                        ),
-                                                        new Property(
                                                             property: 'link',
                                                             description: 'Link to details-page of JACQ of the blocking specimen (if present)',
                                                             type: 'string',
                                                             format: 'uri',
+                                                            nullable: true
+                                                        ),
+                                                        new Property(
+                                                            property: 'visible',
+                                                            description: 'Visibility of SID',
+                                                            type: 'boolean',
+                                                        ),
+                                                        new Property(
+                                                            property: 'error',
+                                                            description: 'The error description',
+                                                            type: 'string',
+                                                            nullable: true
+                                                        ),
+                                                        new Property(
+                                                            property: 'blockedBy',
+                                                            description: 'ID of JACQ blocking specimen (if present)',
+                                                            type: 'integer',
                                                             nullable: true
                                                         ),
                                                     ],
@@ -353,10 +383,20 @@ class StableIdentifierController extends AbstractFOSRestController
                                             new Property(property: 'numberOfEntries', description: 'Number of records found for this specimen ID', type: 'integer'),
                                             new Property(property: 'stableIdentifierList', description: 'List of stable identifiers for this specimen ID', type: 'array',
                                                 items: new Items(
-                                                    properties: array(
+                                                    properties: [
                                                         new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
                                                         new Property(property: 'timestamp', description: 'Timestamp associated with the stable identifier', type: 'string', format: 'date-time'),
-                                                    ),
+                                                        new Property(property: 'link', description: 'Link to specimen detail', type: 'string'),
+                                                        new Property(property: 'visible', description: 'visibility of the SID', type: 'boolean'),
+                                                        new Property(property: 'error', description: 'Error message, present only if an error documented', type: 'string', nullable: true),
+                                                        new Property(
+                                                            property: 'blockedBy',
+                                                            description: 'ID of JACQ of the blocking specimen (if present)',
+                                                            type: 'integer',
+                                                            nullable: true
+                                                        ),
+
+                                                    ],
                                                     type: 'object'
                                                 )
                                             ),
