@@ -1,0 +1,78 @@
+<?php declare(strict_types=1);
+
+namespace App\Service;
+
+use JACQ\Repository\Herbarinput\CollectorRepository;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+class ElasticsearchService
+{
+
+    const string BasePath = 'http://elasticsearch:9200/';
+
+    public function __construct(protected readonly CollectorRepository $collectorRepository, protected HttpClientInterface $client)
+    {
+    }
+
+    public function recreateIndex(string $index): void
+    {
+        // delete if exists
+        try {
+            $this->client->request('DELETE', self::BasePath . $index);
+        } catch (ClientExceptionInterface $e) {
+            // if the index does not exist yet
+            if ($e->getResponse()->getStatusCode() !== 404) {
+                throw $e;
+            }
+        }
+
+        // recreate empty index
+        $this->client->request("PUT", self::BasePath . $index, [
+            'json' => [
+                'mappings' => [
+                    'properties' => [
+                        'name' => ['type' => 'text'],
+                    ],
+                ],
+            ]
+        ]);
+    }
+
+    public function bulk(array $lines): void
+    {
+        $body = implode("\n", $lines) . "\n";
+
+        $this->client->request("POST", self::BasePath . "_bulk", [
+            "headers" => ["Content-Type" => "application/json"],
+            "body" => $body,
+        ]);
+    }
+
+    public function search(string $index, string $query, int $limit = 5): array
+    {
+        $body = [
+            "query" => [
+                "multi_match" => [
+                    "query" => $query,
+                    "fields" => ["name^2"],
+                    "fuzziness" => "AUTO"
+                ]
+            ],
+            "size" => $limit
+        ];
+
+        $response = $this->client->request("GET", self::BasePath . $index . "/_search", [
+            "json" => $body
+        ]);
+
+//        dump($response->getStatusCode());
+////        dump($response->getHeaders());
+//        dump($response->getContent(false)); // <- NEHÁZÍ EXCEPTION a ukáže raw chybu ES
+//        dump($response->getInfo());
+//        exit;
+
+        return $response->toArray();
+    }
+
+}
