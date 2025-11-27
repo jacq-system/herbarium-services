@@ -7,6 +7,7 @@ parameters:
     uuid_endpoint_url: '%env(UUID_ENDPOINT_URL)%'
     uuid_endpoint_key: '%env(UUID_ENDPOINT_KEY)%'
     app.version: '%env(GIT_TAG)%'
+    elasticsearch_url: '%env(ELASTICSEARCH_URL)%'
 
 services:
     # default configuration for services in *this* file
@@ -33,5 +34,9 @@ services:
             $endpoint: '%uuid_endpoint_url%'
             $secret: '%uuid_endpoint_key%'
             $prefix: '%env(UUID_PREFIX)%'
+
+    App\Service\ElasticsearchService:
+        arguments:
+            $basePath: '%elasticsearch_url%'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

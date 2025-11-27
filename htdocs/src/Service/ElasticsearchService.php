@@ -9,9 +9,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class ElasticsearchService
 {
 
-    const string BasePath = 'http://elasticsearch:9200/';
-
-    public function __construct(protected readonly CollectorRepository $collectorRepository, protected HttpClientInterface $client)
+    public function __construct(protected readonly string $basePath, protected readonly CollectorRepository $collectorRepository, protected HttpClientInterface $client)
     {
     }
 
@@ -19,7 +17,7 @@ class ElasticsearchService
     {
         // delete if exists
         try {
-            $this->client->request('DELETE', self::BasePath . $index);
+            $this->client->request('DELETE', $this->basePath . $index);
         } catch (ClientExceptionInterface $e) {
             // if the index does not exist yet
             if ($e->getResponse()->getStatusCode() !== 404) {
@@ -28,7 +26,7 @@ class ElasticsearchService
         }
 
         // recreate empty index
-        $this->client->request("PUT", self::BasePath . $index, [
+        $this->client->request("PUT", $this->basePath . $index, [
             'json' => [
                 'mappings' => [
                     'properties' => [
@@ -43,7 +41,7 @@ class ElasticsearchService
     {
         $body = implode("\n", $lines) . "\n";
 
-        $this->client->request("POST", self::BasePath . "_bulk", [
+        $this->client->request("POST", $this->basePath . "_bulk", [
             "headers" => ["Content-Type" => "application/json"],
             "body" => $body,
         ]);
@@ -62,13 +60,13 @@ class ElasticsearchService
             "size" => $limit
         ];
 
-        $response = $this->client->request("GET", self::BasePath . $index . "/_search", [
+        $response = $this->client->request("GET", $this->basePath . $index . "/_search", [
             "json" => $body
         ]);
 
 //        dump($response->getStatusCode());
-////        dump($response->getHeaders());
-//        dump($response->getContent(false)); // <- NEHÁZÍ EXCEPTION a ukáže raw chybu ES
+//        dump($response->getHeaders());
+//        dump($response->getContent(false));
 //        dump($response->getInfo());
 //        exit;
 
