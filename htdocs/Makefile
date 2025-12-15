@@ -1,4 +1,6 @@
 #	RUN INSIDE THE CONTAINER, that is: docker exec -it app-sjacq bash
+app:
+	php bin/console app:elastic-collectors  # refresh ES index for collectors
 
 code_management:
 	vendor/bin/phpcs --standard=ruleset.xml App # analyze with codesniffer https://github.com/slevomat/coding-standard
