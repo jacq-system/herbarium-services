@@ -48,8 +48,8 @@ when@prod:
             connections:
                 default:
                     options:
-                        1009: '/etc/mysql/ssl/ca-cert.pem' # PDO::MYSQL_ATTR_SSL_CA
-                        1014: false # PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
+                        !php/const:PDO::MYSQL_ATTR_SSL_CA: '/etc/mysql/ssl/ca-cert.pem'
+                        !php/const:PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT:: false # PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
 
     framework:
         cache:
