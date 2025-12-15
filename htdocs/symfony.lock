@@ -9,30 +9,17 @@
         }
     },
     "doctrine/doctrine-bundle": {
-        "version": "2.15",
+        "version": "3.1",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "2.13",
-            "ref": "620b57f496f2e599a6015a9fa222c2ee0a32adcb"
+            "version": "3.0",
+            "ref": "18ee08e513ba0303fd09a01fc1c934870af06ffa"
         },
         "files": [
             "config/packages/doctrine.yaml",
             "src/Entity/.gitignore",
             "src/Repository/.gitignore"
-        ]
-    },
-    "doctrine/doctrine-migrations-bundle": {
-        "version": "3.4",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "3.1",
-            "ref": "1d01ec03c6ecbd67c3375c5478c9a423ae5d6a33"
-        },
-        "files": [
-            "config/packages/doctrine_migrations.yaml",
-            "migrations/.gitignore"
         ]
     },
     "friendsofsymfony/rest-bundle": {
@@ -57,19 +44,6 @@
         },
         "files": [
             "config/packages/jms_serializer.yaml"
-        ]
-    },
-    "league/oauth2-server-bundle": {
-        "version": "0.9",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "0.4",
-            "ref": "7f26963037fce3b69c1b3f6a75a3265edb1e1caa"
-        },
-        "files": [
-            "config/packages/league_oauth2_server.yaml",
-            "config/routes/league_oauth2_server.yaml"
         ]
     },
     "nelmio/api-doc-bundle": {
@@ -203,6 +177,18 @@
             "tests/bootstrap.php"
         ]
     },
+    "symfony/property-info": {
+        "version": "7.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "7.3",
+            "ref": "dae70df71978ae9226ae915ffd5fad817f5ca1f7"
+        },
+        "files": [
+            "config/packages/property_info.yaml"
+        ]
+    },
     "symfony/routing": {
         "version": "7.1",
         "recipe": {
@@ -214,19 +200,6 @@
         "files": [
             "config/packages/routing.yaml",
             "config/routes.yaml"
-        ]
-    },
-    "symfony/security-bundle": {
-        "version": "7.1",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "6.4",
-            "ref": "2ae08430db28c8eb4476605894296c82a642028f"
-        },
-        "files": [
-            "config/packages/security.yaml",
-            "config/routes/security.yaml"
         ]
     },
     "symfony/twig-bundle": {
