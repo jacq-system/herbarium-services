@@ -6,9 +6,9 @@ doctrine:
                 url: '%env(resolve:DATABASE_URL)%'
                 keep_replica: true
                 profiling_collect_backtrace: '%kernel.debug%'
-#                replicas: # usage of replicas - https://medium.com/@dominykasmurauskas1/how-to-add-read-write-replicas-on-symfony-6-using-doctrine-bundle-a46447449f35
-#                    replica1:
-#                        url: '%env(resolve:DATABASE_RO_URL)%'
+                replicas: # usage of replicas - https://medium.com/@dominykasmurauskas1/how-to-add-read-write-replicas-on-symfony-6-using-doctrine-bundle-a46447449f35
+                    replica1:
+                        url: '%env(resolve:DATABASE_RO_URL)%'
 
     orm:
 #        enable_native_lazy_objects: true
