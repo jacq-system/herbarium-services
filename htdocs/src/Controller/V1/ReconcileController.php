@@ -6,12 +6,15 @@ use App\Command\ElasticsearchCollectorRefreshCommand;
 use App\Service\ElasticsearchService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use OpenApi\Attributes\AdditionalProperties;
+use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
+use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\Post;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
 use OpenApi\Attributes\Schema;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -123,4 +126,39 @@ class ReconcileController extends AbstractFOSRestController
     }
 
 
+    #[Get(
+        path: '/v1/reconcile/collector',
+        description: 'Returns service metadata required by OpenRefine reconciliation API.',
+        summary: 'Reconciliation service manifest',
+        tags: ['reconcile'],
+        responses: [
+            new \OpenApi\Attributes\Response(
+                response: 200,
+                description: 'Reconciliation manifest',
+                content: new JsonContent(
+                    properties: [
+                        new Property(
+                            property: 'versions',
+                            type: 'array',
+                            items: new Items(type: 'string'),
+                            example: ['0.2']
+                        ),
+                        new Property(property: 'name', type: 'string', example: 'JACQ Collectors Reconciliation Service'),
+                        new Property(property: 'identifierSpace', type: 'string', example: 'https://example.com/entity/'),
+                        new Property(property: 'schemaSpace', type: 'string', example: 'http://schema.org/Thing'),
+                    ]
+                )
+            )
+        ]
+    )]
+    #[Route('/v1/reconcile/collector', name: 'reconcile_manifest', methods: ['GET'])]
+    public function manifest(): JsonResponse
+    {
+        return new JsonResponse([
+            'versions' => ['0.2'],
+            'name' => 'JACQ Collectors Reconciliation Service TEST',
+            'identifierSpace' => 'https://jacq.org/entity/',
+            'schemaSpace' => 'https://jacq.org/Collector',
+        ]);
+    }
 }
