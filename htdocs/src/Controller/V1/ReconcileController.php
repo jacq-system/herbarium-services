@@ -146,6 +146,17 @@ class ReconcileController extends AbstractFOSRestController
                         new Property(property: 'name', type: 'string', example: 'JACQ Collectors Reconciliation Service'),
                         new Property(property: 'identifierSpace', type: 'string', example: 'https://example.com/entity/'),
                         new Property(property: 'schemaSpace', type: 'string', example: 'http://schema.org/Thing'),
+                        new Property(
+                            property: 'types',
+                            type: 'array',
+                            items: new Items(
+                                properties: [
+                                    new Property(property: 'id', type: 'string', example: 'Person'),
+                                    new Property(property: 'name', type: 'string', example: 'Person')
+                                ],
+                                type: 'object'
+                            )
+                        )
                     ]
                 )
             )
