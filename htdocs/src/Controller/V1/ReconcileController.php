@@ -101,23 +101,27 @@ class ReconcileController extends AbstractFOSRestController
     public function collector(Request $request): Response
     {
         $result = [];
-            $payload = json_decode($request->getContent(), true)["queries"] ?? [];
+        $payload = json_decode($request->getContent(), true)["queries"] ?? [];
 
-            foreach ($payload as $key => $q) {
-                $term = $q["query"] ?? "";
-                $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
+        foreach ($payload as $key => $q) {
+            $term = $q["query"] ?? "";
+            $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
 
-                $result[$key] = [
-                    "result" => array_map(function ($hit) use ($term) {
-                        return [
-                            "id" => $hit["_id"],
-                            "name" => $hit["_source"]["name"],
-                            "score" => $hit["_score"],
-                            "match" => strtolower($term) === strtolower($hit["_source"]["name"])
-                        ];
-                    }, $data["hits"]["hits"])
-                ];
-            }
+            $result[$key] = [
+                "result" => array_map(function ($hit) use ($term) {
+                    return [
+                        "id" => $hit["_id"],
+                        "name" => $hit["_source"]["name"],
+                        "score" => $hit["_score"],
+                        "match" => strtolower($term) === strtolower($hit["_source"]["name"]),
+                        "type" => [
+                            ["id" => "Person", "name" => "Person"]
+                        ],
+                        "uri" => "https://example.com/entity/" . $hit["_id"]
+                    ];
+                }, $data["hits"]["hits"])
+            ];
+        }
 
         $view = $this->view($result, 200);
         $view->setFormat('json');
