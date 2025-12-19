@@ -10,6 +10,7 @@ use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\MediaType;
+use OpenApi\Attributes\PathParameter;
 use OpenApi\Attributes\Post;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
@@ -25,34 +26,20 @@ class ReconcileController extends AbstractFOSRestController
     {
     }
 
-    #[Post(
-        path: '/v1/reconcile/collector',
-        summary: 'Get reconciliation proposals for collector names (bulk)',
-        requestBody: new RequestBody(
-            description: 'OpenRefine reconciliation queries',
-            required: true,
-            content: [
-                new MediaType(
-                    mediaType: 'application/json',
-                    schema: new Schema(
-                        properties: [
-                            new Property(
-                                property: 'queries',
-                                type: 'object',
-                                additionalProperties: new AdditionalProperties(
-                                    properties: [
-                                        new Property(property: 'query', type: 'string', example: 'H. Reiner')
-                                    ],
-                                    type: 'object'
-                                )
-                            )
-                        ],
-                        type: 'object'
-                    )
-                )
-            ]
-        ),
+    #[Get(
+        path: '/v1/reconcile/collector/{term}',
+        summary: 'Get reconciliation proposals for collector names',
         tags: ['reconcile'],
+        parameters: [
+            new PathParameter(
+                name: 'term',
+                description: 'Collectors name',
+                in: 'path',
+                required: true,
+                schema: new Schema(type: 'string'),
+                example: 'Reiner,H.'
+            )
+        ],
         responses: [
             new \OpenApi\Attributes\Response(
                 response: 200,
@@ -97,31 +84,24 @@ class ReconcileController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/v1/reconcile/collector', name: "services_rest_reconcile_collector", methods: ['POST'])]
-    public function collector(Request $request): Response
+    #[Route('/v1/reconcile/collector/{term}', name: "services_rest_reconcile_collector", methods: ['GET'])]
+    public function collector(string $term): Response
     {
-        $result = [];
-        $payload = json_decode($request->getContent(), true)["queries"] ?? [];
 
-        foreach ($payload as $key => $q) {
-            $term = $q["query"] ?? "";
-            $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
 
-            $result[$key] = [
-                "result" => array_map(function ($hit) use ($term) {
+        $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
+
+            $result  =
+                 array_map(function ($hit) use ($term) {
                     return [
                         "id" => $hit["_id"],
                         "name" => $hit["_source"]["name"],
                         "score" => $hit["_score"],
-                        "match" => strtolower($term) === strtolower($hit["_source"]["name"]),
-                        "type" => [
-                            ["id" => "Person", "name" => "Person"]
-                        ],
-                        "uri" => "https://example.com/entity/" . $hit["_id"]
+                        "match" => strtolower($term) === strtolower($hit["_source"]["name"])
                     ];
                 }, $data["hits"]["hits"])
-            ];
-        }
+            ;
+
 
         $view = $this->view($result, 200);
         $view->setFormat('json');
@@ -129,55 +109,4 @@ class ReconcileController extends AbstractFOSRestController
         return $this->handleView($view);
     }
 
-
-    #[Get(
-        path: '/v1/reconcile/collector',
-        description: 'Returns service metadata required by OpenRefine reconciliation API.',
-        summary: 'Reconciliation service manifest',
-        tags: ['reconcile'],
-        responses: [
-            new \OpenApi\Attributes\Response(
-                response: 200,
-                description: 'Reconciliation manifest',
-                content: new JsonContent(
-                    properties: [
-                        new Property(
-                            property: 'versions',
-                            type: 'array',
-                            items: new Items(type: 'string'),
-                            example: ['0.2']
-                        ),
-                        new Property(property: 'name', type: 'string', example: 'JACQ Collectors Reconciliation Service'),
-                        new Property(property: 'identifierSpace', type: 'string', example: 'https://example.com/entity/'),
-                        new Property(property: 'schemaSpace', type: 'string', example: 'http://schema.org/Thing'),
-                        new Property(
-                            property: 'types',
-                            type: 'array',
-                            items: new Items(
-                                properties: [
-                                    new Property(property: 'id', type: 'string', example: 'Person'),
-                                    new Property(property: 'name', type: 'string', example: 'Person')
-                                ],
-                                type: 'object'
-                            )
-                        )
-                    ]
-                )
-            )
-        ]
-    )]
-    #[Route('/v1/reconcile/collector', name: 'reconcile_manifest', methods: ['GET'])]
-    public function manifest(): JsonResponse
-    {
-        return new JsonResponse([
-            'versions' => ['0.2'],
-            'name' => 'JACQ Collectors Reconciliation Service TEST',
-            'identifierSpace' => 'https://jacq.org/entity/',
-            'schemaSpace' => 'https://jacq.org/Collector',
-            'defaultTypes'=>  [
-                'id' => 'Person',
-                'name' => 'Person'
-            ]
-        ]);
-    }
 }
