@@ -174,7 +174,7 @@ class ReconcileController extends AbstractFOSRestController
             'name' => 'JACQ Collectors Reconciliation Service TEST',
             'identifierSpace' => 'https://jacq.org/entity/',
             'schemaSpace' => 'https://jacq.org/Collector',
-            'types'=>  [
+            'defaultTypes'=>  [
                 'id' => 'Person',
                 'name' => 'Person'
             ]
