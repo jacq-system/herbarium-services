@@ -67,9 +67,9 @@ readonly class CoordinateBoundaryService
     {
         if (!empty($boundaries)) {
             foreach ($boundaries as $boundary) {
-                if ($lat >= $boundary->getBoundSouth() && $lat <= $boundary->getBoundNorth()
-                    && ((($boundary->getBoundEast() > $boundary->getBoundWest()) && ($lon >= $boundary->getBoundWest() && $lon <= $boundary->getBoundEast()))
-                        || ($boundary->getBoundEast() < $boundary->getBoundWest() && ($lon >= $boundary->getBoundWest() || $lon <= $boundary->getBoundEast())))) {
+                if ($lat >= $boundary->boundSouth && $lat <= $boundary->boundNorth
+                    && ((($boundary->boundEast > $boundary->boundWest) && ($lon >= $boundary->boundWest && $lon <= $boundary->boundEast))
+                        || ($boundary->boundEast < $boundary->boundWest && ($lon >= $boundary->boundWest || $lon <= $boundary->boundEast)))) {
                     return true;
                 }
             }

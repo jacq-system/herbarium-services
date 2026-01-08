@@ -100,7 +100,7 @@ readonly class ObjectsFacade
             'result' => array()
         );
         foreach ($list as $specimen) {
-            $data['result'][] = (!empty($listOnly)) ? $specimen->getId() : $this->resolveSpecimen($specimen);
+            $data['result'][] = (!empty($listOnly)) ? $specimen->id : $this->resolveSpecimen($specimen);
         }
 
         return $data;
@@ -165,7 +165,6 @@ readonly class ObjectsFacade
 
                 ))
                 ->setParameter('nation', $nation);
-            ;
         }
         if (!empty($typus)) {
             $joins[] = 'typus';

@@ -97,8 +97,8 @@ class StableIdentifierController extends AbstractFOSRestController
             $view = $this->view([], 404);
             return $this->handleView($view);
         }
-        if (!empty($specimen->getStableIdentifiers())) {
-            $results['specimenID'] = $specimen->getId();
+        if (!empty($specimen->stableIdentifiers)) {
+            $results['specimenID'] = $specimen->id;
             $results['stableIdentifierLatest'] = $this->specimenService->sid2array($specimen);
             $results['stableIdentifierList'] = $this->specimenService->sids2array($specimen);
         } else {
@@ -197,7 +197,7 @@ class StableIdentifierController extends AbstractFOSRestController
             return $this->redirect($this->specimenService->getStableIdentifier($specimen), 303);
 
         } else {
-            return $this->forward(self::class . '::sid', ['specimenID' => $specimen->getId()]);
+            return $this->forward(self::class . '::sid', ['specimenID' => $specimen->id]);
         }
 
     }
@@ -207,9 +207,7 @@ class StableIdentifierController extends AbstractFOSRestController
         //add slash
         $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
         //reduce to exactly two
-        $sid = preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
-
-        return $sid;
+        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 
     #[Get(

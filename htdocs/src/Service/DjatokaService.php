@@ -30,9 +30,9 @@ readonly class DjatokaService
             $ok = true;
             $errorRPC = $warningRPC = $errorImage = "";
 
-            $specimen = $this->specimensRepository->getExampleSpecimenWithImage($server->getInstitution());
+            $specimen = $this->specimensRepository->getExampleSpecimenWithImage($server->institution);
             if ($specimen !== null) {
-                $picdetails = $this->imageService->getPicDetails((string) $specimen->getId());
+                $picdetails = $this->imageService->getPicDetails((string) $specimen->id);
                 $filename   = $picdetails['originalFilename'];
 
                 try{
@@ -107,28 +107,28 @@ readonly class DjatokaService
                     $errorImage = htmlentities($e->getMessage());
                 }
                 if ($ok) {
-                    $checks['ok'][] = ['source_id'  => $server->getInstitution()->getId(),
-                        'source'     => $server->getAbbreviation(),
-                        'specimenID' => $specimen->getId()
+                    $checks['ok'][] = ['source_id'  => $server->institution->id,
+                        'source'     => $server->abbreviation,
+                        'specimenID' => $specimen->id
                     ];
                 } elseif ($warningRPC) {
-                    $checks['warn'][] = ['source_id'  => $server->getInstitution()->getId(),
-                        'source'     => $server->getAbbreviation(),
-                        'specimenID' => $specimen->getId(),
+                    $checks['warn'][] = ['source_id'  => $server->institution->id,
+                        'source'     => $server->abbreviation,
+                        'specimenID' => $specimen->id,
                         'warningRPC' => $warningRPC,
                         'errorImage' => $errorImage
                     ];
                 } else {
-                    $checks['fail'][] = ['source_id'  => $server->getInstitution()->getId(),
-                        'source'     => $server->getAbbreviation(),
-                        'specimenID' => $specimen->getId(),
+                    $checks['fail'][] = ['source_id'  => $server->institution->id,
+                        'source'     => $server->abbreviation,
+                        'specimenID' => $specimen->id,
                         'errorRPC'   => $errorRPC,
                         'errorImage' => $errorImage
                     ];
                 }
             } else {
-                $checks['noPicture'][] = ['source_id' => $server->getInstitution()->getId(),
-                    'source'    => $server->getAbbreviation()
+                $checks['noPicture'][] = ['source_id' => $server->institution->id,
+                    'source'    => $server->abbreviation
                 ];
             }
         }

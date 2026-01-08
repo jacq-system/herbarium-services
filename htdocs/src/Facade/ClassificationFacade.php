@@ -341,12 +341,12 @@ readonly class ClassificationFacade
         if ($basionym !== null) {
             $basionymResult = array(
                 "taxonID" => $basID,
-                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionym->getId()], UrlGeneratorInterface::ABSOLUTE_URL)),
+                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionym->id], UrlGeneratorInterface::ABSOLUTE_URL)),
                 "referenceName" => $this->speciesRepository->getScientificName($basionym),
                 "referenceId" => $referenceID,
                 "referenceType" => $referenceType,
-                "hasType" => $this->taxonService->hasType($basionym->getId()),
-                "hasSpecimen" => $this->speciesRepository->hasSpecimen($basionym->getId()),
+                "hasType" => $this->taxonService->hasType($basionym->id),
+                "hasSpecimen" => $this->speciesRepository->hasSpecimen($basionym->id),
                 "insertedCitation" => false,
                 "referenceInfo" => array(
                     "type" => "homotype",
@@ -360,7 +360,7 @@ readonly class ClassificationFacade
             $synonyms = $this->taxonService->findSynonyms($taxonID, $referenceID);
             foreach ($synonyms as $synonym) {
                 // ignore if synonym is basionym
-                if ($basionym !== null && $synonym['taxonID'] == $basionym->getId()) {
+                if ($basionym !== null && $synonym['taxonID'] == $basionym->id) {
                     $basionymResult["referenceInfo"]["cited"] = true;
                 } else {
                     $results[] = array(
