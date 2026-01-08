@@ -209,7 +209,7 @@ class ObjectsController extends AbstractFOSRestController
     public function specimens(#[MapQueryParameter] ?int $p = 0, #[MapQueryParameter] ?int $rpp = 50, #[MapQueryParameter] ?int $list = 1, #[MapQueryParameter] ?string $term = '', #[MapQueryParameter] ?string $sc = '', #[MapQueryParameter] ?string $coll = '', #[MapQueryParameter] ?int $type = 0, #[MapQueryParameter] ?string $sort = '', #[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
     {
         ($rpp > 100) ? $rpp = 100 : null;
-        $data = $this->objectsFacade->resolveSpecimens($p, $rpp, $list, $term, $sc, $coll, $type, $sort, $herbnr, $nation, $withImages, $cltr);
+        $data = $this->objectsFacade->resolveSpecimens($p, $rpp, $list, $term, $sc, $coll, $type, $sort, $herbnr, $nation, $withImages, $cltr, false);
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
