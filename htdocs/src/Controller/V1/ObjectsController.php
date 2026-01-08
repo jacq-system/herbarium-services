@@ -67,11 +67,17 @@ class ObjectsController extends AbstractFOSRestController
     {
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        }catch (Exception $e){
-            $view = $this->view([], 404);
-            return $this->handleView($view);
+            $data = $this->objectsFacade->resolveSpecimen($specimen);
+        } catch (Exception $e) {
+            try {
+                $specimen = $this->specimenService->findNonAccessibleForPublic($specimenID);
+                $data = $this->objectsFacade->resolveSpecimen($specimen);
+            }catch (Exception $e) {
+                $view = $this->view([], 404);
+                return $this->handleView($view);
+            }
         }
-        $data = $this->objectsFacade->resolveSpecimen($specimen);
+
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
@@ -200,10 +206,10 @@ class ObjectsController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
-    public function specimens(#[MapQueryParameter] ?int $p = 0,#[MapQueryParameter] ?int $rpp = 50,#[MapQueryParameter] ?int $list = 1,#[MapQueryParameter] ?string $term = '',#[MapQueryParameter] ?string $sc = '',#[MapQueryParameter] ?string $coll = '',#[MapQueryParameter] ?int $type = 0,#[MapQueryParameter] ?string $sort = '',#[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
+    public function specimens(#[MapQueryParameter] ?int $p = 0, #[MapQueryParameter] ?int $rpp = 50, #[MapQueryParameter] ?int $list = 1, #[MapQueryParameter] ?string $term = '', #[MapQueryParameter] ?string $sc = '', #[MapQueryParameter] ?string $coll = '', #[MapQueryParameter] ?int $type = 0, #[MapQueryParameter] ?string $sort = '', #[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
     {
         ($rpp > 100) ? $rpp = 100 : null;
-        $data = $this->objectsFacade->resolveSpecimens( $p, $rpp, $list, $term,$sc,$coll,$type,$sort, $herbnr, $nation, $withImages, $cltr);
+        $data = $this->objectsFacade->resolveSpecimens($p, $rpp, $list, $term, $sc, $coll, $type, $sort, $herbnr, $nation, $withImages, $cltr);
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
