@@ -94,9 +94,14 @@ class StableIdentifierController extends AbstractFOSRestController
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
         } catch (Exception $e) {
-            $view = $this->view([], 404);
-            return $this->handleView($view);
+            try {
+                $specimen = $this->specimenService->findNonAccessibleForPublic($specimenID);
+            } catch (Exception $e) {
+                $view = $this->view([], 404);
+                return $this->handleView($view);
+            }
         }
+
         if (!empty($specimen->stableIdentifiers)) {
             $results['specimenID'] = $specimen->id;
             $results['stableIdentifierLatest'] = $this->specimenService->sid2array($specimen);
