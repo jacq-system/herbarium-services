@@ -20,16 +20,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class ReconcileController extends AbstractFOSRestController
+class AgentsController extends AbstractFOSRestController
 {
     public function __construct(protected readonly ElasticsearchService $elasticsearchService)
     {
     }
 
     #[Get(
-        path: '/v1/reconcile/collector/{term}',
-        summary: 'Get reconciliation proposals for collector names',
-        tags: ['reconcile'],
+        path: '/v1/agents/collector/{term}',
+        summary: 'Get scored proposals for collector names',
+        tags: ['agents'],
         parameters: [
             new PathParameter(
                 name: 'term',
@@ -43,7 +43,7 @@ class ReconcileController extends AbstractFOSRestController
         responses: [
             new \OpenApi\Attributes\Response(
                 response: 200,
-                description: 'Reconciliation results',
+                description: 'Results',
                 content: [
                     new MediaType(
                         mediaType: 'application/json',
@@ -84,7 +84,7 @@ class ReconcileController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/v1/reconcile/collector/{term}', name: "services_rest_reconcile_collector", methods: ['GET'])]
+    #[Route('/v1/agents/collector/{term}', name: "services_rest_agents_collector", methods: ['GET'])]
     public function collector(string $term): Response
     {
 
