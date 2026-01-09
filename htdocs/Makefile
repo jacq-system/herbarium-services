@@ -1,4 +1,4 @@
-#	RUN INSIDE THE CONTAINER, that is: docker exec -it app-sjacq bash
+#	RUN INSIDE THE CONTAINER, that is: docker exec -it services bash
 app:
 	php bin/console app:elastic-collectors  # refresh ES index for collectors
 
