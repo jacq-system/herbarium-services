@@ -78,18 +78,11 @@ class ClassificationDownloadService
 
     protected function detectAuthorsVisibility(int $referenceId, ?int $hideScientificNameAuthors = null): void
     {
-        switch ($hideScientificNameAuthors) {
-            case 1:
-                $this->hideScientificNameAuthors = true;
-                break;
-            case 0:
-                $this->hideScientificNameAuthors = false;
-                break;
-            default:
-                // if hide scientific name authors is null, use preference from literature entry
-                $this->hideScientificNameAuthors = $this->literatureRepository->find($referenceId)->isHideScientificNameAuthors();
-                break;
-        }
+        $this->hideScientificNameAuthors = match ($hideScientificNameAuthors) {
+            1 => true,
+            0 => false,
+            default => $this->literatureRepository->find($referenceId)->isHideScientificNameAuthors(),
+        };
     }
 
     protected function prepareHeader(): void
@@ -115,35 +108,35 @@ class ClassificationDownloadService
      * @param array $parentTaxSynonymies an array of db-rows of all parent tax-synonymy entries
      * @param array $taxSynonymy db-row of the currently active tax-synonym entry
      */
-    protected function exportClassification($parentTaxSynonymies, Synonymy $taxSynonymy): void
+    protected function exportClassification(array $parentTaxSynonymies, Synonymy $taxSynonymy): void
     {
 
-        $line[0] = $this->uuidService->getResolvableUri($this->uuidService->getUuid('citation', $taxSynonymy->getLiterature()->getId()));
-        $line[1] = $this->literatureRepository->getProtolog($taxSynonymy->getLiterature()->getId());
+        $line[0] = $this->uuidService->getResolvableUri($this->uuidService->getUuid('citation', $taxSynonymy->literature->id));
+        $line[1] = $this->literatureRepository->getProtolog($taxSynonymy->literature->id);
         $line[2] = 'CC-BY-SA'; // TODO in original $this->settings['classifications_license'];  licence is depending on some app configuration? should be stored with data as it is fixed..?
         $line[3] = date("Y-m-d H:i:s");
         $line[4] = '';
-        $line[5] =  $this->uuidService->getResolvableUri($this->uuidService->getUuid('scientific_name', $taxSynonymy->getSpecies()->getId()));
-        $line[6] = $taxSynonymy->getSpecies()->getId();
-        $line[7] = $taxSynonymy->getClassification()?->getParentTaxonId();
-        $line[8] = $taxSynonymy->getActualTaxonId() ?? null;
-        $line[9] = ($taxSynonymy->getActualTaxonId()) ? 'synonym' : 'accepted';
+        $line[5] =  $this->uuidService->getResolvableUri($this->uuidService->getUuid('scientific_name', $taxSynonymy->species->id));
+        $line[6] = $taxSynonymy->species->id;
+        $line[7] = $taxSynonymy->classification?->parentTaxonId;
+        $line[8] = $taxSynonymy->actualTaxonId ?? null;
+        $line[9] = ($taxSynonymy->actualTaxonId) ? 'synonym' : 'accepted';
 
         // add parent information
         foreach ($parentTaxSynonymies as $parentTaxSynonymy) {
             /** @var Synonymy $parentTaxSynonymy */
-            $line[$this->rankKeys[$parentTaxSynonymy->getSpecies()->getRank()->getHierarchy()]] = $this->taxonService->getScientificName($parentTaxSynonymy->getSpecies()->getId(), $this->hideScientificNameAuthors);
+            $line[$this->rankKeys[$parentTaxSynonymy->species->rank->hierarchy]] = $this->taxonService->getScientificName($parentTaxSynonymy->species->id, $this->hideScientificNameAuthors);
         }
 
         // add the currently active information
-        $line[$this->rankKeys[$taxSynonymy->getSpecies()->getRank()->getHierarchy()]] = $this->taxonService->getScientificName($taxSynonymy->getSpecies()->getId(), $this->hideScientificNameAuthors);
+        $line[$this->rankKeys[$taxSynonymy->species->rank->hierarchy]] = $this->taxonService->getScientificName($taxSynonymy->species->id, $this->hideScientificNameAuthors);
         ksort($line);
         $this->outputBody[] = $line;
 
         $queryBuilder = $this->getBaseQueryBuilder()
             ->andWhere('a.actualTaxonId = :taxon')
-            ->setParameter('reference', $taxSynonymy->getLiterature()->getId())
-            ->setParameter('taxon', $taxSynonymy->getSpecies()->getId());
+            ->setParameter('reference', $taxSynonymy->literature->id)
+            ->setParameter('taxon', $taxSynonymy->species->id);
 
         // fetch all synonyms
         foreach ($queryBuilder->getQuery()->getResult() as $taxSynonymySynonym) {
@@ -155,8 +148,8 @@ class ClassificationDownloadService
         $queryBuilder = $this->getBaseQueryBuilder()
             ->leftJoin('a.classification', 'clas')
             ->andWhere('clas.parentTaxonId = :taxon')
-            ->setParameter('reference', $taxSynonymy->getLiterature()->getId())
-            ->setParameter('taxon', $taxSynonymy->getSpecies()->getId())
+            ->setParameter('reference', $taxSynonymy->literature->id)
+            ->setParameter('taxon', $taxSynonymy->species->id)
             ->orderBy('clas.sort', 'ASC');
 
         foreach ($queryBuilder->getQuery()->getResult() as $taxSynonymyChild) {

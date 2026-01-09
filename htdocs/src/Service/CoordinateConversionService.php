@@ -51,7 +51,6 @@ readonly class CoordinateConversionService
 
     public function latlon2utm(float $lat, float $lon): array
     {
-        $lat = $lat;
         $from = GeographicPoint::create(
             Geographic2D::fromSRID(Geographic2D::EPSG_WGS_84),
             new Degree($lat),

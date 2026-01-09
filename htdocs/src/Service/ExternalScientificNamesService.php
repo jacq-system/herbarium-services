@@ -30,18 +30,18 @@ class ExternalScientificNamesService
 
         foreach ($this->servicesRepository->getCallableServices() as $externalService) {
             try {
-                $this->apiResponses[$externalService->getId()] = $this->httpClient->request('GET', $externalService->getApiUrl() . urlencode($term), [
+                $this->apiResponses[$externalService->id] = $this->httpClient->request('GET', $externalService->apiUrl . urlencode($term), [
                     'timeout' => 8,
                 ]);
             } catch (TransportExceptionInterface $e) {
-                $this->errors[$externalService->getId()] = $e->getMessage();
+                $this->errors[$externalService->id] = $e->getMessage();
             } finally {
-                $this->result[$externalService->getApiCode()] = [
+                $this->result[$externalService->apiCode] = [
                     'match'      => [],
                     'candidates' => [],
-                    'serviceID'  => $externalService->getId(),
-                    'name'       => $externalService->getName(),
-                    'error'      => $this->errors[$externalService->getId()] ?? null
+                    'serviceID'  => $externalService->id,
+                    'name'       => $externalService->name,
+                    'error'      => $this->errors[$externalService->id] ?? null
                 ];
             }
 
@@ -56,10 +56,10 @@ class ExternalScientificNamesService
     protected function proceedResponse(ExternalServices $service): void
     {
         try {
-            $response = $this->apiResponses[$service->getId()];
+            $response = $this->apiResponses[$service->id];
             $result = json_decode($response->getContent(), true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
 
-            switch ($service->getId()) {
+            switch ($service->id) {
                 case self::ID_GBIF:
                     $this->gbif_read($service, $result);
                     break;
@@ -73,7 +73,7 @@ class ExternalScientificNamesService
                     break;
             }
         } catch (Throwable $e) {
-            $this->result[$service->getName()]['error'] = $e->getMessage();
+            $this->result[$service->name]['error'] = $e->getMessage();
         }
     }
 
@@ -87,11 +87,11 @@ class ExternalScientificNamesService
     {
         if (isset($result['count']) && $result['count'] > 0) {
             if ($result['count'] === 1) {
-                $this->result[$service->getApiCode()]['match'] = array('id'    => $result['results'][0]['key'],
+                $this->result[$service->apiCode]['match'] = array('id'    => $result['results'][0]['key'],
                     'name'  => $result['results'][0]['scientificName']);
             } else {
                 foreach ($result['results'] as $candidate) {
-                    $this->result[$service->getApiCode()]['candidates'][] = array('id'   => $candidate['key'],
+                    $this->result[$service->apiCode]['candidates'][] = array('id'   => $candidate['key'],
                         'name' => $candidate['scientificName']);
                 }
             }
@@ -107,11 +107,11 @@ class ExternalScientificNamesService
     private function wfo_read(ExternalServices $service, array $result): void
     {
         if (!empty($result['match'])) {
-            $this->result[$service->getApiCode()]['match'] = array('id'    => $result['match']['wfo_id'],
+            $this->result[$service->apiCode]['match'] = array('id'    => $result['match']['wfo_id'],
                 'name'  => $result['match']['full_name_plain']);
         } elseif (!empty($result['candidates'])) {
             foreach ($result['candidates'] as $candidate) {
-                $this->result[$service->getApiCode()]['candidates'][] = array('id'   => $candidate['wfo_id'],
+                $this->result[$service->apiCode]['candidates'][] = array('id'   => $candidate['wfo_id'],
                     'name' => $candidate['full_name_plain']);
             }
         }
@@ -127,11 +127,11 @@ class ExternalScientificNamesService
     {
         if (count($result) > 1) {
             foreach ($result as $candidate) {
-                $this->result[$service->getApiCode()]['candidates'][] = array('id'   => $candidate['AphiaID'],
+                $this->result[$service->apiCode]['candidates'][] = array('id'   => $candidate['AphiaID'],
                     'name' => $candidate['scientificname']);
             }
         } else {
-            $this->result[$service->getApiCode()]['match'] = array('id'   => $result[0]['AphiaID'],
+            $this->result[$service->apiCode]['match'] = array('id'   => $result[0]['AphiaID'],
                 'name' => $result[0]['scientificname']);
         }
     }

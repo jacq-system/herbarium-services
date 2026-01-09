@@ -67,10 +67,71 @@ class ObjectsController extends AbstractFOSRestController
     {
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        }catch (Exception $e){
+            $data = $this->objectsFacade->resolveSpecimen($specimen);
+        } catch (Exception $e) {
+            try {
+                $specimen = $this->specimenService->findNonAccessibleForPublic($specimenID);
+                $data = $this->objectsFacade->resolveSpecimen($specimen);
+            } catch (Exception $e) {
+                $view = $this->view([], 404);
+                return $this->handleView($view);
+            }
+        }
+
+        $view = $this->view($data, 200);
+
+        return $this->handleView($view);
+    }
+
+    #[Get(
+        path: '/v1/objects/specimens/by-sid/{sid}',
+        summary: 'get the properties of a specimen identified by SID',
+        tags: ['objects'],
+        parameters: [
+            new PathParameter(
+                name: 'sid',
+                description: 'stable identifier of specimen',
+                in: 'path',
+                required: true,
+                schema: new Schema(type: 'string'),
+                example: 'https://wu.jacq.org/WU-0000264'
+            )
+        ],
+        responses: [
+            new \OpenApi\Attributes\Response(
+                response: 200,
+                description: 'List',
+                content: [new MediaType(
+                    mediaType: 'application/json',
+                    schema: new Schema(
+                        type: 'array',
+                        items: new Items(
+                            properties: [
+                                new Property(property: 'results', type: 'object')
+                            ],
+                            type: 'object'
+                        )
+                    )
+                )
+                ]
+            ),
+            new \OpenApi\Attributes\Response(
+                response: 400,
+                description: 'Bad Request'
+            )
+        ]
+    )]
+    #[Route('/v1/objects/specimens/by-sid/{sid<.+>}', name: "services_rest_objects_specimen_bysid", methods: ['GET'])]
+    public function specimenBySid(string $sid): Response
+    {
+        $sid = urldecode($sid);
+        $sid = $this->fixSchemeSlashes($sid);
+        $specimen = $this->specimenService->findSpecimenUsingSid($sid);
+        if ($specimen === null) {
             $view = $this->view([], 404);
             return $this->handleView($view);
         }
+
         $data = $this->objectsFacade->resolveSpecimen($specimen);
         $view = $this->view($data, 200);
 
@@ -200,13 +261,20 @@ class ObjectsController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
-    public function specimens(#[MapQueryParameter] ?int $p = 0,#[MapQueryParameter] ?int $rpp = 50,#[MapQueryParameter] ?int $list = 1,#[MapQueryParameter] ?string $term = '',#[MapQueryParameter] ?string $sc = '',#[MapQueryParameter] ?string $coll = '',#[MapQueryParameter] ?int $type = 0,#[MapQueryParameter] ?string $sort = '',#[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
+    public function specimens(#[MapQueryParameter] ?int $p = 0, #[MapQueryParameter] ?int $rpp = 50, #[MapQueryParameter] ?int $list = 1, #[MapQueryParameter] ?string $term = '', #[MapQueryParameter] ?string $sc = '', #[MapQueryParameter] ?string $coll = '', #[MapQueryParameter] ?int $type = 0, #[MapQueryParameter] ?string $sort = '', #[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
     {
         ($rpp > 100) ? $rpp = 100 : null;
-        $data = $this->objectsFacade->resolveSpecimens( $p, $rpp, $list, $term,$sc,$coll,$type,$sort, $herbnr, $nation, $withImages, $cltr);
+        $data = $this->objectsFacade->resolveSpecimens($p, $rpp, $list, $term, $sc, $coll, $type, $sort, $herbnr, $nation, $withImages, $cltr, false);
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
     }
 
+    private function fixSchemeSlashes(string $sid): string
+    {
+        //add slash
+        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
+        //reduce to exactly two
+        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
+    }
 }

@@ -6,54 +6,44 @@ use App\Command\ElasticsearchCollectorRefreshCommand;
 use App\Service\ElasticsearchService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use OpenApi\Attributes\AdditionalProperties;
+use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
+use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\MediaType;
+use OpenApi\Attributes\PathParameter;
 use OpenApi\Attributes\Post;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
 use OpenApi\Attributes\Schema;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class ReconcileController extends AbstractFOSRestController
+class AgentsController extends AbstractFOSRestController
 {
     public function __construct(protected readonly ElasticsearchService $elasticsearchService)
     {
     }
 
-    #[Post(
-        path: '/v1/reconcile/collector',
-        summary: 'Get reconciliation proposals for collector names (bulk)',
-        requestBody: new RequestBody(
-            description: 'OpenRefine reconciliation queries',
-            required: true,
-            content: [
-                new MediaType(
-                    mediaType: 'application/json',
-                    schema: new Schema(
-                        properties: [
-                            new Property(
-                                property: 'queries',
-                                type: 'object',
-                                additionalProperties: new AdditionalProperties(
-                                    properties: [
-                                        new Property(property: 'query', type: 'string', example: 'H. Reiner')
-                                    ],
-                                    type: 'object'
-                                )
-                            )
-                        ],
-                        type: 'object'
-                    )
-                )
-            ]
-        ),
-        tags: ['reconcile'],
+    #[Get(
+        path: '/v1/agents/collector/{term}',
+        summary: 'Get scored proposals for collector names',
+        tags: ['agents'],
+        parameters: [
+            new PathParameter(
+                name: 'term',
+                description: 'Collectors name',
+                in: 'path',
+                required: true,
+                schema: new Schema(type: 'string'),
+                example: 'Reiner,H.'
+            )
+        ],
         responses: [
             new \OpenApi\Attributes\Response(
                 response: 200,
-                description: 'Reconciliation results',
+                description: 'Results',
                 content: [
                     new MediaType(
                         mediaType: 'application/json',
@@ -94,33 +84,29 @@ class ReconcileController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/v1/reconcile/collector', name: "services_rest_reconcile_collector", methods: ['POST'])]
-    public function collector(Request $request): Response
+    #[Route('/v1/agents/collector/{term}', name: "services_rest_agents_collector", methods: ['GET'])]
+    public function collector(string $term): Response
     {
-        $result = [];
-            $payload = json_decode($request->getContent(), true)["queries"] ?? [];
 
-            foreach ($payload as $key => $q) {
-                $term = $q["query"] ?? "";
-                $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
 
-                $result[$key] = [
-                    "result" => array_map(function ($hit) use ($term) {
-                        return [
-                            "id" => $hit["_id"],
-                            "name" => $hit["_source"]["name"],
-                            "score" => $hit["_score"],
-                            "match" => strtolower($term) === strtolower($hit["_source"]["name"])
-                        ];
-                    }, $data["hits"]["hits"])
-                ];
-            }
+        $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
+
+            $result  =
+                 array_map(function ($hit) use ($term) {
+                    return [
+                        "id" => $hit["_id"],
+                        "name" => $hit["_source"]["name"],
+                        "score" => $hit["_score"],
+                        "match" => strtolower($term) === strtolower($hit["_source"]["name"])
+                    ];
+                }, $data["hits"]["hits"])
+            ;
+
 
         $view = $this->view($result, 200);
         $view->setFormat('json');
 
         return $this->handleView($view);
     }
-
 
 }

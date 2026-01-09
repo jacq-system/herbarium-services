@@ -38,7 +38,7 @@ readonly class ObjectsFacade
      * @param array $taxonIDList search for taxon terms has already finished, this is the list of results; defaults to empty array
      * @return array
      */
-    public function resolveSpecimens(int $p, int $rpp, int $listOnly, string $term, string $sc, string $coll, int $type, string $sort, string $herbnr, string $nation, int $withImages, string $cltr): array
+    public function resolveSpecimens(int $p, int $rpp, int $listOnly, string $term, string $sc, string $coll, int $type, string $sort, string $herbnr, string $nation, int $withImages, string $cltr, bool $onlyAccessibleSpecimens = true): array
     {
         $taxonIDList = [];
         if (!empty($term)) {
@@ -54,13 +54,13 @@ readonly class ObjectsFacade
                 return [];
             }
         }
-        $dataQueryBuilder = $this->getQueryBuilder($taxonIDList, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
+        $dataQueryBuilder = $this->getQueryBuilder($taxonIDList, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr, $onlyAccessibleSpecimens)
             ->setFirstResult($rpp * $p)
             ->setMaxResults($rpp);
 
         $list = $dataQueryBuilder->getQuery()->getResult();
 
-        $countQueryBuilder = $this->getQueryBuilder($taxonIDList, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr)
+        $countQueryBuilder = $this->getQueryBuilder($taxonIDList, $herbnr, $sc, $cltr, $nation, $type, $withImages, $sort, $cltr, $onlyAccessibleSpecimens)
             ->resetDQLPart('orderBy')
             ->select('COUNT(DISTINCT s.id)');
         $nrRows = (int)$countQueryBuilder->getQuery()->getSingleScalarResult();
@@ -100,19 +100,21 @@ readonly class ObjectsFacade
             'result' => array()
         );
         foreach ($list as $specimen) {
-            $data['result'][] = (!empty($listOnly)) ? $specimen->getId() : $this->resolveSpecimen($specimen);
+            $data['result'][] = (!empty($listOnly)) ? $specimen->id : $this->resolveSpecimen($specimen);
         }
 
         return $data;
     }
 
-    protected function getQueryBuilder(array $taxonIDList, string $herbNumber, string $institutionCode, string $collectorName, string $nation, int $typus, int $withImages, string $sort, string $collectionNr): QueryBuilder
+    protected function getQueryBuilder(array $taxonIDList, string $herbNumber, string $institutionCode, string $collectorName, string $nation, int $typus, int $withImages, string $sort, string $collectionNr, bool $onlyAccessibleSpecimens = true): QueryBuilder
     {
         $qb = $this->entityManager->getRepository(Specimens::class)->createQueryBuilder('s');
         $joins = [];
 
-        $qb->select('s')
-            ->where('s.accessibleForPublic = true');
+        if ($onlyAccessibleSpecimens){
+            $qb->select('s')
+                ->where('s.accessibleForPublic = true');
+        }
 
         if (count($taxonIDList) > 0) {
             $qb->leftJoin('s.species', 'species')
@@ -165,7 +167,6 @@ readonly class ObjectsFacade
 
                 ))
                 ->setParameter('nation', $nation);
-            ;
         }
         if (!empty($typus)) {
             $joins[] = 'typus';
