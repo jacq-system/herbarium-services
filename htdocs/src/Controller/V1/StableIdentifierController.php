@@ -2,6 +2,7 @@
 
 namespace App\Controller\V1;
 
+use App\Service\ExternalPidService;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JACQ\Service\SpecimenService;
@@ -18,7 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class StableIdentifierController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly SpecimenService $specimenService)
+    public function __construct(protected readonly SpecimenService $specimenService, protected readonly ExternalPidService  $externalPidService)
     {
     }
 
@@ -106,6 +107,15 @@ class StableIdentifierController extends AbstractFOSRestController
             $results['specimenID'] = $specimen->id;
             $results['stableIdentifierLatest'] = $this->specimenService->sid2array($specimen);
             $results['stableIdentifierList'] = $this->specimenService->sids2array($specimen);
+            $externalPids = $this->externalPidService->getAll($specimen);
+
+            if ($externalPids !== null) {
+                $results['stableIdentifierList'] = array_merge(
+                    $results['stableIdentifierList'],
+                    $externalPids
+                );
+            }
+
         } else {
             $view = $this->view("Stable Identifier does not exist", 404);
             return $this->handleView($view);
@@ -198,7 +208,7 @@ class StableIdentifierController extends AbstractFOSRestController
             return $this->handleView($view);
         }
 
-        if ($withredirect) {
+        if ($withredirect && !empty($this->specimenService->getStableIdentifier($specimen))) {
             return $this->redirect($this->specimenService->getStableIdentifier($specimen), 303);
 
         } else {
