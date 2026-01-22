@@ -73,7 +73,7 @@ class ImagesController extends AbstractFOSRestController
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getShowLink($imageNr);
-        if ($withredirect) {
+        if ($withredirect && !empty($results['link'])) {
             return $this->redirect($results['link'], 303);
         }
 
@@ -135,7 +135,7 @@ class ImagesController extends AbstractFOSRestController
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getDownloadLink($imageNr);
 
-        if ($withredirect) {
+        if ($withredirect && !empty($results['link'])) {
             return $this->redirect($results['link'], 303);
         }
 
@@ -198,7 +198,7 @@ class ImagesController extends AbstractFOSRestController
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getEuropeanaLink($imageNr);
 
-        if ($withredirect) {
+        if ($withredirect && !empty($results['link'])) {
             return $this->redirect($results['link'], 303);
         }
 
@@ -261,7 +261,7 @@ class ImagesController extends AbstractFOSRestController
         $this->imageLinkMapper->setSpecimen($specimenID);
         $results['link'] = $this->imageLinkMapper->getThumbLink($imageNr);
 
-        if ($withredirect) {
+        if ($withredirect && !empty($results['link'])) {
             return $this->redirect($results['link'], 303);
         }
 
