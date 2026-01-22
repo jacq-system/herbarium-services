@@ -3,6 +3,7 @@
 namespace App\Facade;
 
 
+use JACQ\Entity\Jacq\Herbarinput\Species;
 use JACQ\Repository\Herbarinput\LiteratureRepository;
 use JACQ\Repository\Herbarinput\SpeciesRepository;
 use JACQ\Repository\Herbarinput\SynonymyRepository;
@@ -336,7 +337,8 @@ readonly class ClassificationFacade
         $basID = 0;
         $basionymResult = null;
         $species = $this->speciesRepository->find($taxonID);
-        $basionym = $species->getBasionym();
+        /** @var Species $basionym */
+        $basionym = $species->basionym;
 
         if ($basionym !== null) {
             $basionymResult = array(
