@@ -1,4 +1,4 @@
-FROM ghcr.io/jacq-system/symfony-base:main@sha256:67a00e51fc5b8de9b8749d164fb537f1754aee01f450e065fa21ae8b173d917a
+FROM ghcr.io/jacq-system/symfony-base:main@sha256:0481a4d99db9e6d84b16b8ee22f7c203e68f81af5abcfa92f6f460204252ace7
 LABEL org.opencontainers.image.source=https://github.com/jacq-system/symfony
 LABEL org.opencontainers.image.description="JACQ herbarium service Symfony"
 ARG GIT_TAG
