@@ -28,9 +28,17 @@ class ElasticsearchService
         // recreate empty index
         $this->client->request("PUT", $this->basePath . $index, [
             'json' => [
+                'settings' => [
+                    'number_of_shards' => 1,
+                    'number_of_replicas' => 0,
+                    'refresh_interval' => '-1',
+                ],
                 'mappings' => [
                     'properties' => [
-                        'name' => ['type' => 'text'],
+                        'name' => [
+                            'type' => 'text',
+                            'analyzer' => 'standard'
+                        ],
                     ],
                 ],
             ]
