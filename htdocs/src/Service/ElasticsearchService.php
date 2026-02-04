@@ -55,6 +55,12 @@ class ElasticsearchService
         ]);
     }
 
+    public function refreshIndex(string $index): void
+    {
+        $this->client->request("POST", $this->basePath . $index . "/_refresh");
+    }
+
+
     public function search(string $index, string $query, int $limit = 5): array
     {
         $body = [

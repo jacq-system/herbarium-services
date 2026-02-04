@@ -61,6 +61,8 @@ class ElasticsearchCollectorRefreshCommand extends Command
             $output->writeln("Indexed TOTAL $indexed records.");
         }
 
+        $this->elasticsearchService->refreshIndex(self::IndexName);
+
         return Command::SUCCESS;
     }
 }
