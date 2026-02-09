@@ -19,7 +19,7 @@
     "ext-fileinfo": "*",
     "doctrine/doctrine-bundle": "^3",
     "friendsofsymfony/rest-bundle": "3.x-dev as 3.6.0",
-    "jacq-system/orm-model": "^0.2",
+    "jacq-system/orm-model": "^0.3",
     "jms/serializer-bundle": "^5",
     "nelmio/api-doc-bundle": "^5",
     "nelmio/cors-bundle": "^2",
