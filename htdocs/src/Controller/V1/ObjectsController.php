@@ -7,8 +7,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
-use JACQ\Application\SearchSpecimen\SpecimenSearchQueryFactory;
-use JACQ\Service\ExcelService;
+use JACQ\Application\Specimen\Export\ExcelService;
+use JACQ\Application\Specimen\Search\SpecimenSearchQueryFactory;
 use JACQ\Service\SpecimenService;
 use JACQ\UI\Http\SpecimenSearchParametersFromRequestFactory;
 use OpenApi\Attributes\Get;
@@ -18,6 +18,8 @@ use OpenApi\Attributes\PathParameter;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\QueryParameter;
 use OpenApi\Attributes\Schema;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use PhpOffice\PhpSpreadsheet\Writer\Ods;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -297,8 +299,7 @@ class ObjectsController extends AbstractFOSRestController
                 description: 'Herbarium number',
                 in: 'query',
                 required: false,
-                schema: new Schema(type: 'string'),
-                example: 'PRC 12345'
+                schema: new Schema(type: 'string')
             ),
             new QueryParameter(
                 name: 'collection',
@@ -382,8 +383,7 @@ class ObjectsController extends AbstractFOSRestController
                 description: 'Country name',
                 in: 'query',
                 required: false,
-                schema: new Schema(type: 'string'),
-                example: 'Germany'
+                schema: new Schema(type: 'string')
             ),
             new QueryParameter(
                 name: 'province',
@@ -442,7 +442,7 @@ class ObjectsController extends AbstractFOSRestController
                 schema: new Schema(
                     type: 'string',
                     default: 'xlsx',
-                    enum: ['xlsx', 'ods', 'kml']
+                    enum: ['xlsx', 'ods', 'csv', 'geojson', 'kml']
                 ),
                 example: 'xlsx'
             )
@@ -477,12 +477,18 @@ class ObjectsController extends AbstractFOSRestController
     {
 
         $parameters = $this->fromRequestFactory->create($request);
-//        dd($parameters);
         $specimenSearchQuery = $this->searchQueryFactory->createForPublic();
         $qb = $specimenSearchQuery->build($parameters);
+//        dd($parameters);
 //        dd($qb->getQuery()->getDQL(), $qb->getQuery()->getParameters());
+        return match ($request->query->get('format')) {
+            'xlsx' => $this->provideExcel($qb),
+            'ods'  => $this->provideOds($qb),
+            'csv'  => $this->provideCsv($qb),
+            //TODO GeoJson, KML
+            default => throw new \InvalidArgumentException('Unsupported format'),
+        };
 
-       return $this->provideExcel($qb);
     }
 
     protected function provideExcel(QueryBuilder $qb): Response
@@ -496,6 +502,36 @@ class ObjectsController extends AbstractFOSRestController
 
         $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $response->headers->set('Content-Disposition', 'attachment;filename="specimens_download.xlsx"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+    protected function provideOds(QueryBuilder $qb): Response
+    {
+        $spreadsheet = $this->excelService->createSpecimenExport($qb);
+
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Ods($spreadsheet);
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="specimens_download.ods"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+    protected function provideCsv(QueryBuilder $qb): Response
+    {
+        $spreadsheet = $this->excelService->createSpecimenExport($qb);
+
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Csv($spreadsheet);
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment;filename="specimens_download.csv"');
         $response->headers->set('Cache-Control', 'max-age=0');
 
         return $response;

@@ -1009,12 +1009,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSRestBundle.git",
-                "reference": "135e1ef14b9878ad363691e86616d54c801f7aa6"
+                "reference": "0a0d597a79734a8bd3a90cf6fa58de82940fc873"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/135e1ef14b9878ad363691e86616d54c801f7aa6",
-                "reference": "135e1ef14b9878ad363691e86616d54c801f7aa6",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/0a0d597a79734a8bd3a90cf6fa58de82940fc873",
+                "reference": "0a0d597a79734a8bd3a90cf6fa58de82940fc873",
                 "shasum": ""
             },
             "require": {
@@ -1108,7 +1108,7 @@
                 "issues": "https://github.com/FriendsOfSymfony/FOSRestBundle/issues",
                 "source": "https://github.com/FriendsOfSymfony/FOSRestBundle/tree/3.x"
             },
-            "time": "2026-01-16T07:55:40+00:00"
+            "time": "2026-02-10T02:36:12+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -1437,16 +1437,16 @@
         },
         {
             "name": "jacq-system/orm-model",
-            "version": "v0.3.3",
+            "version": "v0.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacq-system/orm-model.git",
-                "reference": "68aa34ecb207053541c8490bca1954b82c3e484c"
+                "reference": "f3d69a8d868e3f84e64b4b1edbc4940925029bcc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/68aa34ecb207053541c8490bca1954b82c3e484c",
-                "reference": "68aa34ecb207053541c8490bca1954b82c3e484c",
+                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/f3d69a8d868e3f84e64b4b1edbc4940925029bcc",
+                "reference": "f3d69a8d868e3f84e64b4b1edbc4940925029bcc",
                 "shasum": ""
             },
             "require": {
@@ -1473,10 +1473,10 @@
             ],
             "description": "Shared Doctrine ORM and services for JACQ projects",
             "support": {
-                "source": "https://github.com/jacq-system/orm-model/tree/v0.3.3",
+                "source": "https://github.com/jacq-system/orm-model/tree/v0.3.4",
                 "issues": "https://github.com/jacq-system/orm-model/issues"
             },
-            "time": "2026-02-09T12:50:39+00:00"
+            "time": "2026-02-10T07:57:03+00:00"
         },
         {
             "name": "jms/metadata",
@@ -9081,16 +9081,16 @@
         },
         {
             "name": "symfony/maker-bundle",
-            "version": "v1.65.1",
+            "version": "v1.66.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/maker-bundle.git",
-                "reference": "eba30452d212769c9a5bcf0716959fd8ba1e54e3"
+                "reference": "b5b4afa2a570b926682e9f34615a6766dd560ff4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/eba30452d212769c9a5bcf0716959fd8ba1e54e3",
-                "reference": "eba30452d212769c9a5bcf0716959fd8ba1e54e3",
+                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/b5b4afa2a570b926682e9f34615a6766dd560ff4",
+                "reference": "b5b4afa2a570b926682e9f34615a6766dd560ff4",
                 "shasum": ""
             },
             "require": {
@@ -9113,7 +9113,7 @@
             },
             "require-dev": {
                 "composer/semver": "^3.0",
-                "doctrine/doctrine-bundle": "^2.5.0|^3.0.0",
+                "doctrine/doctrine-bundle": "^2.10|^3.0",
                 "doctrine/orm": "^2.15|^3",
                 "doctrine/persistence": "^3.1|^4.0",
                 "symfony/http-client": "^6.4|^7.0|^8.0",
@@ -9155,7 +9155,7 @@
             ],
             "support": {
                 "issues": "https://github.com/symfony/maker-bundle/issues",
-                "source": "https://github.com/symfony/maker-bundle/tree/v1.65.1"
+                "source": "https://github.com/symfony/maker-bundle/tree/v1.66.0"
             },
             "funding": [
                 {
@@ -9175,7 +9175,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-02T07:14:37+00:00"
+            "time": "2026-02-09T08:55:54+00:00"
         },
         {
             "name": "symfony/phpunit-bridge",
