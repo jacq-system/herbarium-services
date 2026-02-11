@@ -1437,16 +1437,16 @@
         },
         {
             "name": "jacq-system/orm-model",
-            "version": "v0.3.4",
+            "version": "v0.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacq-system/orm-model.git",
-                "reference": "f3d69a8d868e3f84e64b4b1edbc4940925029bcc"
+                "reference": "1f4aace90eb28a5821cdd9f12a45dd7cedccf45b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/f3d69a8d868e3f84e64b4b1edbc4940925029bcc",
-                "reference": "f3d69a8d868e3f84e64b4b1edbc4940925029bcc",
+                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/1f4aace90eb28a5821cdd9f12a45dd7cedccf45b",
+                "reference": "1f4aace90eb28a5821cdd9f12a45dd7cedccf45b",
                 "shasum": ""
             },
             "require": {
@@ -1473,10 +1473,10 @@
             ],
             "description": "Shared Doctrine ORM and services for JACQ projects",
             "support": {
-                "source": "https://github.com/jacq-system/orm-model/tree/v0.3.4",
+                "source": "https://github.com/jacq-system/orm-model/tree/v0.3.5",
                 "issues": "https://github.com/jacq-system/orm-model/issues"
             },
-            "time": "2026-02-10T07:57:03+00:00"
+            "time": "2026-02-11T15:35:55+00:00"
         },
         {
             "name": "jms/metadata",
@@ -7155,16 +7155,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "5.8.1",
+            "version": "5.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "8adf6bb57561243aca48339e7f39bddf27ae546c"
+                "reference": "18ee6592518238a5a6c9905aae4926d5bbc65754"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/8adf6bb57561243aca48339e7f39bddf27ae546c",
-                "reference": "8adf6bb57561243aca48339e7f39bddf27ae546c",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/18ee6592518238a5a6c9905aae4926d5bbc65754",
+                "reference": "18ee6592518238a5a6c9905aae4926d5bbc65754",
                 "shasum": ""
             },
             "require": {
@@ -7237,7 +7237,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/5.8.1"
+                "source": "https://github.com/zircote/swagger-php/tree/5.8.2"
             },
             "funding": [
                 {
@@ -7245,7 +7245,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-03T23:48:39+00:00"
+            "time": "2026-02-10T20:10:15+00:00"
         }
     ],
     "packages-dev": [

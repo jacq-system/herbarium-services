@@ -8,11 +8,13 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JACQ\Application\Specimen\Export\ExcelService;
+use JACQ\Application\Specimen\Export\GeojsonService;
+use JACQ\Application\Specimen\Export\KmlService;
 use JACQ\Application\Specimen\Search\SpecimenSearchQueryFactory;
 use JACQ\Service\SpecimenService;
 use JACQ\UI\Http\SpecimenSearchParametersFromRequestFactory;
-use OpenApi\Attributes\Header;
 use OpenApi\Attributes\Get;
+use OpenApi\Attributes\Header;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\PathParameter;
@@ -31,7 +33,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ObjectsController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly ObjectsFacade $objectsFacade, protected readonly SpecimenService $specimenService, protected LoggerInterface $logger, protected SpecimenSearchParametersFromRequestFactory $fromRequestFactory, protected SpecimenSearchQueryFactory $searchQueryFactory, protected ExcelService $excelService, protected EntityManagerInterface $entityManager)
+    public function __construct(protected readonly ObjectsFacade $objectsFacade, protected readonly SpecimenService $specimenService, protected LoggerInterface $logger, protected SpecimenSearchParametersFromRequestFactory $fromRequestFactory, protected SpecimenSearchQueryFactory $searchQueryFactory, protected ExcelService $excelService, protected EntityManagerInterface $entityManager, protected KmlService $kmlService, protected GeojsonService $geojsonService)
     {
     }
 
@@ -147,6 +149,14 @@ class ObjectsController extends AbstractFOSRestController
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
+    }
+
+    private function fixSchemeSlashes(string $sid): string
+    {
+        //add slash
+        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
+        //reduce to exactly two
+        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 
     #[Get(
@@ -500,9 +510,10 @@ class ObjectsController extends AbstractFOSRestController
 //        dd($qb->getQuery()->getDQL(), $qb->getQuery()->getParameters());
         return match ($request->query->get('format')) {
             'xlsx' => $this->provideExcel($qb),
-            'ods'  => $this->provideOds($qb),
-            'csv'  => $this->provideCsv($qb),
-            //TODO GeoJson, KML
+            'ods' => $this->provideOds($qb),
+            'csv' => $this->provideCsv($qb),
+            'geojson' => $this->provideGeojson($qb),
+            'kml' => $this->provideKml($qb),
             default => throw new \InvalidArgumentException('Unsupported format'),
         };
 
@@ -523,6 +534,7 @@ class ObjectsController extends AbstractFOSRestController
 
         return $response;
     }
+
     protected function provideOds(QueryBuilder $qb): Response
     {
         $spreadsheet = $this->excelService->createSpecimenExport($qb);
@@ -538,6 +550,7 @@ class ObjectsController extends AbstractFOSRestController
 
         return $response;
     }
+
     protected function provideCsv(QueryBuilder $qb): Response
     {
         $spreadsheet = $this->excelService->createSpecimenExport($qb);
@@ -554,11 +567,43 @@ class ObjectsController extends AbstractFOSRestController
         return $response;
     }
 
-    private function fixSchemeSlashes(string $sid): string
+    protected function provideGeojson(QueryBuilder $qb): Response
     {
-        //add slash
-        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
-        //reduce to exactly two
-        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
+        return new StreamedResponse(function () use ($qb) {
+            try {
+                foreach ($this->geojsonService->GeojsonRecords($qb) as $chunk) {
+                    echo $chunk;
+                }
+            } catch (\Throwable $e) {
+                error_log($e->getMessage());
+                throw $e;
+            }
+        }, 200,
+            [
+                'Content-Type' => 'application/geo+json',
+                'Content-Disposition' => 'attachment; filename="specimens_download.geojson"',
+            ]);
+
+    }
+
+    protected function provideKml(QueryBuilder $qb): Response
+    {
+        return new StreamedResponse(function () use ($qb) {
+            try {
+                foreach ($this->kmlService->KmlRecords($qb) as $chunk) {
+                    echo $chunk;
+                }
+            } catch (\Throwable $e) {
+                error_log($e->getMessage());
+                throw $e;
+            }
+        },
+            200,
+            [
+                'Content-Type' => 'application/vnd.google-earth.kml+xml',
+                'Content-Disposition' => 'attachment; filename="specimens_download.kml"',
+            ]
+        );
+
     }
 }
