@@ -11,6 +11,7 @@ use JACQ\Application\Specimen\Export\ExcelService;
 use JACQ\Application\Specimen\Search\SpecimenSearchQueryFactory;
 use JACQ\Service\SpecimenService;
 use JACQ\UI\Http\SpecimenSearchParametersFromRequestFactory;
+use OpenApi\Attributes\Header;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\MediaType;
@@ -451,19 +452,35 @@ class ObjectsController extends AbstractFOSRestController
         responses: [
             new \OpenApi\Attributes\Response(
                 response: 200,
-                description: 'List',
-                content: [new MediaType(
-                    mediaType: 'application/json',
-                    schema: new Schema(
-                        type: 'array',
-                        items: new Items(
-                            properties: [
-                                new Property(property: 'results', type: 'object')
-                            ],
-                            type: 'object'
-                        )
+                description: 'Export file (xlsx, csv, ods, geojson or kml)',
+                headers: [
+                    new Header(
+                        header: 'Content-Disposition',
+                        description: 'attachment; filename="export.ext"',
+                        schema: new Schema(type: 'string')
                     )
-                )
+                ],
+                content: [
+                    new MediaType(
+                        mediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'text/csv',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'application/vnd.oasis.opendocument.spreadsheet',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'application/geo+json',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'application/vnd.google-earth.kml+xml',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
