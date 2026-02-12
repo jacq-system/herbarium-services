@@ -440,7 +440,7 @@ class ObjectsController extends AbstractFOSRestController
             ),
             new QueryParameter(
                 name: 'taxon',
-                description: 'Taxon name',
+                description: 'Taxon name, multiple terms separated by \',\'',
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string')
