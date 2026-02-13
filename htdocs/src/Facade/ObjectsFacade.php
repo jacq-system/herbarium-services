@@ -170,7 +170,7 @@ readonly class ObjectsFacade
         }
         if (!empty($typus)) {
             $joins[] = 'typus';
-            $qb->join('s.typus', 'typus');
+            $qb->innerJoin('s.typus', 'typus');
         }
         if (!empty($withImages)) {
             $qb->andWhere($qb->expr()->orX(

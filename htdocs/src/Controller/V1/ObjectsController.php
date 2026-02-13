@@ -3,24 +3,37 @@
 namespace App\Controller\V1;
 
 use App\Facade\ObjectsFacade;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use JACQ\Application\Specimen\Export\ExcelService;
+use JACQ\Application\Specimen\Export\GeojsonService;
+use JACQ\Application\Specimen\Export\KmlService;
+use JACQ\Application\Specimen\Search\SpecimenSearchQueryFactory;
 use JACQ\Service\SpecimenService;
+use JACQ\UI\Http\SpecimenSearchParametersFromRequestFactory;
 use OpenApi\Attributes\Get;
+use OpenApi\Attributes\Header;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\PathParameter;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\QueryParameter;
 use OpenApi\Attributes\Schema;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use PhpOffice\PhpSpreadsheet\Writer\Ods;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ObjectsController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly ObjectsFacade $objectsFacade, protected readonly SpecimenService $specimenService, protected LoggerInterface $logger)
+    public function __construct(protected readonly ObjectsFacade $objectsFacade, protected readonly SpecimenService $specimenService, protected LoggerInterface $logger, protected SpecimenSearchParametersFromRequestFactory $fromRequestFactory, protected SpecimenSearchQueryFactory $searchQueryFactory, protected ExcelService $excelService, protected EntityManagerInterface $entityManager, protected KmlService $kmlService, protected GeojsonService $geojsonService)
     {
     }
 
@@ -62,7 +75,7 @@ class ObjectsController extends AbstractFOSRestController
             )
         ]
     )]
-    #[Route('/v1/objects/specimens/{specimenID}', name: "services_rest_objects_specimen", methods: ['GET'])]
+    #[Route('/v1/objects/specimens/{specimenID<\d+>}', name: "services_rest_objects_specimen", methods: ['GET'])]
     public function specimen(int $specimenID): Response
     {
         try {
@@ -136,6 +149,14 @@ class ObjectsController extends AbstractFOSRestController
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
+    }
+
+    private function fixSchemeSlashes(string $sid): string
+    {
+        //add slash
+        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
+        //reduce to exactly two
+        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 
     #[Get(
@@ -270,11 +291,319 @@ class ObjectsController extends AbstractFOSRestController
         return $this->handleView($view);
     }
 
-    private function fixSchemeSlashes(string $sid): string
+    #[Get(
+        path: '/v1/objects/specimens/export',
+        summary: 'export specimens which fit given criteria, a limit 1000 rows is applied',
+        tags: ['objects'],
+        parameters: [
+
+            new QueryParameter(
+                name: 'institution',
+                description: 'ID of the institution',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'integer'),
+                example: 5
+            ),
+            new QueryParameter(
+                name: 'herbNr',
+                description: 'Herbarium number',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'collection',
+                description: 'ID of the collection',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'integer')
+            ),
+            new QueryParameter(
+                name: 'collectorNr',
+                description: 'Collector number',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'collector',
+                description: 'Collector name',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'collectionDate',
+                description: 'Date of collection (YYYY-MM-DD)',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string', format: 'date')
+            ),
+            new QueryParameter(
+                name: 'collectionNr',
+                description: 'Collection ID',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'series',
+                description: 'Series name',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'locality',
+                description: 'Locality description',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'habitus',
+                description: 'Plant habitus',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'habitat',
+                description: 'Habitat description',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'taxonAlternative',
+                description: 'Alternative taxon name',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'annotation',
+                description: 'Annotation text',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'country',
+                description: 'Country name',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'province',
+                description: 'Province name',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'onlyType',
+                description: 'Return only type specimens (default false)',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'boolean')
+            ),
+            new QueryParameter(
+                name: 'includeSynonym',
+                description: 'Include synonyms in search (default false)',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'boolean')
+            ),
+            new QueryParameter(
+                name: 'onlyImages',
+                description: 'Return only specimens with images (default false)',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'boolean')
+            ),
+            new QueryParameter(
+                name: 'family',
+                description: 'Family name',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'onlyCoords',
+                description: 'Return only specimens with coordinates (default false)',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'boolean')
+            ),
+            new QueryParameter(
+                name: 'taxon',
+                description: 'Taxon name, multiple terms separated by \',\'',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string')
+            ),
+            new QueryParameter(
+                name: 'format',
+                description: 'Export format (default xlsx)',
+                in: 'query',
+                required: false,
+                schema: new Schema(
+                    type: 'string',
+                    default: 'xlsx',
+                    enum: ['xlsx', 'ods', 'csv', 'geojson', 'kml']
+                ),
+                example: 'xlsx'
+            )
+
+        ],
+        responses: [
+            new \OpenApi\Attributes\Response(
+                response: 200,
+                description: 'Export file (xlsx, csv, ods, geojson or kml)',
+                headers: [
+                    new Header(
+                        header: 'Content-Disposition',
+                        description: 'attachment; filename="export.ext"',
+                        schema: new Schema(type: 'string')
+                    )
+                ],
+                content: [
+                    new MediaType(
+                        mediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'text/csv',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'application/vnd.oasis.opendocument.spreadsheet',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'application/geo+json',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                    new MediaType(
+                        mediaType: 'application/vnd.google-earth.kml+xml',
+                        schema: new Schema(type: 'string', format: 'binary')
+                    ),
+                ]
+            ),
+            new \OpenApi\Attributes\Response(
+                response: 400,
+                description: 'Bad Request'
+            )
+        ]
+    )]
+    #[Route('/v1/objects/specimens/export', name: "services_rest_objects_specimens_export", methods: ['GET'])]
+    public function specimensExport(Request $request): Response
     {
-        //add slash
-        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
-        //reduce to exactly two
-        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
+
+        $parameters = $this->fromRequestFactory->create($request);
+        $specimenSearchQuery = $this->searchQueryFactory->createForPublic();
+        $qb = $specimenSearchQuery->build($parameters);
+//        dd($parameters);
+//        dd($qb->getQuery()->getDQL(), $qb->getQuery()->getParameters());
+        return match ($request->query->get('format')) {
+            'xlsx' => $this->provideExcel($qb),
+            'ods' => $this->provideOds($qb),
+            'csv' => $this->provideCsv($qb),
+            'geojson' => $this->provideGeojson($qb),
+            'kml' => $this->provideKml($qb),
+            default => throw new \InvalidArgumentException('Unsupported format'),
+        };
+
+    }
+
+    protected function provideExcel(QueryBuilder $qb): Response
+    {
+        $spreadsheet = $this->excelService->createSpecimenExport($qb);
+
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="specimens_download.xlsx"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+
+    protected function provideOds(QueryBuilder $qb): Response
+    {
+        $spreadsheet = $this->excelService->createSpecimenExport($qb);
+
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Ods($spreadsheet);
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="specimens_download.ods"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+
+    protected function provideCsv(QueryBuilder $qb): Response
+    {
+        $spreadsheet = $this->excelService->createSpecimenExport($qb);
+
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Csv($spreadsheet);
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment;filename="specimens_download.csv"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+
+    protected function provideGeojson(QueryBuilder $qb): Response
+    {
+        return new StreamedResponse(function () use ($qb) {
+            try {
+                foreach ($this->geojsonService->GeojsonRecords($qb) as $chunk) {
+                    echo $chunk;
+                }
+            } catch (\Throwable $e) {
+                error_log($e->getMessage());
+                throw $e;
+            }
+        }, 200,
+            [
+                'Content-Type' => 'application/geo+json',
+                'Content-Disposition' => 'attachment; filename="specimens_download.geojson"',
+            ]);
+
+    }
+
+    protected function provideKml(QueryBuilder $qb): Response
+    {
+        return new StreamedResponse(function () use ($qb) {
+            try {
+                foreach ($this->kmlService->KmlRecords($qb) as $chunk) {
+                    echo $chunk;
+                }
+            } catch (\Throwable $e) {
+                error_log($e->getMessage());
+                throw $e;
+            }
+        },
+            200,
+            [
+                'Content-Type' => 'application/vnd.google-earth.kml+xml',
+                'Content-Disposition' => 'attachment; filename="specimens_download.kml"',
+            ]
+        );
+
     }
 }
