@@ -166,7 +166,7 @@ class ObjectsController extends AbstractFOSRestController
         parameters: [
             new QueryParameter(
                 name: 'p',
-                description: 'optional number of page to display, starts with 0 (first page), defaults to 0',
+                description: 'optional number of page to display, starts with 1 (first page), defaults to 1',
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'integer'),
@@ -190,7 +190,7 @@ class ObjectsController extends AbstractFOSRestController
             ),
             new QueryParameter(
                 name: 'term',
-                description: 'optional search term for scientific names, use * as a wildcard, multiple terms seperated by \',\'',
+                description: 'optional search term for scientific names, multiple terms seperated by \',\'',
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string'),
@@ -249,13 +249,6 @@ class ObjectsController extends AbstractFOSRestController
                 schema: new Schema(type: 'integer'),
                 example: 0
             ),
-            new QueryParameter(
-                name: 'cltr',
-                description: 'collector',
-                in: 'query',
-                required: false,
-                schema: new Schema(type: 'string')
-            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -282,10 +275,16 @@ class ObjectsController extends AbstractFOSRestController
         ]
     )]
     #[Route('/v1/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
-    public function specimens(#[MapQueryParameter] ?int $p = 0, #[MapQueryParameter] ?int $rpp = 50, #[MapQueryParameter] ?int $list = 1, #[MapQueryParameter] ?string $term = '', #[MapQueryParameter] ?string $sc = '', #[MapQueryParameter] ?string $coll = '', #[MapQueryParameter] ?int $type = 0, #[MapQueryParameter] ?string $sort = '', #[MapQueryParameter] ?string $herbnr = '', #[MapQueryParameter] ?string $nation = '', #[MapQueryParameter] ?int $withImages = 0, #[MapQueryParameter] ?string $cltr = ''): Response
+    public function specimens(Request $request, #[MapQueryParameter] ?int $p = 1, #[MapQueryParameter] ?int $rpp = 50, #[MapQueryParameter] ?int $list = 1): Response
     {
-        ($rpp > 100) ? $rpp = 100 : null;
-        $data = $this->objectsFacade->resolveSpecimens($p, $rpp, $list, $term, $sc, $coll, $type, $sort, $herbnr, $nation, $withImages, $cltr, false);
+        $parameters = $this->fromRequestFactory->createFromLegacy($request);
+
+        $currentPage = $p > 0 ? $p : 1 ;
+        $recordsPerPage = $rpp;
+        $returnOnlyIds = (bool) $list;
+        ($recordsPerPage > 100) ? $recordsPerPage = 100 : null;
+
+        $data = $this->objectsFacade->resolveSpecimens($currentPage, $recordsPerPage, $returnOnlyIds, $parameters);
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
