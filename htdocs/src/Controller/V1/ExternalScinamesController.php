@@ -43,7 +43,7 @@ class ExternalScinamesController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'uuid', description: 'Universally Unique Identifier', type: 'string'), //TODO add examples
+                                new Property(property: 'uuid', description: 'Universally Unique Identifier', type: 'string'),
                                 new Property(property: 'url', description: 'url for uuid request resolver', type: 'string'),
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer'),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string'),
