@@ -3,6 +3,7 @@
 namespace App\Controller\V1;
 
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use JACQ\Entity\Jacq\Herbarinput\Species;
 use JACQ\Repository\Herbarinput\SpeciesRepository;
 use JACQ\Service\SpeciesService;
 use JACQ\Service\UuidService;
@@ -72,7 +73,7 @@ class ScinamesController extends AbstractFOSRestController
             'uuid' => $uuid,
             'url' => $this->uuidService->getResolvableUri($uuid),
             'taxonID' => $taxonID,
-            'scientificName' => $this->speciesRepository->getScientificName($taxon),
+            'scientificName' => $taxon->materializedName->scientificName,
             'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
         $view = $this->view($data, 200);
         return $this->handleView($view);
@@ -224,12 +225,13 @@ class ScinamesController extends AbstractFOSRestController
         $data=[];
         $taxonID = $this->uuidService->getTaxonFromUuid($uuid);
         if (!empty($taxonID)) {
+            /** @var Species $taxon */
             $taxon = $this->speciesRepository->find($taxonID);
             $data = array(
                 'uuid' => $uuid,
                 'url' => $this->uuidService->getResolvableUri($uuid),
                 'taxonID' => $taxonID,
-                'scientificName' => $this->speciesRepository->getScientificName($taxon),
+                'scientificName' => $taxon->materializedName->scientificName,
                 'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
         }
         $view = $this->view($data, 200);

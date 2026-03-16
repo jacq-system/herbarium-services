@@ -344,7 +344,7 @@ readonly class ClassificationFacade
             $basionymResult = array(
                 "taxonID" => $basID,
                 "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionym->id], UrlGeneratorInterface::ABSOLUTE_URL)),
-                "referenceName" => $this->speciesRepository->getScientificName($basionym),
+                "referenceName" => $basionym->materializedName->scientificName,
                 "referenceId" => $referenceID,
                 "referenceType" => $referenceType,
                 "hasType" => $this->taxonService->hasType($basionym->id),
@@ -440,6 +440,7 @@ readonly class ClassificationFacade
             default:
                 // only necessary if taxonID is not null
                 //TODO taxonID is required parameter of the route, can't be null..
+                //TODO calling getScientificNAme function
                 if ($taxonID > 0) {
                     $sql = "SELECT `herbar_view`.GetScientificName( ts.`taxonID`, 0 ) AS `referenceName`, tc.number, tc.order, ts.taxonID
                                             FROM tbl_tax_synonymy ts
@@ -469,6 +470,7 @@ readonly class ClassificationFacade
                         );
                     } // if not we either have a synonym and have to search for an accepted taxon or have to return the citation entry
                     else {
+                        //TODO calling getScientificName function
                         $sql = "SELECT `herbar_view`.GetScientificName( taxonID, 0 ) AS referenceName, acc_taxon_ID
                                                   FROM tbl_tax_synonymy
                                                   WHERE taxonID = :taxonID
