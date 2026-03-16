@@ -125,10 +125,12 @@ class ClassificationDownloadService
         // add parent information
         foreach ($parentTaxSynonymies as $parentTaxSynonymy) {
             /** @var Synonymy $parentTaxSynonymy */
+            // TODO  deprecated call  - but we miss the "getScientificname( xx ,1) materialized data..
             $line[$this->rankKeys[$parentTaxSynonymy->species->rank->hierarchy]] = $this->taxonService->getScientificName($parentTaxSynonymy->species->id, $this->hideScientificNameAuthors);
         }
 
         // add the currently active information
+        // TODO  deprecated call  - but we miss the "getScientificname( xx ,1) mat data..
         $line[$this->rankKeys[$taxSynonymy->species->rank->hierarchy]] = $this->taxonService->getScientificName($taxSynonymy->species->id, $this->hideScientificNameAuthors);
         ksort($line);
         $this->outputBody[] = $line;

@@ -3,6 +3,7 @@
 namespace App\Controller\V1;
 
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use JACQ\Entity\Jacq\Herbarinput\Species;
 use JACQ\Repository\Herbarinput\SpeciesRepository;
 use JACQ\Service\SpeciesService;
 use JACQ\Service\UuidService;
@@ -45,7 +46,7 @@ class ScinamesController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'uuid', description: 'Universally Unique Identifier', type: 'string'), //TODO add examples
+                                new Property(property: 'uuid', description: 'Universally Unique Identifier', type: 'string'),
                                 new Property(property: 'url', description: 'url for uuid request resolver', type: 'string'),
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer'),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string'),
@@ -72,7 +73,7 @@ class ScinamesController extends AbstractFOSRestController
             'uuid' => $uuid,
             'url' => $this->uuidService->getResolvableUri($uuid),
             'taxonID' => $taxonID,
-            'scientificName' => $this->speciesRepository->getScientificName($taxon),
+            'scientificName' => $taxon->materializedName->scientificName,
             'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
         $view = $this->view($data, 200);
         return $this->handleView($view);
@@ -102,7 +103,7 @@ class ScinamesController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'uuid', description: 'Universally Unique Identifier', type: 'string'), //TODO add examples
+                                new Property(property: 'uuid', description: 'Universally Unique Identifier', type: 'string'),
                                 new Property(property: 'url', description: 'url for uuid request resolver', type: 'string'),
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer'),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string'),
@@ -123,7 +124,7 @@ class ScinamesController extends AbstractFOSRestController
     #[Route('/v1/JACQscinames/name/{taxonID}', name: "services_rest_scinames_name", methods: ['GET'])]
     public function name(int $taxonID): Response
     {
-        //TODO this service is just a synonym to $this->uuid()
+        //this service is just a synonym to $this->uuid()
         return $this->forward(self::class . '::uuid', ['taxonID' => $taxonID]);
     }
 
@@ -224,12 +225,13 @@ class ScinamesController extends AbstractFOSRestController
         $data=[];
         $taxonID = $this->uuidService->getTaxonFromUuid($uuid);
         if (!empty($taxonID)) {
+            /** @var Species $taxon */
             $taxon = $this->speciesRepository->find($taxonID);
             $data = array(
                 'uuid' => $uuid,
                 'url' => $this->uuidService->getResolvableUri($uuid),
                 'taxonID' => $taxonID,
-                'scientificName' => $this->speciesRepository->getScientificName($taxon),
+                'scientificName' => $taxon->materializedName->scientificName,
                 'taxonName' => $this->speciesRepository->getTaxonName($taxonID));
         }
         $view = $this->view($data, 200);

@@ -344,7 +344,7 @@ readonly class ClassificationFacade
             $basionymResult = array(
                 "taxonID" => $basID,
                 "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionym->id], UrlGeneratorInterface::ABSOLUTE_URL)),
-                "referenceName" => $this->speciesRepository->getScientificName($basionym),
+                "referenceName" => $basionym->materializedName->scientificName,
                 "referenceId" => $referenceID,
                 "referenceType" => $referenceType,
                 "hasType" => $this->taxonService->hasType($basionym->id),
@@ -441,8 +441,9 @@ readonly class ClassificationFacade
                 // only necessary if taxonID is not null
                 //TODO taxonID is required parameter of the route, can't be null..
                 if ($taxonID > 0) {
-                    $sql = "SELECT `herbar_view`.GetScientificName( ts.`taxonID`, 0 ) AS `referenceName`, tc.number, tc.order, ts.taxonID
+                    $sql = "SELECT mtrlzdName.scientific_name AS `referenceName`, tc.number, tc.order, ts.taxonID
                                             FROM tbl_tax_synonymy ts
+                                                JOIN herbar_view.view_scientificName_mtrlzd mtrlzdName ON mtrlzdName.scientific_name_id = ts.`taxonID`
                                              LEFT JOIN tbl_tax_classification tc ON ts.tax_syn_ID = tc.tax_syn_ID
                                              LEFT JOIN tbl_tax_classification tcchild ON ts.taxonID = tcchild.parent_taxonID
                                              LEFT JOIN tbl_tax_synonymy tschild ON (    tschild.source_citationID = ts.source_citationID
@@ -469,11 +470,13 @@ readonly class ClassificationFacade
                         );
                     } // if not we either have a synonym and have to search for an accepted taxon or have to return the citation entry
                     else {
-                        $sql = "SELECT `herbar_view`.GetScientificName( taxonID, 0 ) AS referenceName, acc_taxon_ID
-                                                  FROM tbl_tax_synonymy
-                                                  WHERE taxonID = :taxonID
-                                                   AND source_citationID = :referenceId
-                                                   AND acc_taxon_ID IS NOT NULL";
+                        $sql = "SELECT mtrlzdName.scientific_name AS referenceName, ts.acc_taxon_ID
+                                                  FROM tbl_tax_synonymy ts
+                                                JOIN herbar_view.view_scientificName_mtrlzd mtrlzdName ON mtrlzdName.scientific_name_id = ts.`taxonID`
+
+                                                  WHERE ts.taxonID = :taxonID
+                                                   AND ts.source_citationID = :referenceId
+                                                   AND ts.acc_taxon_ID IS NOT NULL";
                         $accTaxon = $this->entityManager->getConnection()->executeQuery($sql, ['taxonID' => $taxonID, 'referenceId' => $referenceId])->fetchAssociative();
                         // if we have found an accepted taxon for our synonym then return it
                         if ($accTaxon) {
