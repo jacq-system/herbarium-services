@@ -3,11 +3,11 @@
 namespace App\Service;
 
 
+use Doctrine\ORM\QueryBuilder;
 use JACQ\Entity\Jacq\Herbarinput\Synonymy;
 use JACQ\Repository\Herbarinput\LiteratureRepository;
 use JACQ\Repository\Herbarinput\SynonymyRepository;
 use JACQ\Repository\Herbarinput\TaxonRankRepository;
-use Doctrine\ORM\QueryBuilder;
 use JACQ\Service\SpeciesService;
 use JACQ\Service\UuidService;
 use Symfony\Component\Routing\RouterInterface;
@@ -116,7 +116,7 @@ class ClassificationDownloadService
         $line[2] = 'CC-BY-SA'; // TODO in original $this->settings['classifications_license'];  licence is depending on some app configuration? should be stored with data as it is fixed..?
         $line[3] = date("Y-m-d H:i:s");
         $line[4] = '';
-        $line[5] =  $this->uuidService->getResolvableUri($this->uuidService->getUuid('scientific_name', $taxSynonymy->species->id));
+        $line[5] = $this->uuidService->getResolvableUri($this->uuidService->getUuid('scientific_name', $taxSynonymy->species->id));
         $line[6] = $taxSynonymy->species->id;
         $line[7] = $taxSynonymy->classification?->parentTaxonId;
         $line[8] = $taxSynonymy->actualTaxonId ?? null;
@@ -125,13 +125,22 @@ class ClassificationDownloadService
         // add parent information
         foreach ($parentTaxSynonymies as $parentTaxSynonymy) {
             /** @var Synonymy $parentTaxSynonymy */
-            // TODO  deprecated call  - but we miss the "getScientificname( xx ,1) materialized data..
-            $line[$this->rankKeys[$parentTaxSynonymy->species->rank->hierarchy]] = $this->taxonService->getScientificName($parentTaxSynonymy->species->id, $this->hideScientificNameAuthors);
+            if ($this->hideScientificNameAuthors) {
+                $name = $parentTaxSynonymy->species->materializedName->scientificNameWithoutAuthor;
+            } else {
+                $name = $parentTaxSynonymy->species->materializedName->scientificName;
+            }
+
+            $line[$this->rankKeys[$parentTaxSynonymy->species->rank->hierarchy]] = $name;
         }
 
         // add the currently active information
-        // TODO  deprecated call  - but we miss the "getScientificname( xx ,1) mat data..
-        $line[$this->rankKeys[$taxSynonymy->species->rank->hierarchy]] = $this->taxonService->getScientificName($taxSynonymy->species->id, $this->hideScientificNameAuthors);
+        if ($this->hideScientificNameAuthors) {
+            $name = $taxSynonymy->species->materializedName->scientificNameWithoutAuthor;
+        } else {
+            $name = $taxSynonymy->species->materializedName->scientificName;
+        }
+        $line[$this->rankKeys[$taxSynonymy->species->rank->hierarchy]] = $name;
         ksort($line);
         $this->outputBody[] = $line;
 

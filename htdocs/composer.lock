@@ -1437,16 +1437,16 @@
         },
         {
             "name": "jacq-system/orm-model",
-            "version": "v0.4.3",
+            "version": "v0.4.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacq-system/orm-model.git",
-                "reference": "ed765d2887897a7c1ed231b33e1b5e4c0230abc5"
+                "reference": "70de89d0ade54903f53f4ca92c2a7c309000e1d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/ed765d2887897a7c1ed231b33e1b5e4c0230abc5",
-                "reference": "ed765d2887897a7c1ed231b33e1b5e4c0230abc5",
+                "url": "https://api.github.com/repos/jacq-system/orm-model/zipball/70de89d0ade54903f53f4ca92c2a7c309000e1d4",
+                "reference": "70de89d0ade54903f53f4ca92c2a7c309000e1d4",
                 "shasum": ""
             },
             "require": {
@@ -1473,10 +1473,10 @@
             ],
             "description": "Shared Doctrine ORM and services for JACQ projects",
             "support": {
-                "source": "https://github.com/jacq-system/orm-model/tree/v0.4.3",
+                "source": "https://github.com/jacq-system/orm-model/tree/v0.4.5",
                 "issues": "https://github.com/jacq-system/orm-model/issues"
             },
-            "time": "2026-03-16T10:41:42+00:00"
+            "time": "2026-03-17T07:28:23+00:00"
         },
         {
             "name": "jms/metadata",
