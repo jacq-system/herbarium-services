@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -8,15 +10,10 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use OpenApi\Attributes\AdditionalProperties;
 use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Items;
-use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\PathParameter;
-use OpenApi\Attributes\Post;
 use OpenApi\Attributes\Property;
-use OpenApi\Attributes\RequestBody;
 use OpenApi\Attributes\Schema;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -38,7 +35,7 @@ class AgentsController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: 'Reiner,H.'
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -66,47 +63,43 @@ class AgentsController extends AbstractFOSRestController
                                                     items: new Items(type: 'string'),
                                                     example: ['Person']
                                                 ),
-                                                new Property(property: 'uri', type: 'string', example: 'https://x')
+                                                new Property(property: 'uri', type: 'string', example: 'https://x'),
                                             ],
                                             type: 'object'
                                         )
-                                    )
+                                    ),
                                 ],
                                 type: 'object'
                             )
                         )
-                    )
+                    ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/agents/collector/{term}', name: "services_rest_agents_collector", methods: ['GET'])]
+    #[Route('/v1/agents/collector/{term}', name: 'services_rest_agents_collector', methods: ['GET'])]
     public function collector(string $term): Response
     {
-
-
         $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
 
-            $result  =
-                 array_map(function ($hit) use ($term) {
-                    return [
-                        "id" => $hit["_id"],
-                        "name" => $hit["_source"]["name"],
-                        "score" => $hit["_score"],
-                        "match" => strtolower($term) === strtolower($hit["_source"]["name"])
-                    ];
-                }, $data["hits"]["hits"])
-            ;
-
+        $result =
+             array_map(function ($hit) use ($term) {
+                 return [
+                     'id' => $hit['_id'],
+                     'name' => $hit['_source']['name'],
+                     'score' => $hit['_score'],
+                     'match' => strtolower($term) === strtolower($hit['_source']['name']),
+                 ];
+             }, $data['hits']['hits'])
+        ;
 
         $view = $this->view($result, 200);
         $view->setFormat('json');
 
         return $this->handleView($view);
     }
-
 }

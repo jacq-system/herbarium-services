@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
-
 
 use Doctrine\ORM\QueryBuilder;
 use JACQ\Entity\Jacq\Herbarinput\Synonymy;
@@ -14,21 +15,29 @@ use Symfony\Component\Routing\RouterInterface;
 
 class ClassificationDownloadService
 {
-
     protected bool $hideScientificNameAuthors = false;
-    protected array $outputHeader = array(
-        "reference_guid",
-        "reference",
-        "license",
-        "downloaded",
-        "modified",
-        "scientific_name_guid",
-        "scientific_name_id",
-        "parent_scientific_name_id",
-        "accepted_scientific_name_id",
-        "taxonomic_status");
+    /**
+     * @var string[]
+     */
+    protected array $outputHeader = [
+        'reference_guid',
+        'reference',
+        'license',
+        'downloaded',
+        'modified',
+        'scientific_name_guid',
+        'scientific_name_id',
+        'parent_scientific_name_id',
+        'accepted_scientific_name_id',
+        'taxonomic_status'];
 
+    /**
+     * @var mixed[]
+     */
     protected array $rankKeys = [];
+    /**
+     * @var mixed[]
+     */
     private array $outputBody = [];
 
     public function __construct(protected RouterInterface $router, protected UuidService $uuidService, protected TaxonRankRepository $taxonRankRepository, protected readonly SpeciesService $taxonService, protected readonly LiteratureRepository $literatureRepository, protected readonly SynonymyRepository $synonymyRepository)
@@ -36,13 +45,14 @@ class ClassificationDownloadService
     }
 
     /**
-     * create an array, filled with header and data for download
+     * create an array, filled with header and data for download.
      *
-     * @param string $referenceType Type of reference (only 'citation' allowed at this time)
-     * @param int $referenceId ID of reference
-     * @param int $scientificNameId optional ID of scientific name
-     * @param mixed $hideScientificNameAuthors hide authors name in scientific name (default = use database)
-     * @return array data for download
+     * @param string $referenceType             Type of reference (only 'citation' allowed at this time)
+     * @param int    $referenceId               ID of reference
+     * @param int    $scientificNameId          optional ID of scientific name
+     * @param ?int   $hideScientificNameAuthors hide authors name in scientific name (default = use database)
+     *
+     * @return mixed[] data for download
      */
     public function getDownload(string $referenceType, int $referenceId, ?int $scientificNameId = 0, ?int $hideScientificNameAuthors = null): array
     {
@@ -70,10 +80,10 @@ class ClassificationDownloadService
 
         // cycle through top-level elements and continue exporting their children
         foreach ($queryBuilder->getQuery()->getResult() as $dbRowTaxSynonymy) {
-            $this->exportClassification(array(), $dbRowTaxSynonymy);
+            $this->exportClassification([], $dbRowTaxSynonymy);
         }
 
-        return array('header' => $this->outputHeader, 'body' => $this->outputBody);
+        return ['header' => $this->outputHeader, 'body' => $this->outputBody];
     }
 
     protected function detectAuthorsVisibility(int $referenceId, ?int $hideScientificNameAuthors = null): void
@@ -103,18 +113,17 @@ class ClassificationDownloadService
     }
 
     /**
-     * Map a given tax synonymy entry to an array, including all children recursively
+     * Map a given tax synonymy entry to an array, including all children recursively.
      *
-     * @param array $parentTaxSynonymies an array of db-rows of all parent tax-synonymy entries
-     * @param array $taxSynonymy db-row of the currently active tax-synonym entry
+     * @param Synonymy[] $parentTaxSynonymies an array of db-rows of all parent tax-synonymy entries
+     * @param Synonymy   $taxSynonymy         db-row of the currently active tax-synonym entry
      */
     protected function exportClassification(array $parentTaxSynonymies, Synonymy $taxSynonymy): void
     {
-
         $line[0] = $this->uuidService->getResolvableUri($this->uuidService->getUuid('citation', $taxSynonymy->literature->id));
         $line[1] = $this->literatureRepository->getProtolog($taxSynonymy->literature->id);
         $line[2] = 'CC-BY-SA'; // TODO in original $this->settings['classifications_license'];  licence is depending on some app configuration? should be stored with data as it is fixed..?
-        $line[3] = date("Y-m-d H:i:s");
+        $line[3] = date('Y-m-d H:i:s');
         $line[4] = '';
         $line[5] = $this->uuidService->getResolvableUri($this->uuidService->getUuid('scientific_name', $taxSynonymy->species->id));
         $line[6] = $taxSynonymy->species->id;
@@ -124,7 +133,7 @@ class ClassificationDownloadService
 
         // add parent information
         foreach ($parentTaxSynonymies as $parentTaxSynonymy) {
-            /** @var Synonymy $parentTaxSynonymy */
+            /* @var Synonymy $parentTaxSynonymy */
             if ($this->hideScientificNameAuthors) {
                 $name = $parentTaxSynonymy->species->materializedName->scientificNameWithoutAuthor;
             } else {
@@ -166,8 +175,5 @@ class ClassificationDownloadService
         foreach ($queryBuilder->getQuery()->getResult() as $taxSynonymyChild) {
             $this->exportClassification($parentTaxSynonymies, $taxSynonymyChild);
         }
-
     }
-
-
 }

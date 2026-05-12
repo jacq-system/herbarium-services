@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -31,7 +33,7 @@ class ExternalScinamesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: 'Rhopalocarpus alternifolius (Baker) Capuron'
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -47,21 +49,21 @@ class ExternalScinamesController extends AbstractFOSRestController
                                 new Property(property: 'url', description: 'url for uuid request resolver', type: 'string'),
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer'),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string'),
-                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string')
+                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/externalScinames/find/{term}', name: "services_rest_externalScinames_find", methods: ['GET'])]
+    #[Route('/v1/externalScinames/find/{term}', name: 'services_rest_externalScinames_find', methods: ['GET'])]
     public function search(string $term): Response
     {
         $results = $this->scinamesService->searchAll($term);
@@ -69,6 +71,4 @@ class ExternalScinamesController extends AbstractFOSRestController
 
         return $this->handleView($view);
     }
-
-
 }

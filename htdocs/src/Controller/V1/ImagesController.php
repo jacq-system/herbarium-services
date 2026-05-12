@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -46,7 +48,7 @@ class ImagesController extends AbstractFOSRestController
                 description: 'returns http 303 and redirects to the link immediately',
                 required: false,
                 schema: new Schema(type: 'boolean'),
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -56,19 +58,19 @@ class ImagesController extends AbstractFOSRestController
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'imagelink')
+                            new Property(property: 'imagelink'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/images/show/{specimenID}/{imageNr}', name: "services_rest_images_show", methods: ['GET'])]
+    #[Route('/v1/images/show/{specimenID}/{imageNr}', name: 'services_rest_images_show', methods: ['GET'])]
     public function show(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
@@ -78,6 +80,7 @@ class ImagesController extends AbstractFOSRestController
         }
 
         $view = $this->view($results, 200);
+
         return $this->handleView($view);
     }
 
@@ -107,7 +110,7 @@ class ImagesController extends AbstractFOSRestController
                 description: 'returns http 303 and redirects to the link immediately',
                 required: false,
                 schema: new Schema(type: 'boolean'),
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -117,19 +120,19 @@ class ImagesController extends AbstractFOSRestController
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'imagelink')
+                            new Property(property: 'imagelink'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/images/download/{specimenID}/{imageNr}', name: "services_rest_images_download", methods: ['GET'])]
+    #[Route('/v1/images/download/{specimenID}/{imageNr}', name: 'services_rest_images_download', methods: ['GET'])]
     public function download(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
@@ -170,7 +173,7 @@ class ImagesController extends AbstractFOSRestController
                 description: 'returns http 303 and redirects to the link immediately',
                 required: false,
                 schema: new Schema(type: 'boolean'),
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -180,19 +183,19 @@ class ImagesController extends AbstractFOSRestController
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'imagelink')
+                            new Property(property: 'imagelink'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/images/europeana/{specimenID}/{imageNr}', name: "services_rest_images_europeana", methods: ['GET'])]
+    #[Route('/v1/images/europeana/{specimenID}/{imageNr}', name: 'services_rest_images_europeana', methods: ['GET'])]
     public function europeana(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
@@ -233,7 +236,7 @@ class ImagesController extends AbstractFOSRestController
                 description: 'returns http 303 and redirects to the link immediately',
                 required: false,
                 schema: new Schema(type: 'boolean'),
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -243,19 +246,19 @@ class ImagesController extends AbstractFOSRestController
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'imagelink')
+                            new Property(property: 'imagelink'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/images/thumb/{specimenID}/{imageNr}', name: "services_rest_images_thumb", methods: ['GET'])]
+    #[Route('/v1/images/thumb/{specimenID}/{imageNr}', name: 'services_rest_images_thumb', methods: ['GET'])]
     public function thumb(int $specimenID, int $imageNr = 0, #[MapQueryParameter] ?bool $withredirect = false): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);
@@ -282,7 +285,7 @@ class ImagesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 4354
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -292,19 +295,19 @@ class ImagesController extends AbstractFOSRestController
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'imagelink')
+                            new Property(property: 'imagelink'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/images/list/{specimenID}', name: "services_rest_images_list", methods: ['GET'])]
+    #[Route('/v1/images/list/{specimenID}', name: 'services_rest_images_list', methods: ['GET'])]
     public function list(int $specimenID, int $imageNr = 0): Response
     {
         $this->imageLinkMapper->setSpecimen($specimenID);

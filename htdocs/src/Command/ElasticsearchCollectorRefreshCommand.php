@@ -14,19 +14,19 @@ use Symfony\Component\Console\Output\OutputInterface;
     description: 'Updates search index of collectors in the ElasticSearch engine (drop existing index and fill with actual data)')]
 class ElasticsearchCollectorRefreshCommand extends Command
 {
-    public const string IndexName = "collector-test";
+    public const string IndexName = 'collector-test';
+
     public function __construct(
-        readonly private CollectorRepository $repo,
-        readonly private ElasticsearchService $elasticsearchService
+        private readonly CollectorRepository $repo,
+        private readonly ElasticsearchService $elasticsearchService,
     ) {
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-
-        $output->writeln("<info>Recreating index ". self::IndexName . "…</info>");
-        $this->elasticsearchService->recreateIndex( self::IndexName);
+        $output->writeln('<info>Recreating index '.self::IndexName.'…</info>');
+        $this->elasticsearchService->recreateIndex(self::IndexName);
 
         $batchSize = 1000;
         $bulk = [];
@@ -34,17 +34,16 @@ class ElasticsearchCollectorRefreshCommand extends Command
         $indexed = 0;
 
         foreach ($this->repo->iterateAll() as $row) {
-
             $bulk[] = json_encode([
-                "index" => ["_index" => self::IndexName, "_id" => $row['id']]
+                'index' => ['_index' => self::IndexName, '_id' => $row['id']],
             ]);
 
             $bulk[] = json_encode([
-                "name" => $row['name'],
+                'name' => $row['name'],
             ]);
 
-            $count++;
-            $indexed++;
+            ++$count;
+            ++$indexed;
 
             if ($count >= $batchSize) {
                 $this->elasticsearchService->bulk($bulk);
@@ -66,4 +65,3 @@ class ElasticsearchCollectorRefreshCommand extends Command
         return Command::SUCCESS;
     }
 }
-

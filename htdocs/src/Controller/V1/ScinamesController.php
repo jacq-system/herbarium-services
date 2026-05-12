@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -34,7 +36,7 @@ class ScinamesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 249254
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -50,34 +52,35 @@ class ScinamesController extends AbstractFOSRestController
                                 new Property(property: 'url', description: 'url for uuid request resolver', type: 'string'),
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer'),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string'),
-                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string')
+                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/JACQscinames/uuid/{taxonID}', name: "services_rest_scinames_uuid", methods: ['GET'])]
+    #[Route('/v1/JACQscinames/uuid/{taxonID}', name: 'services_rest_scinames_uuid', methods: ['GET'])]
     public function uuid(int $taxonID): Response
     {
         $uuid = $this->uuidService->getUuid('scientific_name', $taxonID);
         /** @var Species $species */
         $species = $this->speciesRepository->find($taxonID);
-        $data = array(
+        $data = [
             'uuid' => $uuid,
             'url' => $this->uuidService->getResolvableUri($uuid),
             'taxonID' => $taxonID,
             'scientificName' => $species->materializedName->scientificName,
-            'taxonName' => $species->materializedName->scientificNameWithoutAuthor
-        );
+            'taxonName' => $species->materializedName->scientificNameWithoutAuthor,
+        ];
         $view = $this->view($data, 200);
+
         return $this->handleView($view);
     }
 
@@ -93,7 +96,7 @@ class ScinamesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 249254
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -109,25 +112,25 @@ class ScinamesController extends AbstractFOSRestController
                                 new Property(property: 'url', description: 'url for uuid request resolver', type: 'string'),
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer'),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string'),
-                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string')
+                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/JACQscinames/name/{taxonID}', name: "services_rest_scinames_name", methods: ['GET'])]
+    #[Route('/v1/JACQscinames/name/{taxonID}', name: 'services_rest_scinames_name', methods: ['GET'])]
     public function name(int $taxonID): Response
     {
-        //this service is just a synonym to $this->uuid()
-        return $this->forward(self::class . '::uuid', ['taxonID' => $taxonID]);
+        // this service is just a synonym to $this->uuid()
+        return $this->forward(self::class.'::uuid', ['taxonID' => $taxonID]);
     }
 
     #[Get(
@@ -142,7 +145,7 @@ class ScinamesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: 'prunus aviu* martens'
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -156,21 +159,21 @@ class ScinamesController extends AbstractFOSRestController
                             properties: [
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer', example: 47239),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string', example: 'Prunus avium subsp. duracina (L.) Schübl. & G. Martens'),
-                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string', example: 'Prunus avium subsp. duracina (L.) Schübl. & G. Martens')
+                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string', example: 'Prunus avium subsp. duracina (L.) Schübl. & G. Martens'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/JACQscinames/find/{term}', name: "services_rest_scinames_find", methods: ['GET'])]
+    #[Route('/v1/JACQscinames/find/{term}', name: 'services_rest_scinames_find', methods: ['GET'])]
     public function find(string $term): Response
     {
         $data = $this->taxaNamesService->fulltextSearch($term);
@@ -191,7 +194,7 @@ class ScinamesController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: '86d5ecb1-c631-11e4-89a5-005056a41758'
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -207,37 +210,37 @@ class ScinamesController extends AbstractFOSRestController
                                 new Property(property: 'url', description: 'url for uuid request resolver', type: 'string'),
                                 new Property(property: 'taxonID', description: 'ID of scientific name', type: 'integer'),
                                 new Property(property: 'scientificName', description: 'scientific name', type: 'string'),
-                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string')
+                                new Property(property: 'taxonName', description: 'scientific name without hybrids', type: 'string'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/JACQscinames/resolve/{uuid}', name: "services_rest_scinames_resolve", methods: ['GET'])]
+    #[Route('/v1/JACQscinames/resolve/{uuid}', name: 'services_rest_scinames_resolve', methods: ['GET'])]
     public function resolve(string $uuid): Response
     {
-        $data=[];
+        $data = [];
         $taxonID = $this->uuidService->getTaxonFromUuid($uuid);
         if (!empty($taxonID)) {
             /** @var Species $species */
             $species = $this->speciesRepository->find($taxonID);
-            $data = array(
+            $data = [
                 'uuid' => $uuid,
                 'url' => $this->uuidService->getResolvableUri($uuid),
                 'taxonID' => $taxonID,
                 'scientificName' => $species->materializedName->scientificName,
-                'taxonName' => $species->materializedName->scientificNameWithoutAuthor);
+                'taxonName' => $species->materializedName->scientificNameWithoutAuthor];
         }
         $view = $this->view($data, 200);
+
         return $this->handleView($view);
     }
-
 }

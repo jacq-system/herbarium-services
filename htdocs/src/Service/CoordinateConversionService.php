@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
@@ -7,7 +9,6 @@ use PHPCoord\Point\GeographicPoint;
 use PHPCoord\Point\UTMPoint;
 use PHPCoord\UnitOfMeasure\Angle\Degree;
 use PHPCoord\UnitOfMeasure\Length\Metre;
-
 
 /*
  * Vienna:
@@ -20,8 +21,9 @@ use PHPCoord\UnitOfMeasure\Length\Metre;
 
 readonly class CoordinateConversionService
 {
-
-
+    /**
+     * @return mixed[]
+     */
     public function utm2latlon(string $utm): array
     {
         $parts = explode(' ', preg_replace('/\s+/', ' ', trim($utm)));
@@ -30,7 +32,7 @@ readonly class CoordinateConversionService
             $easting = $parts[1];
             $northing = $parts[2];
         } else {
-            $hemisphere = ($parts[1] == 'S') ? UTMPoint::HEMISPHERE_SOUTH : UTMPoint::HEMISPHERE_NORTH;
+            $hemisphere = ('S' == $parts[1]) ? UTMPoint::HEMISPHERE_SOUTH : UTMPoint::HEMISPHERE_NORTH;
             $easting = $parts[2];
             $northing = $parts[3];
         }
@@ -42,13 +44,17 @@ readonly class CoordinateConversionService
             $hemisphere
         );
         $to = $from->asGeographicPoint();
-        return array(
+
+        return [
             'lat' => $to->getLatitude()->getValue(),
             'lon' => $to->getLongitude()->getValue(),
-            'string' => (string)$to
-        );
+            'string' => (string) $to,
+        ];
     }
 
+    /**
+     * @return mixed[]
+     */
     public function latlon2utm(float $lat, float $lon): array
     {
         $from = GeographicPoint::create(
@@ -58,50 +64,50 @@ readonly class CoordinateConversionService
         );
         $to = $from->asUTMPoint();
         if ($lat < -32) {
-            $band = chr((int)floor($lat / 8) + ord('M')); // band is 'H' or below
+            $band = chr((int) floor($lat / 8) + ord('M')); // band is 'H' or below
         } elseif ($lat < 8) {
-            $band = chr((int)floor($lat / 8) + ord('N')); // band is between 'J' and 'N'
+            $band = chr((int) floor($lat / 8) + ord('N')); // band is between 'J' and 'N'
         } else {
-            $band = chr((int)floor($lat / 8) + ord('O')); // band is 'P' or above
+            $band = chr((int) floor($lat / 8) + ord('O')); // band is 'P' or above
         }
-        return array(
+
+        return [
             'zone' => $to->getZone(),
             'hemisphere' => $to->getHemisphere(),
-            'easting' => (int)$to->getEasting()->getValue(),
-            'northing' => (int)$to->getNorthing()->getValue(),
-            'string' => $to->getZone() . $band . ' ' . (int)$to->getEasting()->getValue() . ' ' . (int)$to->getNorthing()->getValue()
-        );
+            'easting' => (int) $to->getEasting()->getValue(),
+            'northing' => (int) $to->getNorthing()->getValue(),
+            'string' => $to->getZone().$band.' '.(int) $to->getEasting()->getValue().' '.(int) $to->getNorthing()->getValue(),
+        ];
     }
 
     /**
-     * @param $mgrs
-     * @return array|string[]
+     * @return mixed[]
      */
     public function mgrs2utm(string $mgrs): array
     {
         $parts = $this->parseMGRSstring($mgrs);
         if ($parts['error']) {
-            return ($parts);
+            return $parts;
         }
 
-        if ($parts['letters'][0] == 'X' && ($parts['zone'] == 32 || $parts['zone'] == 34 || $parts['zone'] == 36)) {
-            return array('error' => 'no valid MGRS string');
+        if ('X' == $parts['letters'][0] && (32 == $parts['zone'] || 34 == $parts['zone'] || 36 == $parts['zone'])) {
+            return ['error' => 'no valid MGRS string'];
         }
 
-        $data = array('zone' => $parts['zone'],
-            'hemisphere' => ($parts['letters'][0] < 'N') ? 'S' : 'N'
-        );
+        $data = ['zone' => $parts['zone'],
+            'hemisphere' => ($parts['letters'][0] < 'N') ? 'S' : 'N',
+        ];
 
         $grid_values = $this->getGridValues($parts['zone']);
         // Check that the second letter of the MGRS string is within the range of valid second letter values
         // Also check that the third letter is valid
         if ($parts['letters'][1] < $grid_values['ltr2_low_value'] || $parts['letters'][1] > $grid_values['ltr2_high_value'] || $parts['letters'][2] > 'V') {
-            return array('error' => 'no valid MGRS string');
+            return ['error' => 'no valid MGRS string'];
         }
 
         $grid_northing = (ord($parts['letters'][2]) - ord('A')) * 100000 + $grid_values['false_northing'];
         $grid_easting = ((ord($parts['letters'][1]) - ord($grid_values['ltr2_low_value'])) + 1) * 100000;
-        if ($grid_values['ltr2_low_value'] == 'J' && $parts['letters'][1] > 'O') {
+        if ('J' == $grid_values['ltr2_low_value'] && $parts['letters'][1] > 'O') {
             $grid_easting -= 100000;
         }
         if ($parts['letters'][2] > 'O') {
@@ -127,20 +133,21 @@ readonly class CoordinateConversionService
 
         $data['easting'] = $grid_easting + $parts['easting'];
         $data['northing'] = $grid_northing + $parts['northing'];
-        $data['string'] = $data['zone'] . ' ' . $data['hemisphere'] . ' ' . (int)$data['easting'] . ' ' . (int)$data['northing'];
+        $data['string'] = $data['zone'].' '.$data['hemisphere'].' '.(int) $data['easting'].' '.(int) $data['northing'];
 
         return $data;
     }
 
     /**
-     * parse a MGRS coordinate string into its components
+     * parse a MGRS coordinate string into its components.
      *
      * @param string $text the string to parse
-     * @return array the components (zone, letters, easting, northing, error (if any))
+     *
+     * @return mixed[] the components (zone, letters, easting, northing, error (if any))
      */
     protected function parseMGRSstring(string $text): array
     {
-        $data = array();
+        $data = [];
 
         // 33UXP0177940548
         $mgrsString = str_replace(' ', '', trim($text));  // erase all blanks
@@ -148,7 +155,7 @@ readonly class CoordinateConversionService
         $mgrsLen = strlen($mgrsString);
 
         while ($pointerRun < $mgrsLen && is_numeric($mgrsString[$pointerRun])) {
-            $pointerRun++;
+            ++$pointerRun;
         }
         $num_digits = $pointerRun - $pointerStart;
         if ($num_digits <= 2) {
@@ -158,32 +165,32 @@ readonly class CoordinateConversionService
                 $data['zone'] = 0;
             }
         } else {
-            return array('error' => 'no valid MGRS string');
+            return ['error' => 'no valid MGRS string'];
         }
         $pointerStart = $pointerRun;
 
         while ($pointerRun < $mgrsLen && ctype_alpha($mgrsString[$pointerRun])) {
-            $pointerRun++;
+            ++$pointerRun;
         }
         $num_letters = $pointerRun - $pointerStart;
-        if ($num_letters == 3) {
+        if (3 == $num_letters) {
             $data['letters'] = strtoupper(substr($mgrsString, $pointerStart, $num_letters));
-            if ($data['letters'][0] <= 'B' || $data['letters'][0] >= 'Y' ||
-                $data['letters'][0] == 'I' || $data['letters'][0] == 'O' ||
-                $data['letters'][1] == 'I' || $data['letters'][1] == 'O' ||
-                $data['letters'][2] == 'I' || $data['letters'][2] == 'O') {
-                return array('error' => 'no valid MGRS string');
+            if ($data['letters'][0] <= 'B' || $data['letters'][0] >= 'Y'
+                || 'I' == $data['letters'][0] || 'O' == $data['letters'][0]
+                || 'I' == $data['letters'][1] || 'O' == $data['letters'][1]
+                || 'I' == $data['letters'][2] || 'O' == $data['letters'][2]) {
+                return ['error' => 'no valid MGRS string'];
             }
         } else {
-            return array('error' => 'no valid MGRS string');
+            return ['error' => 'no valid MGRS string'];
         }
         $pointerStart = $pointerRun;
 
         while ($pointerRun < $mgrsLen && is_numeric($mgrsString[$pointerRun])) {
-            $pointerRun++;
+            ++$pointerRun;
         }
         $num_digits = $pointerRun - $pointerStart;
-        if ($num_digits <= 10 && $num_digits % 2 == 0) {
+        if ($num_digits <= 10 && 0 == $num_digits % 2) {
             $n = $num_digits / 2;
             $data['precision'] = $n;
             if ($n > 0) {
@@ -194,19 +201,21 @@ readonly class CoordinateConversionService
                 $data['easting'] = $data['northing'] = 0;
             }
         } else {
-            return array('error' => 'no valid MGRS string');
+            return ['error' => 'no valid MGRS string'];
         }
 
         $data['error'] = '';
+
         return $data;
     }
 
     /**
      * set the letter range used for the 2nd letter in the MGRS coordinate string, based on the set number of the utm zone (zone % 6)
-     * also set the false northing for even numbered zones
+     * also set the false northing for even numbered zones.
      *
      * @param int $zone zone-number
-     * @return array ltr2_low_value, ltr2_high_value and false_northing
+     *
+     * @return mixed[] ltr2_low_value, ltr2_high_value and false_northing
      */
     protected function getGridValues(int $zone): array
     {
@@ -215,10 +224,10 @@ readonly class CoordinateConversionService
             $set_number = 6;
         }
 
-        if ($set_number == 1 || $set_number == 4) {
+        if (1 == $set_number || 4 == $set_number) {
             $data['ltr2_low_value'] = 'A';
             $data['ltr2_high_value'] = 'H';
-        } elseif ($set_number == 2 || $set_number == 5) {
+        } elseif (2 == $set_number || 5 == $set_number) {
             $data['ltr2_low_value'] = 'J';
             $data['ltr2_high_value'] = 'R';
         } else {
@@ -232,30 +241,28 @@ readonly class CoordinateConversionService
     }
 
     /**
-     * This function receives a latitude band letter and returns the minimum northing
+     * This function receives a latitude band letter and returns the minimum northing.
      *
      * @param string $letter latitude band letter
-     * @return float|int
      */
     protected function getMinNorthing(string $letter): float|int
     {
-        if ($letter == 'X') {
+        if ('X' == $letter) {
             return 7900000;
-        } elseif ($letter == 'W') {
+        } elseif ('W' == $letter) {
             return 7000000;
         } elseif ($letter >= 'P') {
             return (ord($letter) - ord('P')) * 900000 + 800000;
-        } elseif ($letter == 'N') {
+        } elseif ('N' == $letter) {
             return 0;
         } elseif ($letter >= 'J') {
             return (ord($letter) - ord('J')) * 900000 + 6400000;
         } elseif ($letter >= 'E') {
             return (ord($letter) - ord('E')) * 900000 + 2800000;
-        } elseif ($letter == 'D') {
+        } elseif ('D' == $letter) {
             return 2000000;
-        } else {  // C
-            return 1100000;
-        }
-    }
+        }    // C
 
+        return 1100000;
+    }
 }

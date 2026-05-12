@@ -1,9 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
 use App\Service\ExternalPidService;
-use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JACQ\Service\SpecimenService;
 use OpenApi\Attributes\Get;
@@ -19,7 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class StableIdentifierController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly SpecimenService $specimenService, protected readonly ExternalPidService  $externalPidService)
+    public function __construct(protected readonly SpecimenService $specimenService, protected readonly ExternalPidService $externalPidService)
     {
     }
 
@@ -35,7 +36,7 @@ class StableIdentifierController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 1385945
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -79,13 +80,13 @@ class StableIdentifierController extends AbstractFOSRestController
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
     #[Route('/v1/stableIdentifier/sid/{specimenID}', methods: ['GET'])]
@@ -94,11 +95,12 @@ class StableIdentifierController extends AbstractFOSRestController
         $results = [];
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             try {
                 $specimen = $this->specimenService->findNonAccessibleForPublic($specimenID);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $view = $this->view([], 404);
+
                 return $this->handleView($view);
             }
         }
@@ -109,18 +111,19 @@ class StableIdentifierController extends AbstractFOSRestController
             $results['stableIdentifierList'] = $this->specimenService->sids2array($specimen);
             $externalPids = $this->externalPidService->getAll($specimen);
 
-            if ($externalPids !== null) {
+            if (null !== $externalPids) {
                 $results['stableIdentifierList'] = array_merge(
                     $results['stableIdentifierList'],
                     $externalPids
                 );
             }
-
         } else {
-            $view = $this->view("Stable Identifier does not exist", 404);
+            $view = $this->view('Stable Identifier does not exist', 404);
+
             return $this->handleView($view);
         }
         $view = $this->view($results, 200);
+
         return $this->handleView($view);
     }
 
@@ -142,7 +145,7 @@ class StableIdentifierController extends AbstractFOSRestController
                 description: 'returns http 303 and redirects to the link immediately',
                 required: false,
                 schema: new Schema(type: 'boolean'),
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -186,13 +189,13 @@ class StableIdentifierController extends AbstractFOSRestController
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
     #[Route('/v1/stableIdentifier/resolve/{sid<.+>}', methods: ['GET'])]
@@ -203,25 +206,25 @@ class StableIdentifierController extends AbstractFOSRestController
 
         $specimen = $this->specimenService->findSpecimenUsingSid($sid);
 
-        if ($specimen === null) {
+        if (null === $specimen) {
             $view = $this->view([], 404);
+
             return $this->handleView($view);
         }
 
         if ($withredirect && !empty($this->specimenService->getStableIdentifier($specimen))) {
             return $this->redirect($this->specimenService->getStableIdentifier($specimen), 303);
-
-        } else {
-            return $this->forward(self::class . '::sid', ['specimenID' => $specimen->id]);
         }
 
+        return $this->forward(self::class.'::sid', ['specimenID' => $specimen->id]);
     }
 
     private function fixSchemeSlashes(string $sid): string
     {
-        //add slash
+        // add slash
         $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
-        //reduce to exactly two
+
+        // reduce to exactly two
         return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 
@@ -237,7 +240,7 @@ class StableIdentifierController extends AbstractFOSRestController
                 required: false,
                 schema: new Schema(type: 'integer', nullable: true),
                 example: 30
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -325,13 +328,13 @@ class StableIdentifierController extends AbstractFOSRestController
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
     #[Route('/v1/stableIdentifier/errors', methods: ['GET'])]
@@ -339,6 +342,7 @@ class StableIdentifierController extends AbstractFOSRestController
     {
         $results = $this->specimenService->getEntriesWithErrors($sourceID);
         $view = $this->view($results, 200);
+
         return $this->handleView($view);
     }
 
@@ -381,7 +385,7 @@ class StableIdentifierController extends AbstractFOSRestController
                     schema: new Schema(
                         type: 'array',
                         items: new Items(
-                            properties: array(
+                            properties: [
                                 new Property(property: 'page', description: 'Page currently displayed', type: 'integer'),
                                 new Property(property: 'previousPage', description: 'Link to the previous page', type: 'string', format: 'uri', nullable: true),
                                 new Property(property: 'nextPage', description: 'Link to the next page', type: 'string', format: 'uri', nullable: true),
@@ -391,7 +395,7 @@ class StableIdentifierController extends AbstractFOSRestController
                                 new Property(property: 'total', description: 'Total number of records found', type: 'integer'),
                                 new Property(property: 'result', description: 'List of found entries', type: 'array',
                                     items: new Items(
-                                        properties: array(
+                                        properties: [
                                             new Property(property: 'specimenID', description: 'ID of the specimen', type: 'integer'),
                                             new Property(property: 'numberOfEntries', description: 'Number of records found for this specimen ID', type: 'integer'),
                                             new Property(property: 'stableIdentifierList', description: 'List of stable identifiers for this specimen ID', type: 'array',
@@ -408,32 +412,31 @@ class StableIdentifierController extends AbstractFOSRestController
                                                             type: 'integer',
                                                             nullable: true
                                                         ),
-
                                                     ],
                                                     type: 'object'
                                                 )
                                             ),
-                                        ),
+                                        ],
                                         type: 'object'
                                     )
                                 ),
-                            ),
+                            ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/stableIdentifier/multi', name: "services_rest_sid_multi", methods: ['GET'])]
+    #[Route('/v1/stableIdentifier/multi', name: 'services_rest_sid_multi', methods: ['GET'])]
     public function multi(#[MapQueryParameter] int $page = 1, #[MapQueryParameter] int $entriesPerPage = 6, #[MapQueryParameter] ?int $sourceID = null): Response
     {
-        if ($sourceID !== null) {
+        if (null !== $sourceID) {
             $results = $this->specimenService->getMultipleEntriesFromSource($sourceID);
         } else {
             $results = $this->specimenService->getMultipleEntries($page, $entriesPerPage);

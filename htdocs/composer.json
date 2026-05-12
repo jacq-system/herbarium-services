@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "php": ">=8.4",
+    "php": ">=8.5",
     "ext-ctype": "*",
     "ext-curl": "*",
     "ext-gd": "*",
@@ -45,7 +45,9 @@
     "symfony/maker-bundle": "^1",
     "symfony/phpunit-bridge": "^8",
     "symfony/stopwatch": "^8",
-    "symfony/web-profiler-bundle": "^8"
+    "symfony/web-profiler-bundle": "^8",
+    "friendsofphp/php-cs-fixer": "^3",
+    "phpstan/phpstan": "^2"
   },
   "config": {
     "allow-plugins": {
@@ -85,6 +87,13 @@
     ],
     "post-update-cmd": [
       "@auto-scripts"
+    ],
+    "fixer": "php-cs-fixer check",
+    "fixit": "php-cs-fixer fix",
+    "phpstan": "phpstan analyse --memory-limit=500M --level=7 src",
+    "check": [
+      "@phpstan",
+      "@fixer"
     ]
   },
   "conflict": {

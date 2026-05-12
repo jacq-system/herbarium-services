@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Facade;
 
@@ -18,11 +20,14 @@ readonly class ObjectsFacade
     {
     }
 
+    /**
+     * @return mixed[]
+     */
     public function resolveSpecimens(int $currentPage, int $recordsPerPage, bool $returnOnlyIds, SpecimenSearchParameters $parameters): array
     {
         $specimenSearchQuery = $this->searchQueryFactory->createForPublic();
         $totalRows = $specimenSearchQuery->countResults($parameters);
-        $offset = $recordsPerPage * ($currentPage-1);
+        $offset = $recordsPerPage * ($currentPage - 1);
 
         $originalParameters = [
             'rpp' => $recordsPerPage,              // records per page, default: 50
@@ -32,20 +37,18 @@ readonly class ObjectsFacade
             'sc' => $parameters->institutionCode,              // search for a source-code
             'cltr' => $parameters->collector,              // search for a collector
             'nation' => $parameters->country,              // search for a nation
-            'type' => (int)$parameters->onlyType,               // switch, search only for type records (default: no)
-            'withImages' => (int)$parameters->onlyImages,               // switch, search only for records with images (default: no)
-            'sort' => implode(',',array_map(
-                static fn($column, $direction) =>
-                    (strtoupper($direction) === 'DESC' ? '-' : '+') . $column,
+            'type' => (int) $parameters->onlyType,               // switch, search only for type records (default: no)
+            'withImages' => (int) $parameters->onlyImages,               // switch, search only for records with images (default: no)
+            'sort' => implode(',', array_map(
+                static fn ($column, $direction) => ('DESC' === strtoupper($direction) ? '-' : '+').$column,
                 array_keys($parameters->sort),
                 $parameters->sort ?? []
-            ))
+            )),
         ];
 
         $response = $this->getResponseSkeleton($originalParameters, $totalRows, $currentPage, $recordsPerPage);
 
         $queryBuilder = $specimenSearchQuery->build($parameters);
-
 
         $data = [];
         foreach ($this->specimenBatchProvider->iterate($queryBuilder, $offset, $recordsPerPage, 50, !$returnOnlyIds) as $specimen) {
@@ -60,58 +63,62 @@ readonly class ObjectsFacade
         return $response;
     }
 
+    /**
+     * @param mixed[] $originalParameters
+     *
+     * @return mixed[]
+     */
     protected function getResponseSkeleton(array $originalParameters, int $totalRows, int $currentPage, int $recordsPerPage): array
     {
         // get the number of pages and check the active page again
-        $lastPage = (int)ceil($totalRows / $recordsPerPage);
+        $lastPage = (int) ceil($totalRows / $recordsPerPage);
         if ($currentPage > $lastPage) {
             $currentPage = $lastPage;
         }
 
-        //remove null values
+        // remove null values
         $originalParameters = array_filter(
             $originalParameters,
-            static fn($value) => $value !== null
+            static fn ($value) => null !== $value
         );
 
-        $newParameters = '&' . http_build_query($originalParameters, '', '&', PHP_QUERY_RFC3986);
+        $newParameters = '&'.http_build_query($originalParameters, '', '&', PHP_QUERY_RFC3986);
         $url = $this->router->generate('services_rest_objects_specimens', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        return array('total' => $totalRows,
+        return ['total' => $totalRows,
             'itemsPerPage' => $originalParameters['rpp'],
             'page' => $currentPage,
-            'previousPage' => $url . '?p=' . (($currentPage > 0) ? ($currentPage - 1) : 1) . $newParameters,
-            'nextPage' => $url . '?p=' . (($currentPage < $lastPage && $currentPage > 0) ? ($currentPage + 1) : $lastPage) . $newParameters,
-            'firstPage' => $url . '?p=1' . $newParameters,
-            'lastPage' => $url . '?p=' . $lastPage . $newParameters,
+            'previousPage' => $url.'?p='.(($currentPage > 0) ? ($currentPage - 1) : 1).$newParameters,
+            'nextPage' => $url.'?p='.(($currentPage < $lastPage && $currentPage > 0) ? ($currentPage + 1) : $lastPage).$newParameters,
+            'firstPage' => $url.'?p=1'.$newParameters,
+            'lastPage' => $url.'?p='.$lastPage.$newParameters,
             'totalPages' => $lastPage,
-            'result' => array()
-        );
+            'result' => [],
+        ];
     }
 
-
     /**
-     * get all or some properties of a specimen with given ID
+     * get all or some properties of a specimen with given ID.
      *
-     * @param Specimens $specimen specimen
-     * @param string $fieldGroups which groups should be returned (dc, dwc, jacq), defaults to all
-     * @return array properties (dc, dwc and jacq)
+     * @param Specimens $specimen    specimen
+     * @param string    $fieldGroups which groups should be returned (dc, dwc, jacq), defaults to all
+     *
+     * @return mixed[] properties (dc, dwc and jacq)
      */
     public function resolveSpecimen(Specimens $specimen, string $fieldGroups = '', bool $removeEmptyValues = false): array
     {
-
-        if (!str_contains($fieldGroups, "dc") && !str_contains($fieldGroups, "dwc") && !str_contains($fieldGroups, "jacq")) {
-            $fieldGroups = "dc, dwc, jacq";
+        if (!str_contains($fieldGroups, 'dc') && !str_contains($fieldGroups, 'dwc') && !str_contains($fieldGroups, 'jacq')) {
+            $fieldGroups = 'dc, dwc, jacq';
         }
 
-        $ret = array();
-        if (str_contains($fieldGroups, "dc")) {
+        $ret = [];
+        if (str_contains($fieldGroups, 'dc')) {
             $ret['dc'] = $this->specimenService->getDublinCore($specimen);
         }
-        if (str_contains($fieldGroups, "dwc")) {
+        if (str_contains($fieldGroups, 'dwc')) {
             $ret['dwc'] = $this->specimenService->getDarwinCore($specimen);
         }
-        if (str_contains($fieldGroups, "jacq")) {
+        if (str_contains($fieldGroups, 'jacq')) {
             $ret['jacq'] = $this->specimenService->getJACQ($specimen);
         }
 
@@ -124,10 +131,10 @@ readonly class ObjectsFacade
                     }
                 }
             }
+
             return $resultsFiltered;
         }
 
         return $ret;
     }
-
 }

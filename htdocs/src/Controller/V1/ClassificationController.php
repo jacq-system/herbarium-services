@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -32,7 +34,7 @@ class ClassificationController extends AbstractFOSRestController
                 description: 'Type of reference (citation, person, service, specimen, periodical)',
                 in: 'path',
                 required: true,
-                schema: new Schema(type: 'string',  enum: ['citation', 'person', 'service', 'specimen', 'periodical']),
+                schema: new Schema(type: 'string', enum: ['citation', 'person', 'service', 'specimen', 'periodical']),
                 example: 'citation'
             ),
             new PathParameter(
@@ -58,7 +60,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: false,
                 schema: new Schema(type: 'integer'),
                 example: 1
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -66,16 +68,16 @@ class ClassificationController extends AbstractFOSRestController
                 description: 'parent entry of a given reference',
                 content: [new MediaType(
                     mediaType: 'application/json',
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/download/{referenceType}/{referenceID}', name: "services_rest_classification_download", methods: ['GET'])]
+    #[Route('/v1/classification/download/{referenceType}/{referenceID}', name: 'services_rest_classification_download', methods: ['GET'])]
     public function download(string $referenceType, int $referenceID, #[MapQueryParameter] ?int $scientificNameId, #[MapQueryParameter] ?int $hideScientificNameAuthors): Response
     {
         $data = $this->downloadService->getDownload($referenceType, $referenceID, $scientificNameId, $hideScientificNameAuthors);
@@ -120,7 +122,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: false,
                 schema: new Schema(type: 'integer', nullable: true),
                 example: 0
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -140,21 +142,21 @@ class ClassificationController extends AbstractFOSRestController
                                 new Property(property: 'hasChildren', description: 'true if children of this entry exist', type: 'boolean', example: true),
                                 new Property(property: 'hasType', description: ' true if Typi exist', type: 'boolean', example: false),
                                 new Property(property: 'hasSpecimen', description: 'true if at least one specimen exists', type: 'boolean', example: false),
-                                new Property(property: 'referenceInfo', description: '', type: 'object', example: '{"number": "classification number","order": "classification order","rank_abbr": "rank abbreviation","rank_hierarchy": "rank hierarchy","tax_syn_ID": "internal ID of synonym"}')
+                                new Property(property: 'referenceInfo', description: '', type: 'object', example: '{"number": "classification number","order": "classification order","rank_abbr": "rank abbreviation","rank_hierarchy": "rank hierarchy","tax_syn_ID": "internal ID of synonym"}'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/children/{referenceType}/{referenceID}', name: "services_rest_classification_children", methods: ['GET'])]
+    #[Route('/v1/classification/children/{referenceType}/{referenceID}', name: 'services_rest_classification_children', methods: ['GET'])]
     public function children(string $referenceType, int $referenceID, #[MapQueryParameter] ?int $taxonID = 0, #[MapQueryParameter] ?int $insertSeries = 0): Response
     {
         $data = $this->classificationFacade->resolveChildren($referenceType, $referenceID, $taxonID, $insertSeries);
@@ -191,7 +193,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: false,
                 schema: new Schema(type: 'integer', nullable: true),
                 example: 0
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -210,22 +212,22 @@ class ClassificationController extends AbstractFOSRestController
                                 new Property(property: 'uuid', description: 'URL to UUID service', type: 'object', example: '{"href": "url to get the uuid"}'),
                                 new Property(property: 'hasChildren', description: 'true if children of this entry exist', type: 'boolean', example: true),
                                 new Property(property: 'hasType', description: ' true if Typi exist', type: 'boolean', example: false),
-                                new Property(property: 'hasSpecimen', description: 'true if at least one specimen exists', type: 'boolean', example: false)
+                                new Property(property: 'hasSpecimen', description: 'true if at least one specimen exists', type: 'boolean', example: false),
                             ],
 
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/nameReferences/{taxonID}', name: "services_rest_classification_nameReferences", methods: ['GET'])]
+    #[Route('/v1/classification/nameReferences/{taxonID}', name: 'services_rest_classification_nameReferences', methods: ['GET'])]
     public function nameReferences(int $taxonID, #[MapQueryParameter] ?int $excludeReferenceId = 0, #[MapQueryParameter] ?int $insertSeries = 0): Response
     {
         $data = $this->classificationFacade->resolveNameReferences($taxonID, $excludeReferenceId, $insertSeries);
@@ -254,7 +256,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: false,
                 schema: new Schema(type: 'integer'),
                 example: 233658
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -266,16 +268,16 @@ class ClassificationController extends AbstractFOSRestController
                         type: 'integer',
                         example: 2
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/numberOfChildrenWithChildrenCitation/{referenceID}', name: "services_rest_classification_numberOfChildrenWithChildrenCitation", methods: ['GET'])]
+    #[Route('/v1/classification/numberOfChildrenWithChildrenCitation/{referenceID}', name: 'services_rest_classification_numberOfChildrenWithChildrenCitation', methods: ['GET'])]
     public function numberOfChildrenWithChildrenCitation(int $referenceID, #[MapQueryParameter] ?int $taxonID = 0): Response
     {
         $data = $this->classificationFacade->resolveNumberOfChildrenWithChildrenCitation($referenceID, $taxonID);
@@ -312,7 +314,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 46183
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -331,21 +333,21 @@ class ClassificationController extends AbstractFOSRestController
                                 new Property(property: 'referenceType', description: 'Type of the reference', type: 'string', example: ''),
                                 new Property(property: 'hasType', description: ' true if Type exist', type: 'boolean', example: false),
                                 new Property(property: 'hasSpecimen', description: 'true if at least one specimen exists', type: 'boolean', example: false),
-                                new Property(property: 'referenceInfo', description: '', type: 'object', example: '{"number": "","order": ""}')
+                                new Property(property: 'referenceInfo', description: '', type: 'object', example: '{"number": "","order": ""}'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/parent/{referenceType}/{referenceID}/{taxonID}', name: "services_rest_classification_parent", methods: ['GET'])]
+    #[Route('/v1/classification/parent/{referenceType}/{referenceID}/{taxonID}', name: 'services_rest_classification_parent', methods: ['GET'])]
     public function parent(string $referenceType, int $referenceID, int $taxonID): Response
     {
         $data = $this->classificationFacade->resolveParent($referenceType, $referenceID, $taxonID);
@@ -366,7 +368,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 31070
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -377,31 +379,31 @@ class ClassificationController extends AbstractFOSRestController
                     schema: new Schema(type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: "nrAccTaxa", type: "integer", example: 492),
-                                new Property(property: "nrSynonyms", type: "integer", example: 34),
+                                new Property(property: 'nrAccTaxa', type: 'integer', example: 492),
+                                new Property(property: 'nrSynonyms', type: 'integer', example: 34),
                                 new Property(
-                                    property: "ranks",
-                                    type: "array",
+                                    property: 'ranks',
+                                    type: 'array',
                                     items: new Items(
                                         properties: [
-                                            new Property(property: "rank", type: "string", example: "divisions"),
-                                            new Property(property: "nrAccTaxa", type: "integer", example: 1),
-                                            new Property(property: "nrSynTaxa", type: "integer", example: 0),
+                                            new Property(property: 'rank', type: 'string', example: 'divisions'),
+                                            new Property(property: 'nrAccTaxa', type: 'integer', example: 1),
+                                            new Property(property: 'nrSynTaxa', type: 'integer', example: 0),
                                         ]
                                     )
-                                )
+                                ),
                             ]),
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/periodicalStatistics/{referenceID}', name: "services_rest_classification_periodicalStatistics", methods: ['GET'])]
+    #[Route('/v1/classification/periodicalStatistics/{referenceID}', name: 'services_rest_classification_periodicalStatistics', methods: ['GET'])]
     public function periodicalStatistics(int $referenceID): Response
     {
         $data = $this->classificationFacade->resolvePeriodicalStatistics($referenceID);
@@ -430,7 +432,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer', nullable: true),
                 example: 15
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -443,21 +445,21 @@ class ClassificationController extends AbstractFOSRestController
                         items: new Items(
                             properties: [
                                 new Property(property: 'name', description: 'name of reference', type: 'string', example: 'Addisonia'),
-                                new Property(property: 'id', description: 'ID of reference', type: 'integer', example: 15)
+                                new Property(property: 'id', description: 'ID of reference', type: 'integer', example: 15),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/references/{referenceType}/{referenceID}', name: "services_rest_classification_references", methods: ['GET'])]
+    #[Route('/v1/classification/references/{referenceType}/{referenceID}', name: 'services_rest_classification_references', methods: ['GET'])]
     public function references(string $referenceType, ?int $referenceID = null): Response
     {
         $data = $this->classificationFacade->resolveByType($referenceType, $referenceID);
@@ -502,7 +504,7 @@ class ClassificationController extends AbstractFOSRestController
                 required: false,
                 schema: new Schema(type: 'integer', nullable: true),
                 example: 0
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -521,21 +523,21 @@ class ClassificationController extends AbstractFOSRestController
                                 new Property(property: 'referenceType', description: 'Type of the reference', type: 'string', example: ''),
                                 new Property(property: 'hasType', description: ' true if Typi exist', type: 'boolean', example: false),
                                 new Property(property: 'hasSpecimen', description: 'true if at least one specimen exists', type: 'boolean', example: false),
-                                new Property(property: 'referenceInfo', description: '', type: 'object', example: '{"type": "","cited": ""}')
+                                new Property(property: 'referenceInfo', description: '', type: 'object', example: '{"type": "","cited": ""}'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/classification/synonyms/{referenceType}/{referenceID}/{taxonID}', name: "services_rest_classification_synonyms", methods: ['GET'])]
+    #[Route('/v1/classification/synonyms/{referenceType}/{referenceID}/{taxonID}', name: 'services_rest_classification_synonyms', methods: ['GET'])]
     public function synonyms(string $referenceType, int $referenceID, int $taxonID, #[MapQueryParameter] ?int $insertSeries = 0): Response
     {
         $data = $this->classificationFacade->resolveSynonyms($referenceType, $referenceID, $taxonID, $insertSeries);
@@ -543,6 +545,4 @@ class ClassificationController extends AbstractFOSRestController
 
         return $this->handleView($view);
     }
-
-
 }

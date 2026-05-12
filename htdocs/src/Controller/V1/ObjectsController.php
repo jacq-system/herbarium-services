@@ -1,11 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
 use App\Facade\ObjectsFacade;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
-use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JACQ\Application\Specimen\Export\ExcelService;
 use JACQ\Application\Specimen\Export\GeojsonService;
@@ -49,7 +50,7 @@ class ObjectsController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 316368
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -61,32 +62,33 @@ class ObjectsController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'results', type: 'object')
+                                new Property(property: 'results', type: 'object'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/objects/specimens/{specimenID<\d+>}', name: "services_rest_objects_specimen", methods: ['GET'])]
+    #[Route('/v1/objects/specimens/{specimenID<\d+>}', name: 'services_rest_objects_specimen', methods: ['GET'])]
     public function specimen(int $specimenID): Response
     {
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
             $data = $this->objectsFacade->resolveSpecimen($specimen);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             try {
                 $specimen = $this->specimenService->findNonAccessibleForPublic($specimenID);
                 $data = $this->objectsFacade->resolveSpecimen($specimen);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $view = $this->view([], 404);
+
                 return $this->handleView($view);
             }
         }
@@ -108,7 +110,7 @@ class ObjectsController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: 'https://wu.jacq.org/WU-0000264'
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -120,28 +122,29 @@ class ObjectsController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'results', type: 'object')
+                                new Property(property: 'results', type: 'object'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/objects/specimens/by-sid/{sid<.+>}', name: "services_rest_objects_specimen_bysid", methods: ['GET'])]
+    #[Route('/v1/objects/specimens/by-sid/{sid<.+>}', name: 'services_rest_objects_specimen_bysid', methods: ['GET'])]
     public function specimenBySid(string $sid): Response
     {
         $sid = urldecode($sid);
         $sid = $this->fixSchemeSlashes($sid);
         $specimen = $this->specimenService->findSpecimenUsingSid($sid);
-        if ($specimen === null) {
+        if (null === $specimen) {
             $view = $this->view([], 404);
+
             return $this->handleView($view);
         }
 
@@ -153,9 +156,10 @@ class ObjectsController extends AbstractFOSRestController
 
     private function fixSchemeSlashes(string $sid): string
     {
-        //add slash
+        // add slash
         $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
-        //reduce to exactly two
+
+        // reduce to exactly two
         return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 
@@ -194,7 +198,7 @@ class ObjectsController extends AbstractFOSRestController
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string'),
-                example: "prunus av*"
+                example: 'prunus av*'
             ),
             new QueryParameter(
                 name: 'sc',
@@ -209,7 +213,7 @@ class ObjectsController extends AbstractFOSRestController
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string'),
-                example: "rainer"
+                example: 'rainer'
             ),
             new QueryParameter(
                 name: 'type',
@@ -225,7 +229,7 @@ class ObjectsController extends AbstractFOSRestController
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string'),
-                example: ""
+                example: ''
             ),
             new QueryParameter(
                 name: 'herbnr',
@@ -260,26 +264,26 @@ class ObjectsController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'results', type: 'object')
+                                new Property(property: 'results', type: 'object'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/objects/specimens', name: "services_rest_objects_specimens", methods: ['GET'])]
+    #[Route('/v1/objects/specimens', name: 'services_rest_objects_specimens', methods: ['GET'])]
     public function specimens(Request $request, #[MapQueryParameter] ?int $p = 1, #[MapQueryParameter] ?int $rpp = 50, #[MapQueryParameter] ?int $list = 1): Response
     {
         $parameters = $this->fromRequestFactory->createFromLegacy($request);
 
-        $currentPage = $p > 0 ? $p : 1 ;
+        $currentPage = $p > 0 ? $p : 1;
         $recordsPerPage = $rpp;
         $returnOnlyIds = (bool) $list;
         ($recordsPerPage > 100) ? $recordsPerPage = 100 : null;
@@ -295,7 +299,6 @@ class ObjectsController extends AbstractFOSRestController
         summary: 'export specimens which fit given criteria, a limit 1000 rows is applied',
         tags: ['objects'],
         parameters: [
-
             new QueryParameter(
                 name: 'institution',
                 description: 'ID of the institution',
@@ -455,8 +458,7 @@ class ObjectsController extends AbstractFOSRestController
                     enum: ['xlsx', 'ods', 'csv', 'geojson', 'kml']
                 ),
                 example: 'xlsx'
-            )
-
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -467,7 +469,7 @@ class ObjectsController extends AbstractFOSRestController
                         header: 'Content-Disposition',
                         description: 'attachment; filename="export.ext"',
                         schema: new Schema(type: 'string')
-                    )
+                    ),
                 ],
                 content: [
                     new MediaType(
@@ -495,18 +497,18 @@ class ObjectsController extends AbstractFOSRestController
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/objects/specimens/export', name: "services_rest_objects_specimens_export", methods: ['GET'])]
+    #[Route('/v1/objects/specimens/export', name: 'services_rest_objects_specimens_export', methods: ['GET'])]
     public function specimensExport(Request $request): Response
     {
-
         $parameters = $this->fromRequestFactory->create($request);
         $specimenSearchQuery = $this->searchQueryFactory->createForPublic();
         $qb = $specimenSearchQuery->build($parameters);
-//        dd($parameters);
-//        dd($qb->getQuery()->getDQL(), $qb->getQuery()->getParameters());
+
+        //        dd($parameters);
+        //        dd($qb->getQuery()->getDQL(), $qb->getQuery()->getParameters());
         return match ($request->query->get('format')) {
             'xlsx' => $this->provideExcel($qb),
             'ods' => $this->provideOds($qb),
@@ -515,7 +517,6 @@ class ObjectsController extends AbstractFOSRestController
             'kml' => $this->provideKml($qb),
             default => throw new \InvalidArgumentException('Unsupported format'),
         };
-
     }
 
     protected function provideExcel(QueryBuilder $qb): Response
@@ -582,7 +583,6 @@ class ObjectsController extends AbstractFOSRestController
                 'Content-Type' => 'application/geo+json',
                 'Content-Disposition' => 'attachment; filename="specimens_download.geojson"',
             ]);
-
     }
 
     protected function provideKml(QueryBuilder $qb): Response
@@ -603,6 +603,5 @@ class ObjectsController extends AbstractFOSRestController
                 'Content-Disposition' => 'attachment; filename="specimens_download.kml"',
             ]
         );
-
     }
 }

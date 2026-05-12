@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -55,17 +57,17 @@ class StatisticsController extends AbstractFOSRestController
                 description: 'type of statistics analysis',
                 in: 'path',
                 required: true,
-                schema: new Schema(type: 'string', enum: ["names", "citations", "names_citations", "specimens", "type_specimens", "names_type_specimens", "types_name", "synonyms", "classifications"]),
-                example: "specimens"
+                schema: new Schema(type: 'string', enum: ['names', 'citations', 'names_citations', 'specimens', 'type_specimens', 'names_type_specimens', 'types_name', 'synonyms', 'classifications']),
+                example: 'specimens'
             ),
             new PathParameter(
                 name: 'interval',
                 description: 'resolution of statistics analysis',
                 in: 'path',
                 required: true,
-                schema: new Schema(type: 'string', enum: ["day", "week", "month", "year"]),
-                example: "week"
-            )
+                schema: new Schema(type: 'string', enum: ['day', 'week', 'month', 'year']),
+                example: 'week'
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -77,7 +79,7 @@ class StatisticsController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'results', type: 'object')
+                                new Property(property: 'results', type: 'object'),
                             ],
                             type: 'object'
                         )
@@ -89,21 +91,21 @@ class StatisticsController extends AbstractFOSRestController
                             type: 'array',
                             items: new Items(
                                 properties: [
-                                    new Property(property: 'results')
+                                    new Property(property: 'results'),
                                 ],
                                 type: 'object'
                             )
                         )
-                    )
+                    ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/statistics/results/{periodStart}/{periodEnd}/{updated}/{type}/{interval}', name: "services_rest_statistics_results", methods: ['GET'])]
+    #[Route('/v1/statistics/results/{periodStart}/{periodEnd}/{updated}/{type}/{interval}', name: 'services_rest_statistics_results', methods: ['GET'])]
     public function results(string $periodStart, string $periodEnd, int $updated, CoreObjectsEnum $type, TimeIntervalEnum $interval): Response
     {
         $data = $this->statisticsService->getResults($periodStart, $periodEnd, $updated, $type, $interval);
@@ -111,6 +113,4 @@ class StatisticsController extends AbstractFOSRestController
 
         return $this->handleView($view);
     }
-
-
 }

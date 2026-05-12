@@ -1,55 +1,67 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
-
 
 use JACQ\Entity\Jacq\Herbarinput\ExternalServices;
 use JACQ\Repository\Herbarinput\ExternalServicesRepository;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Throwable;
 
 class ExternalScientificNamesService
 {
-
+    /**
+     * @var mixed[]
+     */
     protected array $result = [];
+    /**
+     * @var mixed[]
+     */
     protected array $apiResponses = [];
+    /**
+     * @var mixed[]
+     */
     protected array $errors = [];
     protected string $searchString = '';
-    const int ID_GBIF = 51;
-    const int ID_WFO = 57;
-    const int ID_WORMS = 58;
+    public const int ID_GBIF = 51;
+    public const int ID_WFO = 57;
+    public const int ID_WORMS = 58;
 
-    public function __construct(protected readonly ExternalServicesRepository $servicesRepository,  protected HttpClientInterface $httpClient)
+    public function __construct(protected readonly ExternalServicesRepository $servicesRepository, protected HttpClientInterface $httpClient)
     {
     }
 
+    /**
+     * @return mixed[]
+     */
     public function searchAll(string $term): array
     {
         $this->searchString = $term;
 
         foreach ($this->servicesRepository->getCallableServices() as $externalService) {
             try {
-                $this->apiResponses[$externalService->id] = $this->httpClient->request('GET', $externalService->apiUrl . urlencode($term), [
+                $this->apiResponses[$externalService->id] = $this->httpClient->request('GET', $externalService->apiUrl.urlencode($term), [
                     'timeout' => 8,
                 ]);
             } catch (TransportExceptionInterface $e) {
                 $this->errors[$externalService->id] = $e->getMessage();
             } finally {
                 $this->result[$externalService->apiCode] = [
-                    'match'      => [],
+                    'match' => [],
                     'candidates' => [],
-                    'serviceID'  => $externalService->id,
-                    'name'       => $externalService->name,
-                    'error'      => $this->errors[$externalService->id] ?? null
+                    'serviceID' => $externalService->id,
+                    'name' => $externalService->name,
+                    'error' => $this->errors[$externalService->id] ?? null,
                 ];
             }
 
             $this->proceedResponse($externalService);
         }
+
         return [
-            "searchString" => $this->searchString,
-            "results"      => $this->result
+            'searchString' => $this->searchString,
+            'results' => $this->result,
         ];
     }
 
@@ -67,72 +79,69 @@ class ExternalScientificNamesService
                     $this->wfo_read($service, $result);
                     break;
                 case self::ID_WORMS:
-                    if ($response->getStatusCode() === 200) {
+                    if (200 === $response->getStatusCode()) {
                         $this->worms_read($service, $result);
                     }
                     break;
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->result[$service->name]['error'] = $e->getMessage();
         }
     }
 
     /**
-     * read GBIF and store data into internal array, needs just the result of the service
+     * read GBIF and store data into internal array, needs just the result of the service.
      *
-     * @param array $result given result of the service, json decoded
-     * @return void
+     * @param mixed[] $result given result of the service, json decoded
      */
     private function gbif_read(ExternalServices $service, array $result): void
     {
         if (isset($result['count']) && $result['count'] > 0) {
-            if ($result['count'] === 1) {
-                $this->result[$service->apiCode]['match'] = array('id'    => $result['results'][0]['key'],
-                    'name'  => $result['results'][0]['scientificName']);
+            if (1 === $result['count']) {
+                $this->result[$service->apiCode]['match'] = ['id' => $result['results'][0]['key'],
+                    'name' => $result['results'][0]['scientificName']];
             } else {
                 foreach ($result['results'] as $candidate) {
-                    $this->result[$service->apiCode]['candidates'][] = array('id'   => $candidate['key'],
-                        'name' => $candidate['scientificName']);
+                    $this->result[$service->apiCode]['candidates'][] = ['id' => $candidate['key'],
+                        'name' => $candidate['scientificName']];
                 }
             }
         }
     }
 
     /**
-     * read World Flora Online and store data into internal array, needs just the result of the service
+     * read World Flora Online and store data into internal array, needs just the result of the service.
      *
-     * @param array $result given result of the service, json decoded
-     * @return void
+     * @param mixed[] $result given result of the service, json decoded
      */
     private function wfo_read(ExternalServices $service, array $result): void
     {
         if (!empty($result['match'])) {
-            $this->result[$service->apiCode]['match'] = array('id'    => $result['match']['wfo_id'],
-                'name'  => $result['match']['full_name_plain']);
+            $this->result[$service->apiCode]['match'] = ['id' => $result['match']['wfo_id'],
+                'name' => $result['match']['full_name_plain']];
         } elseif (!empty($result['candidates'])) {
             foreach ($result['candidates'] as $candidate) {
-                $this->result[$service->apiCode]['candidates'][] = array('id'   => $candidate['wfo_id'],
-                    'name' => $candidate['full_name_plain']);
+                $this->result[$service->apiCode]['candidates'][] = ['id' => $candidate['wfo_id'],
+                    'name' => $candidate['full_name_plain']];
             }
         }
     }
 
     /**
-     *  read World Register of Marine Species (VLIZ) and store data into internal array, needs just the result of the service
+     *  read World Register of Marine Species (VLIZ) and store data into internal array, needs just the result of the service.
      *
-     * @param array $result given result of the service, json decoded
-     * @return void
+     * @param mixed[] $result given result of the service, json decoded
      */
     private function worms_read(ExternalServices $service, array $result): void
     {
         if (count($result) > 1) {
             foreach ($result as $candidate) {
-                $this->result[$service->apiCode]['candidates'][] = array('id'   => $candidate['AphiaID'],
-                    'name' => $candidate['scientificname']);
+                $this->result[$service->apiCode]['candidates'][] = ['id' => $candidate['AphiaID'],
+                    'name' => $candidate['scientificname']];
             }
         } else {
-            $this->result[$service->apiCode]['match'] = array('id'   => $result[0]['AphiaID'],
-                'name' => $result[0]['scientificname']);
+            $this->result[$service->apiCode]['match'] = ['id' => $result[0]['AphiaID'],
+                'name' => $result[0]['scientificname']];
         }
     }
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -32,7 +34,7 @@ class AutocompleteController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: 'Asteranthe'
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -47,18 +49,18 @@ class AutocompleteController extends AbstractFOSRestController
                                 new Property(property: 'label', description: 'scientific name', type: 'string', example: 'Asteranthera Hanst.'),
                                 new Property(property: 'value', description: 'scientific name', type: 'string', example: 'Asteranthera Hanst.'),
                                 new Property(property: 'id', description: 'ID of taxon name', type: 'integer', example: 16889),
-                                new Property(property: 'uuid', description: 'URL to UUID service', type: 'object', example: '{"href": "url to get the uuid"}')
+                                new Property(property: 'uuid', description: 'URL to UUID service', type: 'object', example: '{"href": "url to get the uuid"}'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
     #[Route('/v1/autocomplete/scientificNames/{term}', methods: ['GET'])]
@@ -67,16 +69,15 @@ class AutocompleteController extends AbstractFOSRestController
         $results = [];
         $data = $this->speciesRepository->autocompleteStartsWith($term);
         foreach ($data as $row) {
-            $results[] = array(
-                "label" => $row['scientificName'],
-                "value" => $row['scientificName'],
-                "id" => $row['id'],
-                "uuid" => array('href' => $this->generateUrl('services_rest_scinames_uuid', ['taxonID' => $row['id']], UrlGeneratorInterface::ABSOLUTE_URL))
-            );
+            $results[] = [
+                'label' => $row['scientificName'],
+                'value' => $row['scientificName'],
+                'id' => $row['id'],
+                'uuid' => ['href' => $this->generateUrl('services_rest_scinames_uuid', ['taxonID' => $row['id']], UrlGeneratorInterface::ABSOLUTE_URL)],
+            ];
         }
         $view = $this->view($results, 200);
 
         return $this->handleView($view);
     }
-
 }

@@ -1,8 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
-use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use JACQ\Service\Legacy\IiifFacade;
 use JACQ\Service\SpecimenService;
@@ -32,7 +33,7 @@ class IiifController extends AbstractFOSRestController
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 1739342
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -42,25 +43,26 @@ class IiifController extends AbstractFOSRestController
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'uri', description: 'uri of specimen', type: 'string', example: 'https://api.jacq.org/v1/iiif/manifest/1739342')
+                            new Property(property: 'uri', description: 'uri of specimen', type: 'string', example: 'https://api.jacq.org/v1/iiif/manifest/1739342'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/iiif/manifestUri/{specimenID}', name: "services_rest_iiif_manifest_uri", methods: ['GET'])]
+    #[Route('/v1/iiif/manifestUri/{specimenID}', name: 'services_rest_iiif_manifest_uri', methods: ['GET'])]
     public function manifestUri(int $specimenID): Response
     {
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        }catch (Exception $e){
+        } catch (\Exception $e) {
             $view = $this->view([], 404);
+
             return $this->handleView($view);
         }
         $results['uri'] = $this->iiifFacade->resolveManifestUri($specimen);
@@ -69,7 +71,6 @@ class IiifController extends AbstractFOSRestController
 
         return $this->handleView($view);
     }
-
 
     #[Get(
         path: '/v1/iiif/manifest/{specimenID}',
@@ -84,7 +85,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
                 required: true,
                 schema: new Schema(type: 'integer'),
                 example: 1739342
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -94,10 +95,10 @@ If no backend is configured, the webservice tries to get the manifest from the a
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'manifest')
+                            new Property(property: 'manifest'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
@@ -107,16 +108,17 @@ If no backend is configured, the webservice tries to get the manifest from the a
             new \OpenApi\Attributes\Response(
                 response: 404,
                 description: 'no manifest available'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/iiif/manifest/{specimenID}', name: "services_rest_iiif_manifest", methods: ['GET'])]
+    #[Route('/v1/iiif/manifest/{specimenID}', name: 'services_rest_iiif_manifest', methods: ['GET'])]
     public function manifest(int $specimenID): Response
     {
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
-        }catch (Exception $e){
+        } catch (\Exception $e) {
             $view = $this->view([], 404);
+
             return $this->handleView($view);
         }
 
@@ -128,7 +130,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
 
     #[Get(
         path: '/v1/iiif/createManifest/{serverID}/{imageIdentifier}',
-        description: "create a manifest for an image with a given image identifer and a given image server. Uses the jacq-servlet interface of an extended cantaloupe image server. ",
+        description: 'create a manifest for an image with a given image identifer and a given image server. Uses the jacq-servlet interface of an extended cantaloupe image server. ',
         summary: 'create a manifest for an image server with a given image filename',
         tags: ['iiif'],
         parameters: [
@@ -147,7 +149,7 @@ If no backend is configured, the webservice tries to get the manifest from the a
                 required: true,
                 schema: new Schema(type: 'string'),
                 example: 'gjo_0079614'
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -157,10 +159,10 @@ If no backend is configured, the webservice tries to get the manifest from the a
                     mediaType: 'application/json',
                     schema: new Schema(
                         properties: [
-                            new Property(property: 'manifest')
+                            new Property(property: 'manifest'),
                         ]
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
@@ -170,19 +172,18 @@ If no backend is configured, the webservice tries to get the manifest from the a
             new \OpenApi\Attributes\Response(
                 response: 404,
                 description: 'no manifest available'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/iiif/createManifest/{serverID}/{imageIdentifier}', name: "services_rest_iiif_createManifest", methods: ['GET'])]
+    #[Route('/v1/iiif/createManifest/{serverID}/{imageIdentifier}', name: 'services_rest_iiif_createManifest', methods: ['GET'])]
     public function createManifest(int $serverID, string $imageIdentifier): Response
     {
         $manifest = $this->iiifFacade->createManifestFromExtendedCantaloupeImage($serverID, $imageIdentifier);
-        if(empty($manifest)){
+        if (empty($manifest)) {
             return $this->json(null, 404);
         }
         $view = $this->view($manifest, 200);
 
         return $this->handleView($view);
     }
-
 }

@@ -1,15 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Facade;
 
-
+use Doctrine\ORM\EntityManagerInterface;
 use JACQ\Entity\Jacq\Herbarinput\Species;
 use JACQ\Repository\Herbarinput\LiteratureRepository;
 use JACQ\Repository\Herbarinput\SpeciesRepository;
 use JACQ\Repository\Herbarinput\SynonymyRepository;
 use JACQ\Service\ReferenceService;
 use JACQ\Service\SpeciesService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -20,18 +21,19 @@ readonly class ClassificationFacade
     }
 
     /**
-     * Fetch a list of all references (which have a classification attached)
+     * Fetch a list of all references (which have a classification attached).
      *
      * @param string $referenceType Type of references to return (citation, person, service, specimen, periodical)
-     * @param ?int $referenceID optional ID of reference
-     * @return array References information
+     * @param ?int   $referenceID   optional ID of reference
+     *
+     * @return mixed[] References information
      */
     public function resolveByType(string $referenceType, ?int $referenceID): array
     {
-//            //TODO  these three from oirignal code are not supported or do not exists?
-//            case 'person':
-//            case 'service':
-//            case 'specimen':
+        //            //TODO  these three from oirignal code are not supported or do not exists?
+        //            case 'person':
+        //            case 'service':
+        //            case 'specimen':
         return match ($referenceType) {
             'citation' => $this->referenceService->getCitationReferences($referenceID),
             'periodical' => $this->referenceService->getPeriodicalReferences($referenceID),
@@ -40,15 +42,17 @@ readonly class ClassificationFacade
     }
 
     /**
-     * Return (other) references for this name which include them in their classification
+     * Return (other) references for this name which include them in their classification.
+     *
+     * @return mixed[]
      */
     public function resolveNameReferences(int $taxonID, int $excludeReferenceId = 0, int $insertSeries = 0): array
     {
         $results = [];
         // direct integration of tbl_lit_... for (much) faster sorting whe using ORDER BY
         // only select entries which are part of a classification, so either tc.tax_syn_ID or has_children_syn.tax_syn_ID must not be NULL
-        //ONLY_FULL_GROUP_BY,
-        $sql = "SELECT ts.source_citationID AS referenceId, `herbar_view`.GetProtolog(`ts`.`source_citationID`) AS `referenceName`
+        // ONLY_FULL_GROUP_BY,
+        $sql = 'SELECT ts.source_citationID AS referenceId, `herbar_view`.GetProtolog(`ts`.`source_citationID`) AS `referenceName`
             FROM tbl_tax_synonymy ts
              LEFT JOIN tbl_tax_classification tc ON tc.tax_syn_ID = ts.tax_syn_ID
              LEFT JOIN tbl_tax_classification has_children ON has_children.parent_taxonID = ts.taxonID
@@ -61,28 +65,28 @@ readonly class ClassificationFacade
             WHERE ts.source_citationID IS NOT NULL
              AND ts.acc_taxon_ID IS NULL
              AND ts.taxonID = :taxonID
-             AND (tc.tax_syn_ID IS NOT NULL OR has_children_syn.tax_syn_ID IS NOT NULL) ";
-        if ($insertSeries !== 0) {
-            $sql .= " AND ts.source_citationID NOT IN (SELECT citationID
+             AND (tc.tax_syn_ID IS NOT NULL OR has_children_syn.tax_syn_ID IS NOT NULL) ';
+        if (0 !== $insertSeries) {
+            $sql .= ' AND ts.source_citationID NOT IN (SELECT citationID
                                                    FROM tbl_classification_citation_insert
                                                    WHERE series = :insertSeries
                                                     AND taxonID = :taxonID
-                                                    AND referenceId = :excludeReferenceId)"; //TODO param :excludeReferenceId can be default O, no control?
+                                                    AND referenceId = :excludeReferenceId)'; // TODO param :excludeReferenceId can be default O, no control?
         }
-        $sql .= " GROUP BY ts.source_citationID
-              ORDER BY la.autor, l.jahr, le.autor, l.suptitel, lp.periodical, l.vol, l.part, l.pp";
+        $sql .= ' GROUP BY ts.source_citationID
+              ORDER BY la.autor, l.jahr, le.autor, l.suptitel, lp.periodical, l.vol, l.part, l.pp';
         $dbRows = $this->entityManager->getConnection()->executeQuery($sql, ['taxonID' => $taxonID, 'insertSeries' => $insertSeries, 'excludeReferenceId' => $excludeReferenceId])->fetchAllAssociative();
         foreach ($dbRows as $dbRow) {
             // check for exclude id
             if ($dbRow['referenceId'] != $excludeReferenceId) {
                 $results[] = [
-                    "referenceName" => $dbRow['referenceName'],
-                    "referenceId" => intval($dbRow['referenceId']),
-                    "referenceType" => "citation", "taxonID" => $taxonID,
-                    "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)),
-                    "hasChildren" => $this->synonymyRepository->hasClassificationChildren($taxonID, $dbRow['referenceId']),
-                    "hasType" => false, //TODO always false?
-                    "hasSpecimen" => false //TODO always false?
+                    'referenceName' => $dbRow['referenceName'],
+                    'referenceId' => intval($dbRow['referenceId']),
+                    'referenceType' => 'citation', 'taxonID' => $taxonID,
+                    'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)],
+                    'hasChildren' => $this->synonymyRepository->hasClassificationChildren($taxonID, $dbRow['referenceId']),
+                    'hasType' => false, // TODO always false?
+                    'hasSpecimen' => false, // TODO always false?
                 ];
             }
         }
@@ -90,7 +94,7 @@ readonly class ClassificationFacade
         // Fetch all synonym rows (if any)
         // direct integration of tbl_lit_... for (much) faster sorting whe using ORDER BY
         // ONLY_FULL_GROUP_BY,
-        $sqlSyns = "SELECT ts.source_citationID AS referenceId,
+        $sqlSyns = 'SELECT ts.source_citationID AS referenceId,
                        `herbar_view`.GetProtolog(`ts`.`source_citationID`) AS `referenceName`,
                        ts.acc_taxon_ID AS acceptedId
                 FROM tbl_tax_synonymy ts
@@ -103,13 +107,13 @@ readonly class ClassificationFacade
                  AND ts.acc_taxon_ID IS NOT NULL
                  AND ts.taxonID = :taxonID
                 GROUP BY ts.source_citationID
-                ORDER BY la.autor, l.jahr, le.autor, l.suptitel, lp.periodical, l.vol, l.part, l.pp";
+                ORDER BY la.autor, l.jahr, le.autor, l.suptitel, lp.periodical, l.vol, l.part, l.pp';
         $dbSyns = $this->entityManager->getConnection()->executeQuery($sqlSyns, ['taxonID' => $taxonID, 'excludeReferenceId' => $excludeReferenceId])->fetchAllAssociative();
 
         foreach ($dbSyns as $dbSyn) {
             if ($this->taxonService->isAcceptedTaxonPartOfClassification($dbSyn['referenceId'], $dbSyn['acceptedId'])) {
-                $results[] = array("referenceName" => '= ' . $dbSyn['referenceName'],  //  mark the reference Name as synonym
-                    "referenceId" => intval($dbSyn['referenceId']), "referenceType" => "citation", "taxonID" => $taxonID, "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)), "hasChildren" => false, "hasType" => false, "hasSpecimen" => false,);
+                $results[] = ['referenceName' => '= '.$dbSyn['referenceName'],  //  mark the reference Name as synonym
+                    'referenceId' => intval($dbSyn['referenceId']), 'referenceType' => 'citation', 'taxonID' => $taxonID, 'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)], 'hasChildren' => false, 'hasType' => false, 'hasSpecimen' => false, ];
             }
         }
 
@@ -117,25 +121,25 @@ readonly class ClassificationFacade
     }
 
     /**
-     * Get number of classification children who have children themselves of a given taxonID according to a given reference of type citation
+     * Get number of classification children who have children themselves of a given taxonID according to a given reference of type citation.
      *
-     * @param int $referenceID ID of reference (citation)
-     * @param ?int $taxonID ID of taxon
+     * @param int  $referenceID ID of reference (citation)
+     * @param ?int $taxonID     ID of taxon
      */
     public function resolveNumberOfChildrenWithChildrenCitation(int $referenceID, ?int $taxonID): int
     {
         $resultNumber = 0;
 
-        if(!empty($taxonID)) {
+        if (!empty($taxonID)) {
             $stack[] = $taxonID;
-        }else{
+        } else {
             $stack = [];
         }
         do {
             $taxonID = array_pop($stack);
 
             // basic query
-            $sql = "SELECT ts.taxonID,
+            $sql = 'SELECT ts.taxonID,
                        max(`has_children`.`tax_syn_ID` IS NOT NULL) AS `hasChildren`,
                        max(`has_synonyms`.`tax_syn_ID` IS NOT NULL) AS `hasSynonyms`,
                        max(`has_basionym`.`basID` IS NOT NULL) AS `hasBasionym`
@@ -148,31 +152,31 @@ readonly class ClassificationFacade
                  LEFT JOIN herbarinput.tbl_tax_synonymy has_children ON (has_children.tax_syn_ID = has_children_clas.tax_syn_ID AND has_children.source_citationID = ts.source_citationID)
                  LEFT JOIN herbarinput.tbl_tax_species has_basionym ON ts.taxonID = has_basionym.taxonID
                 WHERE ts.source_citationID = :referenceID
-                 AND ts.acc_taxon_ID IS NULL ";
+                 AND ts.acc_taxon_ID IS NULL ';
 
             // check if we search for children of a specific taxon
             if (!empty($taxonID)) {
-                $sql .= " AND tc.parent_taxonID = :taxonID ";
+                $sql .= ' AND tc.parent_taxonID = :taxonID ';
             } // .. if not make sure we only return entries which have at least one child
             else {
-                $sql .= " AND tc.parent_taxonID IS NULL
-                      AND has_children.tax_syn_ID IS NOT NULL ";
+                $sql .= ' AND tc.parent_taxonID IS NULL
+                      AND has_children.tax_syn_ID IS NOT NULL ';
             }
 
-            $sql.= " GROUP BY ts.taxonID";
+            $sql .= ' GROUP BY ts.taxonID';
 
             $connection = $this->entityManager->getConnection();
             $params = ['referenceID' => $referenceID];
             if (!empty($taxonID)) {
-               $params['taxonID'] =$taxonID;
+                $params['taxonID'] = $taxonID;
             }
-            $dbRows = $connection->executeQuery($sql,$params)->fetchAllAssociative();
+            $dbRows = $connection->executeQuery($sql, $params)->fetchAllAssociative();
 
             // process all results and create response from it
             foreach ($dbRows as $dbRow) {
                 if ($dbRow['hasChildren'] > 0 || $dbRow['hasSynonyms'] > 0 || $dbRow['hasBasionym']) {
                     $stack[] = $dbRow['taxonID'];
-                    $resultNumber++;
+                    ++$resultNumber;
                 }
             }
         } while (!empty($stack));
@@ -181,56 +185,55 @@ readonly class ClassificationFacade
     }
 
     /**
-     * Get statistics information of a given reference
+     * Get statistics information of a given reference.
+     *
+     * @return mixed[]
      */
     public function resolvePeriodicalStatistics(int $referenceID): array
     {
-        $results = array();
+        $results = [];
 
-        $sql = "SELECT count(*) AS number
+        $sql = 'SELECT count(*) AS number
                   FROM tbl_tax_synonymy
                   WHERE source_citationID = :referenceID
-                   AND acc_taxon_ID IS NULL";
-        $results["nrAccTaxa"] = $this->entityManager->getConnection()->executeQuery($sql, ['referenceID' => $referenceID])->fetchOne();
+                   AND acc_taxon_ID IS NULL';
+        $results['nrAccTaxa'] = $this->entityManager->getConnection()->executeQuery($sql, ['referenceID' => $referenceID])->fetchOne();
 
-
-        $sql = "SELECT count(*) AS number
+        $sql = 'SELECT count(*) AS number
                FROM tbl_tax_synonymy
                WHERE source_citationID = :referenceID
-                AND acc_taxon_ID IS NOT NULL";
-        $results["nrSynonyms"] = $this->entityManager->getConnection()->executeQuery($sql, ['referenceID' => $referenceID])->fetchOne();
+                AND acc_taxon_ID IS NOT NULL';
+        $results['nrSynonyms'] = $this->entityManager->getConnection()->executeQuery($sql, ['referenceID' => $referenceID])->fetchOne();
 
-
-        $sql = "SELECT tr.rank_plural, tr.rank_hierarchy, count(tr.tax_rankID) AS number
+        $sql = 'SELECT tr.rank_plural, tr.rank_hierarchy, count(tr.tax_rankID) AS number
                    FROM tbl_tax_synonymy ts
                     LEFT JOIN tbl_tax_species tsp ON ts.taxonID = tsp.taxonID
                     LEFT JOIN tbl_tax_rank tr ON tsp.tax_rankID = tr.tax_rankID
                    WHERE source_citationID = :referenceID
                     AND acc_taxon_ID IS NULL
                    GROUP BY tr.tax_rankID
-                   ORDER BY tr.rank_hierarchy";
+                   ORDER BY tr.rank_hierarchy';
         $dbRowsAcc = $this->entityManager->getConnection()->executeQuery($sql, ['referenceID' => $referenceID])->fetchAllAssociative();
 
-        $sql = "SELECT tr.rank_plural, tr.rank_hierarchy, count(tr.tax_rankID) AS number
+        $sql = 'SELECT tr.rank_plural, tr.rank_hierarchy, count(tr.tax_rankID) AS number
                    FROM tbl_tax_synonymy ts
                     LEFT JOIN tbl_tax_species tsp ON ts.taxonID = tsp.taxonID
                     LEFT JOIN tbl_tax_rank tr ON tsp.tax_rankID = tr.tax_rankID
                    WHERE source_citationID = :referenceID
                     AND acc_taxon_ID IS NOT NULL
                    GROUP BY tr.tax_rankID
-                   ORDER BY tr.rank_hierarchy";
+                   ORDER BY tr.rank_hierarchy';
         $dbRowsSyn = $this->entityManager->getConnection()->executeQuery($sql, ['referenceID' => $referenceID])->fetchAllAssociative();
 
-
-        $rows = array();
+        $rows = [];
         foreach ($dbRowsAcc as $dbRow) {
-            $rows[$dbRow['rank_hierarchy']]['acc'] = array("rank" => $dbRow['rank_plural'], "number" => $dbRow['number']);
+            $rows[$dbRow['rank_hierarchy']]['acc'] = ['rank' => $dbRow['rank_plural'], 'number' => $dbRow['number']];
         }
         foreach ($dbRowsSyn as $dbRow) {
-            $rows[$dbRow['rank_hierarchy']]['syn'] = array("rank" => $dbRow['rank_plural'], "number" => $dbRow['number']);
+            $rows[$dbRow['rank_hierarchy']]['syn'] = ['rank' => $dbRow['rank_plural'], 'number' => $dbRow['number']];
         }
 
-        $results["ranks"] = array();
+        $results['ranks'] = [];
         foreach ($rows as $row) {
             if (isset($row['acc'])) {
                 $buffer['rank'] = $row['acc']['rank'];
@@ -244,75 +247,77 @@ readonly class ClassificationFacade
             } else {
                 $buffer['nrSynTaxa'] = 0;
             }
-            $results["ranks"][] = $buffer;
+            $results['ranks'][] = $buffer;
         }
 
         return $results;
     }
 
     /**
-     * Get classification children of a given taxonID according to a given reference
+     * Get classification children of a given taxonID according to a given reference.
      *
      * @param string $referenceType Type of reference (periodical, citation, service, etc.)
-     * @param int $referenceID ID of reference
-     * @param int $taxonID optional ID of taxon
-     * @param int $insertSeries optional ID of cication-Series to insert
-     * @return array structured array with classification information
+     * @param int    $referenceID   ID of reference
+     * @param int    $taxonID       optional ID of taxon
+     * @param int    $insertSeries  optional ID of cication-Series to insert
+     *
+     * @return mixed[] structured array with classification information
      */
     public function resolveChildren(string $referenceType, int $referenceID, int $taxonID, int $insertSeries): array
     {
-        $results = array();
+        $results = [];
 
         switch ($referenceType) {
             case 'periodical':
                 $dbRows = $this->literatureRepository->getChildrenReferences($referenceID);
                 foreach ($dbRows as $dbRow) {
-                    $results[] = array(
-                        "taxonID" => 0,
-                        "referenceId" => intval($dbRow['referenceID']),
-                        "referenceName" => $dbRow['referenceName'],
-                        "referenceType" => "citation",
-                        "hasChildren" => true,
-                        "hasType" => false,
-                        "hasSpecimen" => false,
-                        "insertedCitation" => false,
-                    );
+                    $results[] = [
+                        'taxonID' => 0,
+                        'referenceId' => intval($dbRow['referenceID']),
+                        'referenceName' => $dbRow['referenceName'],
+                        'referenceType' => 'citation',
+                        'hasChildren' => true,
+                        'hasType' => false,
+                        'hasSpecimen' => false,
+                        'insertedCitation' => false,
+                    ];
                 }
+
                 return $results;
             case 'citation':
             default:
                 $dbRows = $this->referenceService->getCitationChildrenReferences($referenceID, $taxonID);
                 foreach ($dbRows as $dbRow) {
-                    $results[] = array(
-                        "taxonID" => intval($dbRow['taxonID']),
-                        "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)),
-                        "referenceId" => $referenceID,
-                        "referenceName" => $dbRow['scientificName'],
-                        "referenceType" => "citation",
-                        "hasChildren" => ($dbRow['hasChildren'] > 0 || $dbRow['hasSynonyms'] > 0 || $dbRow['hasBasionym']),
-                        "hasType" => $this->taxonService->hasType($dbRow['taxonID']),
-                        "hasSpecimen" => $this->speciesRepository->hasSpecimen($dbRow['taxonID']),
-                        "insertedCitation" => false,
-                        "referenceInfo" => array(
-                            "number" => $dbRow['number'],
-                            "order" => intval($dbRow['order']),
-                            "rank_abbr" => $dbRow['rank_abbr'],
-                            "rank_hierarchy" => intval($dbRow['rank_hierarchy']),
-                            "tax_syn_ID" => intval($dbRow['tax_syn_ID']),
-                        ),
-                    );
+                    $results[] = [
+                        'taxonID' => intval($dbRow['taxonID']),
+                        'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)],
+                        'referenceId' => $referenceID,
+                        'referenceName' => $dbRow['scientificName'],
+                        'referenceType' => 'citation',
+                        'hasChildren' => ($dbRow['hasChildren'] > 0 || $dbRow['hasSynonyms'] > 0 || $dbRow['hasBasionym']),
+                        'hasType' => $this->taxonService->hasType($dbRow['taxonID']),
+                        'hasSpecimen' => $this->speciesRepository->hasSpecimen($dbRow['taxonID']),
+                        'insertedCitation' => false,
+                        'referenceInfo' => [
+                            'number' => $dbRow['number'],
+                            'order' => intval($dbRow['order']),
+                            'rank_abbr' => $dbRow['rank_abbr'],
+                            'rank_hierarchy' => intval($dbRow['rank_hierarchy']),
+                            'tax_syn_ID' => intval($dbRow['tax_syn_ID']),
+                        ],
+                    ];
                     $insertedCitations = $this->getInsertedCitation($insertSeries, $referenceID, $dbRow['taxonID']);
                     if (!empty($insertedCitations)) {
                         foreach ($insertedCitations as $citation) {
-                            $results[] = array(
-                                "taxonID" => $citation['taxonID'],
-                                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)),
-                                "referenceId" => $citation['referenceId'],
-                                "referenceName" => $citation['referenceName'],
-                                "referenceType" => $citation['referenceType'],
-                                "hasChildren" => $citation['hasChildren'],
-                                "insertedCitation" => true,
-                            );
+                            $results[] = [
+                                'taxonID' => $citation['taxonID'],
+                                'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)],
+                                'referenceId' => $citation['referenceId'],
+                                'referenceName' => $citation['referenceName'],
+                                'referenceType' => $citation['referenceType'],
+                                'hasChildren' => $citation['hasChildren'],
+                                'insertedCitation' => true,
+                            ];
                         }
                     }
                 }
@@ -323,13 +328,14 @@ readonly class ClassificationFacade
     }
 
     /**
-     * fetch synonyms (and basionym) for a given taxonID, according to a given reference
+     * fetch synonyms (and basionym) for a given taxonID, according to a given reference.
      *
      * @param string $referenceType type of reference (periodical, citation, service, etc.)
-     * @param int $referenceID ID of reference
-     * @param int $taxonID ID of taxon name
-     * @param int $insertSeries optional ID of cication-Series to insert
-     * @return array List of synonyms including extra information
+     * @param int    $referenceID   ID of reference
+     * @param int    $taxonID       ID of taxon name
+     * @param int    $insertSeries  optional ID of cication-Series to insert
+     *
+     * @return mixed[] List of synonyms including extra information
      */
     public function resolveSynonyms(string $referenceType, int $referenceID, int $taxonID, int $insertSeries = 0): array
     {
@@ -340,58 +346,58 @@ readonly class ClassificationFacade
         /** @var Species $basionym */
         $basionym = $species->basionym;
 
-        if ($basionym !== null) {
-            $basionymResult = array(
-                "taxonID" => $basID,
-                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionym->id], UrlGeneratorInterface::ABSOLUTE_URL)),
-                "referenceName" => $basionym->materializedName->scientificName,
-                "referenceId" => $referenceID,
-                "referenceType" => $referenceType,
-                "hasType" => $this->taxonService->hasType($basionym->id),
-                "hasSpecimen" => $this->speciesRepository->hasSpecimen($basionym->id),
-                "insertedCitation" => false,
-                "referenceInfo" => array(
-                    "type" => "homotype",
-                    "cited" => false
-                ),
-            );
+        if (null !== $basionym) {
+            $basionymResult = [
+                'taxonID' => $basID,
+                'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $basionym->id], UrlGeneratorInterface::ABSOLUTE_URL)],
+                'referenceName' => $basionym->materializedName->scientificName,
+                'referenceId' => $referenceID,
+                'referenceType' => $referenceType,
+                'hasType' => $this->taxonService->hasType($basionym->id),
+                'hasSpecimen' => $this->speciesRepository->hasSpecimen($basionym->id),
+                'insertedCitation' => false,
+                'referenceInfo' => [
+                    'type' => 'homotype',
+                    'cited' => false,
+                ],
+            ];
         }
 
-        //TODO only citation type is implemented, rearrange?
-        if (trim($referenceType) == 'citation') {
+        // TODO only citation type is implemented, rearrange?
+        if ('citation' == trim($referenceType)) {
             $synonyms = $this->taxonService->findSynonyms($taxonID, $referenceID);
             foreach ($synonyms as $synonym) {
                 // ignore if synonym is basionym
-                if ($basionym !== null && $synonym['taxonID'] == $basionym->id) {
-                    $basionymResult["referenceInfo"]["cited"] = true;
+                if (null !== $basionym && $synonym['taxonID'] == $basionym->id) {
+                    $basionymResult['referenceInfo']['cited'] = true;
                 } else {
-                    $results[] = array(
-                        "taxonID" => intval($synonym['taxonID']),
-                        "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $synonym['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
+                    $results[] = [
+                        'taxonID' => intval($synonym['taxonID']),
+                        'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $synonym['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)],
 
-                        "referenceName" => $synonym['scientificName'],
-                        "referenceId" => $referenceID,
-                        "referenceType" => $referenceType,
-                        "hasType" => $this->taxonService->hasType($synonym['taxonID']),
-                        "hasSpecimen" => $this->speciesRepository->hasSpecimen($synonym['taxonID']),
-                        "insertedCitation" => false,
-                        "referenceInfo" => array(
-                            "type" => ($synonym['homotype'] > 0) ? "homotype" : "heterotype",
-                            'cited' => true
-                        ),
-                    );
+                        'referenceName' => $synonym['scientificName'],
+                        'referenceId' => $referenceID,
+                        'referenceType' => $referenceType,
+                        'hasType' => $this->taxonService->hasType($synonym['taxonID']),
+                        'hasSpecimen' => $this->speciesRepository->hasSpecimen($synonym['taxonID']),
+                        'insertedCitation' => false,
+                        'referenceInfo' => [
+                            'type' => ($synonym['homotype'] > 0) ? 'homotype' : 'heterotype',
+                            'cited' => true,
+                        ],
+                    ];
                     $insertedCitations = $this->getInsertedCitation($insertSeries, $referenceID, $synonym['taxonID']);
                     if (!empty($insertedCitations)) {
                         foreach ($insertedCitations as $citation) {
-                            $results[] = array(
-                                "taxonID" => $citation['taxonID'],
-                                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $citation['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
-                                "referenceId" => $citation['referenceId'],
-                                "referenceName" => $citation['referenceName'],
-                                "referenceType" => $citation['referenceType'],
-                                "hasChildren" => $citation['hasChildren'],
-                                "insertedCitation" => true,
-                            );
+                            $results[] = [
+                                'taxonID' => $citation['taxonID'],
+                                'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $citation['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)],
+                                'referenceId' => $citation['referenceId'],
+                                'referenceName' => $citation['referenceName'],
+                                'referenceType' => $citation['referenceType'],
+                                'hasChildren' => $citation['hasChildren'],
+                                'insertedCitation' => true,
+                            ];
                         }
                     }
                 }
@@ -399,19 +405,19 @@ readonly class ClassificationFacade
         }
 
         // if we have a basionym, prepend it to list
-        if ($basionymResult != null) {
+        if (null != $basionymResult) {
             $insertedCitations = $this->getInsertedCitation($insertSeries, $referenceID, $basionymResult['taxonID']);
             if (!empty($insertedCitations)) {
                 foreach ($insertedCitations as $citation) {
-                    $buffer = array(
-                        "taxonID" => $citation['taxonID'],
-                        "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $citation['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
-                        "referenceId" => $citation['referenceId'],
-                        "referenceName" => $citation['referenceName'],
-                        "referenceType" => $citation['referenceType'],
-                        "hasChildren" => $citation['hasChildren'],
-                        "insertedCitation" => true,
-                    );
+                    $buffer = [
+                        'taxonID' => $citation['taxonID'],
+                        'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $citation['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)],
+                        'referenceId' => $citation['referenceId'],
+                        'referenceName' => $citation['referenceName'],
+                        'referenceType' => $citation['referenceType'],
+                        'hasChildren' => $citation['hasChildren'],
+                        'insertedCitation' => true,
+                    ];
                     array_unshift($results, $buffer);
                 }
             }
@@ -422,11 +428,13 @@ readonly class ClassificationFacade
     }
 
     /**
-     * Get the parent entry of a given reference
+     * Get the parent entry of a given reference.
      *
      * @param string $referenceType type of reference (periodical, citation, service, etc.)
-     * @param int $referenceId ID of reference
-     * @param int $taxonID ID of taxon name
+     * @param int    $referenceId   ID of reference
+     * @param int    $taxonID       ID of taxon name
+     *
+     * @return ?mixed[]
      */
     public function resolveParent(string $referenceType, int $referenceId, int $taxonID): ?array
     {
@@ -439,9 +447,9 @@ readonly class ClassificationFacade
             case 'citation':
             default:
                 // only necessary if taxonID is not null
-                //TODO taxonID is required parameter of the route, can't be null..
+                // TODO taxonID is required parameter of the route, can't be null..
                 if ($taxonID > 0) {
-                    $sql = "SELECT mtrlzdName.scientific_name AS `referenceName`, tc.number, tc.order, ts.taxonID
+                    $sql = 'SELECT mtrlzdName.scientific_name AS `referenceName`, tc.number, tc.order, ts.taxonID
                                             FROM tbl_tax_synonymy ts
                                                 JOIN herbar_view.view_scientificName_mtrlzd mtrlzdName ON mtrlzdName.scientific_name_id = ts.`taxonID`
                                              LEFT JOIN tbl_tax_classification tc ON ts.tax_syn_ID = tc.tax_syn_ID
@@ -450,81 +458,81 @@ readonly class ClassificationFacade
                                                                                     AND tcchild.tax_syn_ID = tschild.tax_syn_ID)
                                             WHERE ts.source_citationID = :referenceId
                                              AND ts.acc_taxon_ID IS NULL
-                                             AND tschild.taxonID = :taxonID";
+                                             AND tschild.taxonID = :taxonID';
 
                     $dbRow = $this->entityManager->getConnection()->executeQuery($sql, ['taxonID' => $taxonID, 'referenceId' => $referenceId])->fetchAssociative();
                     // check if we found a parent
                     if ($dbRow) {
-                        $parent = array(
-                            "taxonID" => $dbRow['taxonID'],
-                            "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $dbRow['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)),
-                            "referenceId" => $referenceId,
-                            "referenceName" => $dbRow['referenceName'],
-                            "referenceType" => "citation",
-                            "hasType" => $this->taxonService->hasType($dbRow['taxonID']),
-                            "hasSpecimen" => $this->speciesRepository->hasSpecimen($dbRow['taxonID']),
-                            "referenceInfo" => array(
-                                "number" => $dbRow['number'],
-                                "order" => $dbRow['order']
-                            )
-                        );
+                        $parent = [
+                            'taxonID' => $dbRow['taxonID'],
+                            'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $dbRow['taxonID']], UrlGeneratorInterface::ABSOLUTE_URL)],
+                            'referenceId' => $referenceId,
+                            'referenceName' => $dbRow['referenceName'],
+                            'referenceType' => 'citation',
+                            'hasType' => $this->taxonService->hasType($dbRow['taxonID']),
+                            'hasSpecimen' => $this->speciesRepository->hasSpecimen($dbRow['taxonID']),
+                            'referenceInfo' => [
+                                'number' => $dbRow['number'],
+                                'order' => $dbRow['order'],
+                            ],
+                        ];
                     } // if not we either have a synonym and have to search for an accepted taxon or have to return the citation entry
                     else {
-                        $sql = "SELECT mtrlzdName.scientific_name AS referenceName, ts.acc_taxon_ID
+                        $sql = 'SELECT mtrlzdName.scientific_name AS referenceName, ts.acc_taxon_ID
                                                   FROM tbl_tax_synonymy ts
                                                 JOIN herbar_view.view_scientificName_mtrlzd mtrlzdName ON mtrlzdName.scientific_name_id = ts.`taxonID`
 
                                                   WHERE ts.taxonID = :taxonID
                                                    AND ts.source_citationID = :referenceId
-                                                   AND ts.acc_taxon_ID IS NOT NULL";
+                                                   AND ts.acc_taxon_ID IS NOT NULL';
                         $accTaxon = $this->entityManager->getConnection()->executeQuery($sql, ['taxonID' => $taxonID, 'referenceId' => $referenceId])->fetchAssociative();
                         // if we have found an accepted taxon for our synonym then return it
                         if ($accTaxon) {
-                            $parent = array(
-                                "taxonID" => $accTaxon['acc_taxon_ID'],
-                                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $accTaxon['acc_taxon_ID']], UrlGeneratorInterface::ABSOLUTE_URL)),
-                                "referenceId" => $referenceId,
-                                "referenceName" => $accTaxon['referenceName'],
-                                "referenceType" => "citation",
-                                "hasType" => $this->taxonService->hasType($accTaxon['acc_taxon_ID']),
-                                "hasSpecimen" => $this->speciesRepository->hasSpecimen($accTaxon['acc_taxon_ID'])
-                            );
+                            $parent = [
+                                'taxonID' => $accTaxon['acc_taxon_ID'],
+                                'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $accTaxon['acc_taxon_ID']], UrlGeneratorInterface::ABSOLUTE_URL)],
+                                'referenceId' => $referenceId,
+                                'referenceName' => $accTaxon['referenceName'],
+                                'referenceType' => 'citation',
+                                'hasType' => $this->taxonService->hasType($accTaxon['acc_taxon_ID']),
+                                'hasSpecimen' => $this->speciesRepository->hasSpecimen($accTaxon['acc_taxon_ID']),
+                            ];
                         } // if not we have to return the citation entry
                         else {
-                            $sql = "SELECT `herbar_view`.GetProtolog(l.citationID) AS referenceName, l.citationID AS referenceId
+                            $sql = 'SELECT `herbar_view`.GetProtolog(l.citationID) AS referenceName, l.citationID AS referenceId
                                                     FROM tbl_lit l
-                                                    WHERE l.citationID = :referenceId";
+                                                    WHERE l.citationID = :referenceId';
                             $citation = $this->entityManager->getConnection()->executeQuery($sql, ['referenceId' => $referenceId])->fetchAssociative();
 
                             if ($citation) {
-                                $parent = array(
-                                    "taxonID" => 0,
-                                    "referenceId" => $citation['referenceId'],
-                                    "referenceName" => $citation['referenceName'],
-                                    "referenceType" => "citation",
-                                    "hasType" => false,
-                                    "hasSpecimen" => false
-                                );
+                                $parent = [
+                                    'taxonID' => 0,
+                                    'referenceId' => $citation['referenceId'],
+                                    'referenceName' => $citation['referenceName'],
+                                    'referenceType' => 'citation',
+                                    'hasType' => false,
+                                    'hasSpecimen' => false,
+                                ];
                             }
                         }
                     }
                 } // find the top-level periodical entry
                 else {
-                    $sql = "SELECT lp.periodical AS referenceName, l.periodicalID AS referenceId
+                    $sql = 'SELECT lp.periodical AS referenceName, l.periodicalID AS referenceId
                                             FROM tbl_lit_periodicals lp
                                              LEFT JOIN tbl_lit l ON l.periodicalID = lp.periodicalID
-                                            WHERE l.citationID = :referenceId";
+                                            WHERE l.citationID = :referenceId';
                     $periodical = $this->entityManager->getConnection()->executeQuery($sql, ['referenceId' => $referenceId])->fetchAssociative();
 
                     if ($periodical) {
-                        $parent = array(
-                            "taxonID" => 0,
-                            "referenceId" => $periodical['referenceId'],
-                            "referenceName" => $periodical['referenceName'],
-                            "referenceType" => "periodical",
-                            "hasType" => false,
-                            "hasSpecimen" => false
-                        );
+                        $parent = [
+                            'taxonID' => 0,
+                            'referenceId' => $periodical['referenceId'],
+                            'referenceName' => $periodical['referenceName'],
+                            'referenceType' => 'periodical',
+                            'hasType' => false,
+                            'hasSpecimen' => false,
+                        ];
                     }
                 }
                 break;
@@ -534,20 +542,23 @@ readonly class ClassificationFacade
         return $parent;
     }
 
+    /**
+     * @return mixed[]
+     */
     protected function getInsertedCitation(int $insertSeries, int $referenceID, int $taxonID): array
     {
         $results = [];
 
         $ids = $this->referenceService->findCitationsId($insertSeries, $referenceID, $taxonID);
         foreach ($ids as $id) {
-            $results[] = array(
+            $results[] = [
                 'referenceName' => $this->literatureRepository->getProtolog($id),
                 'referenceId' => $id,
-                "referenceType" => "citation",
-                "taxonID" => $taxonID,
-                "uuid" => array('href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)),
-                "hasChildren" => $this->synonymyRepository->hasClassificationChildren($taxonID, $id),
-            );
+                'referenceType' => 'citation',
+                'taxonID' => $taxonID,
+                'uuid' => ['href' => $this->router->generate('services_rest_scinames_uuid', ['taxonID' => $taxonID], UrlGeneratorInterface::ABSOLUTE_URL)],
+                'hasChildren' => $this->synonymyRepository->hasClassificationChildren($taxonID, $id),
+            ];
         }
 
         return $results;

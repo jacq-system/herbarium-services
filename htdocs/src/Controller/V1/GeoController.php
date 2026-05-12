@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller\V1;
 
@@ -48,7 +50,7 @@ class GeoController extends AbstractFOSRestController
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string'),
-                example: "33 N 601779 5340548"
+                example: '33 N 601779 5340548'
             ),
             new QueryParameter(
                 name: 'mgrs',
@@ -56,8 +58,8 @@ class GeoController extends AbstractFOSRestController
                 in: 'query',
                 required: false,
                 schema: new Schema(type: 'string'),
-                example: "33UXP0177940548"
-            )
+                example: '33UXP0177940548'
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -70,40 +72,40 @@ class GeoController extends AbstractFOSRestController
                         items: new Items(
                             properties: [
                                 new Property(property: 'zone', type: 'integer', example: 33),
-                                new Property(property: 'hemisphere', type: 'string', example: "N"),
+                                new Property(property: 'hemisphere', type: 'string', example: 'N'),
                                 new Property(property: 'easting', type: 'integer', example: 601779),
                                 new Property(property: 'northing', type: 'integer', example: 5340548),
-                                new Property(property: 'string', type: 'string', example: "33U 601779 5340548"),
+                                new Property(property: 'string', type: 'string', example: '33U 601779 5340548'),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/geo/convert', name: "services_rest_geo_convert", methods: ['GET'])]
+    #[Route('/v1/geo/convert', name: 'services_rest_geo_convert', methods: ['GET'])]
     public function convert(#[MapQueryParameter] ?float $lat, #[MapQueryParameter] ?float $lon, #[MapQueryParameter] ?string $utm, #[MapQueryParameter] ?string $mgrs): Response
     {
         if (isset($lat) && isset($lon)) {   // from lat/lon
-            $data = array('utm' => $this->coordinateConversionService->latlon2utm($lat, $lon));
+            $data = ['utm' => $this->coordinateConversionService->latlon2utm($lat, $lon)];
         } elseif (isset($utm)) {                      // from UTM
-            $data = array('latlon' => $this->coordinateConversionService->utm2latlon($utm));
+            $data = ['latlon' => $this->coordinateConversionService->utm2latlon($utm)];
         } elseif (isset($mgrs)) {                     // from MGRS
             $conv = $this->coordinateConversionService->mgrs2utm($mgrs);
             if (empty($conv['error'])) {
-                $data = array('utm' => $conv,
-                    'latlon' => $this->coordinateConversionService->utm2latlon($conv['string']));
+                $data = ['utm' => $conv,
+                    'latlon' => $this->coordinateConversionService->utm2latlon($conv['string'])];
             } else {
-                $data = array('error' => $conv['error']);
+                $data = ['error' => $conv['error']];
             }
         } else {
-            $data = array('error' => "nothing to do");
+            $data = ['error' => 'nothing to do'];
         }
         $view = $this->view($data, 200);
 
@@ -146,7 +148,7 @@ class GeoController extends AbstractFOSRestController
                 required: false,
                 schema: new Schema(type: 'integer'),
                 example: 622
-            )
+            ),
         ],
         responses: [
             new \OpenApi\Attributes\Response(
@@ -165,30 +167,30 @@ class GeoController extends AbstractFOSRestController
                                         new Property(property: 'inside', type: 'boolean', example: true),
                                     ],
                                     type: 'object'
-                                )
+                                ),
                             ],
                             type: 'object'
                         )
                     )
-                )
+                ),
                 ]
             ),
             new \OpenApi\Attributes\Response(
                 response: 400,
                 description: 'Bad Request'
-            )
+            ),
         ]
     )]
-    #[Route('/v1/geo/checkBoundaries', name: "services_rest_geo_checkBoundaries", methods: ['GET'])]
+    #[Route('/v1/geo/checkBoundaries', name: 'services_rest_geo_checkBoundaries', methods: ['GET'])]
     public function checkBoundaries(#[MapQueryParameter] float $lat, #[MapQueryParameter] float $lon, #[MapQueryParameter] int $nationID, #[MapQueryParameter] ?int $provinceID): Response
     {
-        $data = array();
+        $data = [];
         $data['nation'] = $this->coordinateBoundaryService->nationBoundaries($nationID, $lat, $lon);
         if (isset($provinceID)) {
             $data['province'] = $this->coordinateBoundaryService->provinceBoundaries($provinceID, $lat, $lon);
         }
-        //TODO better to use http codes, left for backward compatibility
-        $data['error'] = (empty($data)) ? "nothing to do" : '';
+        // TODO better to use http codes, left for backward compatibility
+        $data['error'] = (empty($data['nation'])) ? 'nothing to do' : '';
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
