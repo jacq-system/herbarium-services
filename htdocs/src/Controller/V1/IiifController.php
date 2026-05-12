@@ -17,9 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class IiifController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly IiifFacade $iiifFacade, protected readonly SpecimenService $specimenService)
-    {
-    }
+    public function __construct(protected readonly IiifFacade $iiifFacade, protected readonly SpecimenService $specimenService) {}
 
     #[Get(
         path: '/v1/iiif/manifestUri/{specimenID}',

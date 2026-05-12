@@ -20,9 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class StableIdentifierController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly SpecimenService $specimenService, protected readonly ExternalPidService $externalPidService)
-    {
-    }
+    public function __construct(protected readonly SpecimenService $specimenService, protected readonly ExternalPidService $externalPidService) {}
 
     #[Get(
         path: '/v1/stableIdentifier/sid/{specimenID}',
@@ -48,17 +46,26 @@ class StableIdentifierController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'specimenID', description: 'ID of specimen', type: 'integer', example: 1385945
+                                new Property(
+                                    property: 'specimenID',
+                                    description: 'ID of specimen',
+                                    type: 'integer',
+                                    example: 1385945
                                 ),
-                                new Property(property: 'stableIdentifierLatest', description: 'Latest stable identifier', properties: [
-                                    new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
-                                    new Property(property: 'timestamp', description: 'Timestamp of the stable identifier', type: 'string', format: 'date-time'),
-                                    new Property(property: 'link', description: 'Link to details page of JACQ (for convenience)', type: 'string', format: 'uri'),
-                                ],
+                                new Property(
+                                    property: 'stableIdentifierLatest',
+                                    description: 'Latest stable identifier',
+                                    properties: [
+                                        new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
+                                        new Property(property: 'timestamp', description: 'Timestamp of the stable identifier', type: 'string', format: 'date-time'),
+                                        new Property(property: 'link', description: 'Link to details page of JACQ (for convenience)', type: 'string', format: 'uri'),
+                                    ],
                                     type: 'object'
                                 ),
                                 new Property(
-                                    property: 'stableIdentifierList', description: 'List of all found stable identifiers, ordered by timestamp', type: 'array',
+                                    property: 'stableIdentifierList',
+                                    description: 'List of all found stable identifiers, ordered by timestamp',
+                                    type: 'array',
                                     items: new Items(
                                         properties: [
                                             new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
@@ -93,6 +100,7 @@ class StableIdentifierController extends AbstractFOSRestController
     public function sid(int $specimenID): Response
     {
         $results = [];
+
         try {
             $specimen = $this->specimenService->findAccessibleForPublic($specimenID);
         } catch (\Exception $e) {
@@ -157,17 +165,26 @@ class StableIdentifierController extends AbstractFOSRestController
                         type: 'array',
                         items: new Items(
                             properties: [
-                                new Property(property: 'specimenID', description: 'ID of specimen', type: 'integer', example: 6830
+                                new Property(
+                                    property: 'specimenID',
+                                    description: 'ID of specimen',
+                                    type: 'integer',
+                                    example: 6830
                                 ),
-                                new Property(property: 'stableIdentifierLatest', description: 'Latest stable identifier', properties: [
-                                    new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
-                                    new Property(property: 'timestamp', description: 'Timestamp of the stable identifier', type: 'string', format: 'date-time'),
-                                    new Property(property: 'link', description: 'Link to details page of JACQ (for convenience)', type: 'string', format: 'uri'),
-                                ],
+                                new Property(
+                                    property: 'stableIdentifierLatest',
+                                    description: 'Latest stable identifier',
+                                    properties: [
+                                        new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
+                                        new Property(property: 'timestamp', description: 'Timestamp of the stable identifier', type: 'string', format: 'date-time'),
+                                        new Property(property: 'link', description: 'Link to details page of JACQ (for convenience)', type: 'string', format: 'uri'),
+                                    ],
                                     type: 'object'
                                 ),
                                 new Property(
-                                    property: 'stableIdentifierList', description: 'List of all found stable identifiers, ordered by timestamp', type: 'array',
+                                    property: 'stableIdentifierList',
+                                    description: 'List of all found stable identifiers, ordered by timestamp',
+                                    type: 'array',
                                     items: new Items(
                                         properties: [
                                             new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
@@ -217,15 +234,6 @@ class StableIdentifierController extends AbstractFOSRestController
         }
 
         return $this->forward(self::class.'::sid', ['specimenID' => $specimen->id]);
-    }
-
-    private function fixSchemeSlashes(string $sid): string
-    {
-        // add slash
-        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
-
-        // reduce to exactly two
-        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 
     #[Get(
@@ -393,12 +401,18 @@ class StableIdentifierController extends AbstractFOSRestController
                                 new Property(property: 'lastPage', description: 'Link to the last page', type: 'string', format: 'uri'),
                                 new Property(property: 'totalPages', description: 'Total number of pages', type: 'integer'),
                                 new Property(property: 'total', description: 'Total number of records found', type: 'integer'),
-                                new Property(property: 'result', description: 'List of found entries', type: 'array',
+                                new Property(
+                                    property: 'result',
+                                    description: 'List of found entries',
+                                    type: 'array',
                                     items: new Items(
                                         properties: [
                                             new Property(property: 'specimenID', description: 'ID of the specimen', type: 'integer'),
                                             new Property(property: 'numberOfEntries', description: 'Number of records found for this specimen ID', type: 'integer'),
-                                            new Property(property: 'stableIdentifierList', description: 'List of stable identifiers for this specimen ID', type: 'array',
+                                            new Property(
+                                                property: 'stableIdentifierList',
+                                                description: 'List of stable identifiers for this specimen ID',
+                                                type: 'array',
                                                 items: new Items(
                                                     properties: [
                                                         new Property(property: 'stableIdentifier', description: 'Stable identifier', type: 'string'),
@@ -445,5 +459,14 @@ class StableIdentifierController extends AbstractFOSRestController
         $view = $this->view($results, 200);
 
         return $this->handleView($view);
+    }
+
+    private function fixSchemeSlashes(string $sid): string
+    {
+        // add slash
+        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
+
+        // reduce to exactly two
+        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 }

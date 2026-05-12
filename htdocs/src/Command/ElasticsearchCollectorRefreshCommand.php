@@ -11,7 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'app:elastic-collectors',
-    description: 'Updates search index of collectors in the ElasticSearch engine (drop existing index and fill with actual data)')]
+    description: 'Updates search index of collectors in the ElasticSearch engine (drop existing index and fill with actual data)'
+)]
 class ElasticsearchCollectorRefreshCommand extends Command
 {
     public const string IndexName = 'collector-test';
@@ -50,14 +51,14 @@ class ElasticsearchCollectorRefreshCommand extends Command
                 $bulk = [];
                 $count = 0;
 
-                $output->writeln("Indexed $indexed …");
+                $output->writeln("Indexed {$indexed} …");
             }
         }
 
         // flush last batch
         if (!empty($bulk)) {
             $this->elasticsearchService->bulk($bulk);
-            $output->writeln("Indexed TOTAL $indexed records.");
+            $output->writeln("Indexed TOTAL {$indexed} records.");
         }
 
         $this->elasticsearchService->refreshIndex(self::IndexName);

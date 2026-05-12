@@ -16,9 +16,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 readonly class ObjectsFacade
 {
-    public function __construct(protected EntityManagerInterface $entityManager, protected RouterInterface $router, protected SpeciesService $taxonService, protected SpecimenService $specimenService, protected SpecimenBatchProvider $specimenBatchProvider, protected SpecimenSearchQueryFactory $searchQueryFactory)
-    {
-    }
+    public function __construct(protected EntityManagerInterface $entityManager, protected RouterInterface $router, protected SpeciesService $taxonService, protected SpecimenService $specimenService, protected SpecimenBatchProvider $specimenBatchProvider, protected SpecimenSearchQueryFactory $searchQueryFactory) {}
 
     /**
      * @return mixed[]
@@ -42,7 +40,7 @@ readonly class ObjectsFacade
             'sort' => implode(',', array_map(
                 static fn ($column, $direction) => ('DESC' === strtoupper($direction) ? '-' : '+').$column,
                 array_keys($parameters->sort),
-                $parameters->sort ?? []
+                $parameters->sort
             )),
         ];
 
@@ -61,40 +59,6 @@ readonly class ObjectsFacade
         $response['result'] = $data;
 
         return $response;
-    }
-
-    /**
-     * @param mixed[] $originalParameters
-     *
-     * @return mixed[]
-     */
-    protected function getResponseSkeleton(array $originalParameters, int $totalRows, int $currentPage, int $recordsPerPage): array
-    {
-        // get the number of pages and check the active page again
-        $lastPage = (int) ceil($totalRows / $recordsPerPage);
-        if ($currentPage > $lastPage) {
-            $currentPage = $lastPage;
-        }
-
-        // remove null values
-        $originalParameters = array_filter(
-            $originalParameters,
-            static fn ($value) => null !== $value
-        );
-
-        $newParameters = '&'.http_build_query($originalParameters, '', '&', PHP_QUERY_RFC3986);
-        $url = $this->router->generate('services_rest_objects_specimens', [], UrlGeneratorInterface::ABSOLUTE_URL);
-
-        return ['total' => $totalRows,
-            'itemsPerPage' => $originalParameters['rpp'],
-            'page' => $currentPage,
-            'previousPage' => $url.'?p='.(($currentPage > 0) ? ($currentPage - 1) : 1).$newParameters,
-            'nextPage' => $url.'?p='.(($currentPage < $lastPage && $currentPage > 0) ? ($currentPage + 1) : $lastPage).$newParameters,
-            'firstPage' => $url.'?p=1'.$newParameters,
-            'lastPage' => $url.'?p='.$lastPage.$newParameters,
-            'totalPages' => $lastPage,
-            'result' => [],
-        ];
     }
 
     /**
@@ -136,5 +100,39 @@ readonly class ObjectsFacade
         }
 
         return $ret;
+    }
+
+    /**
+     * @param mixed[] $originalParameters
+     *
+     * @return mixed[]
+     */
+    protected function getResponseSkeleton(array $originalParameters, int $totalRows, int $currentPage, int $recordsPerPage): array
+    {
+        // get the number of pages and check the active page again
+        $lastPage = (int) ceil($totalRows / $recordsPerPage);
+        if ($currentPage > $lastPage) {
+            $currentPage = $lastPage;
+        }
+
+        // remove null values
+        $originalParameters = array_filter(
+            $originalParameters,
+            static fn ($value) => null !== $value
+        );
+
+        $newParameters = '&'.http_build_query($originalParameters, '', '&', PHP_QUERY_RFC3986);
+        $url = $this->router->generate('services_rest_objects_specimens', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        return ['total' => $totalRows,
+            'itemsPerPage' => $originalParameters['rpp'],
+            'page' => $currentPage,
+            'previousPage' => $url.'?p='.(($currentPage > 0) ? ($currentPage - 1) : 1).$newParameters,
+            'nextPage' => $url.'?p='.(($currentPage < $lastPage && $currentPage > 0) ? ($currentPage + 1) : $lastPage).$newParameters,
+            'firstPage' => $url.'?p=1'.$newParameters,
+            'lastPage' => $url.'?p='.$lastPage.$newParameters,
+            'totalPages' => $lastPage,
+            'result' => [],
+        ];
     }
 }

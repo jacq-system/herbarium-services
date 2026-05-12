@@ -16,6 +16,7 @@ use Symfony\Component\Routing\RouterInterface;
 class ClassificationDownloadService
 {
     protected bool $hideScientificNameAuthors = false;
+
     /**
      * @var string[]
      */
@@ -35,14 +36,13 @@ class ClassificationDownloadService
      * @var mixed[]
      */
     protected array $rankKeys = [];
+
     /**
      * @var mixed[]
      */
     private array $outputBody = [];
 
-    public function __construct(protected RouterInterface $router, protected UuidService $uuidService, protected TaxonRankRepository $taxonRankRepository, protected readonly SpeciesService $taxonService, protected readonly LiteratureRepository $literatureRepository, protected readonly SynonymyRepository $synonymyRepository)
-    {
-    }
+    public function __construct(protected RouterInterface $router, protected UuidService $uuidService, protected TaxonRankRepository $taxonRankRepository, protected readonly SpeciesService $taxonService, protected readonly LiteratureRepository $literatureRepository, protected readonly SynonymyRepository $synonymyRepository) {}
 
     /**
      * create an array, filled with header and data for download.
@@ -66,13 +66,15 @@ class ClassificationDownloadService
         $queryBuilder = $this->getBaseQueryBuilder()
             ->andWhere('a.actualTaxonId IS NULL')
             ->setParameter('reference', $referenceId)
-            ->setParameter('scientificNameId', $scientificNameId);
+            ->setParameter('scientificNameId', $scientificNameId)
+        ;
 
         // check if a certain scientific name id is specified & load the fitting synonymy entry
         if ($scientificNameId > 0) {
             $queryBuilder = $queryBuilder
                 ->leftJoin('a.species', 'sp')
-                ->andWhere('sp.id = :scientificNameId');
+                ->andWhere('sp.id = :scientificNameId')
+            ;
         } // if not, fetch all top-level entries for this reference
         else {
             $queryBuilder = $queryBuilder->leftJoin('a.classification', 'clas')->andWhere('class.id IS NOT NULL');
@@ -91,17 +93,17 @@ class ClassificationDownloadService
         $this->hideScientificNameAuthors = match ($hideScientificNameAuthors) {
             1 => true,
             0 => false,
-            default => $this->literatureRepository->find($referenceId)->isHideScientificNameAuthors(),
+            default => $this->literatureRepository->find($referenceId)->hideScientificNameAuthors,
         };
     }
 
     protected function prepareHeader(): void
     {
         foreach ($this->taxonRankRepository->getRankHierarchies() as $rank) {
-            $this->rankKeys[$rank['hierarchy']] = count($this->outputHeader) - 1 + $rank['hierarchy'];
+            $this->rankKeys[$rank->hierarchy] = count($this->outputHeader) - 1 + $rank->hierarchy;
         }
         foreach ($this->taxonRankRepository->getRankHierarchies() as $rank) {
-            $this->outputHeader[$this->rankKeys[$rank['hierarchy']]] = $rank['name'];
+            $this->outputHeader[$this->rankKeys[$rank->hierarchy]] = $rank->name;
         }
     }
 
@@ -109,7 +111,8 @@ class ClassificationDownloadService
     {
         return $this->synonymyRepository->createQueryBuilder('a')
             ->leftJoin('a.literature', 'lit')
-            ->andWhere('lit.id = :reference');
+            ->andWhere('lit.id = :reference')
+        ;
     }
 
     /**
@@ -133,7 +136,7 @@ class ClassificationDownloadService
 
         // add parent information
         foreach ($parentTaxSynonymies as $parentTaxSynonymy) {
-            /* @var Synonymy $parentTaxSynonymy */
+            // @var Synonymy $parentTaxSynonymy
             if ($this->hideScientificNameAuthors) {
                 $name = $parentTaxSynonymy->species->materializedName->scientificNameWithoutAuthor;
             } else {
@@ -156,7 +159,8 @@ class ClassificationDownloadService
         $queryBuilder = $this->getBaseQueryBuilder()
             ->andWhere('a.actualTaxonId = :taxon')
             ->setParameter('reference', $taxSynonymy->literature->id)
-            ->setParameter('taxon', $taxSynonymy->species->id);
+            ->setParameter('taxon', $taxSynonymy->species->id)
+        ;
 
         // fetch all synonyms
         foreach ($queryBuilder->getQuery()->getResult() as $taxSynonymySynonym) {
@@ -170,7 +174,8 @@ class ClassificationDownloadService
             ->andWhere('clas.parentTaxonId = :taxon')
             ->setParameter('reference', $taxSynonymy->literature->id)
             ->setParameter('taxon', $taxSynonymy->species->id)
-            ->orderBy('clas.sort', 'ASC');
+            ->orderBy('clas.sort', 'ASC')
+        ;
 
         foreach ($queryBuilder->getQuery()->getResult() as $taxSynonymyChild) {
             $this->exportClassification($parentTaxSynonymies, $taxSynonymyChild);

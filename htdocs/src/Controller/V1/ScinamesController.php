@@ -20,9 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ScinamesController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly SpeciesService $taxaNamesService, protected readonly UuidService $uuidService, protected readonly SpeciesRepository $speciesRepository)
-    {
-    }
+    public function __construct(protected readonly SpeciesService $taxaNamesService, protected readonly UuidService $uuidService, protected readonly SpeciesRepository $speciesRepository) {}
 
     #[Get(
         path: '/v1/JACQscinames/uuid/{taxonID}',
@@ -70,6 +68,7 @@ class ScinamesController extends AbstractFOSRestController
     public function uuid(int $taxonID): Response
     {
         $uuid = $this->uuidService->getUuid('scientific_name', $taxonID);
+
         /** @var Species $species */
         $species = $this->speciesRepository->find($taxonID);
         $data = [

@@ -16,9 +16,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 readonly class ClassificationFacade
 {
-    public function __construct(protected ReferenceService $referenceService, protected EntityManagerInterface $entityManager, protected SpeciesService $taxonService, protected RouterInterface $router, protected LiteratureRepository $literatureRepository, protected SynonymyRepository $synonymyRepository, protected SpeciesRepository $speciesRepository)
-    {
-    }
+    public function __construct(protected ReferenceService $referenceService, protected EntityManagerInterface $entityManager, protected SpeciesService $taxonService, protected RouterInterface $router, protected LiteratureRepository $literatureRepository, protected SynonymyRepository $synonymyRepository, protected SpeciesRepository $speciesRepository) {}
 
     /**
      * Fetch a list of all references (which have a classification attached).
@@ -284,6 +282,7 @@ readonly class ClassificationFacade
                 }
 
                 return $results;
+
             case 'citation':
             default:
                 $dbRows = $this->referenceService->getCitationChildrenReferences($referenceID, $taxonID);
@@ -321,6 +320,7 @@ readonly class ClassificationFacade
                         }
                     }
                 }
+
                 break;
         }
 
@@ -341,9 +341,10 @@ readonly class ClassificationFacade
     {
         $results = [];
         $basID = 0;
-        $basionymResult = null;
+        $basionymResult = [];
         $species = $this->speciesRepository->find($taxonID);
-        /** @var Species $basionym */
+
+        /** @var ?Species $basionym */
         $basionym = $species->basionym;
 
         if (null !== $basionym) {
@@ -366,6 +367,14 @@ readonly class ClassificationFacade
         // TODO only citation type is implemented, rearrange?
         if ('citation' == trim($referenceType)) {
             $synonyms = $this->taxonService->findSynonyms($taxonID, $referenceID);
+
+            /**
+             * @var array<int, array{
+             *     taxonID: int,
+             *     scientificName: string,
+             *     homotype: int
+             * }> $synonyms
+             */
             foreach ($synonyms as $synonym) {
                 // ignore if synonym is basionym
                 if (null !== $basionym && $synonym['taxonID'] == $basionym->id) {
@@ -405,7 +414,23 @@ readonly class ClassificationFacade
         }
 
         // if we have a basionym, prepend it to list
-        if (null != $basionymResult) {
+        if (!empty($basionymResult)) {
+            /**
+             * @var array{
+             *     taxonID: int,
+             *     uuid: array{href: string},
+             *     referenceName: string,
+             *     referenceId: int,
+             *     referenceType: string,
+             *     hasType: bool,
+             *     hasSpecimen: bool,
+             *     insertedCitation: false,
+             *     referenceInfo: array{
+             *         type: string,
+             *         cited: true
+             *     }
+             * } $basionymResult
+             */
             $insertedCitations = $this->getInsertedCitation($insertSeries, $referenceID, $basionymResult['taxonID']);
             if (!empty($insertedCitations)) {
                 foreach ($insertedCitations as $citation) {
@@ -444,6 +469,7 @@ readonly class ClassificationFacade
             case 'periodical':
                 // periodical is a top level element, so no parent
                 return null;
+
             case 'citation':
             default:
                 // only necessary if taxonID is not null
@@ -535,6 +561,7 @@ readonly class ClassificationFacade
                         ];
                     }
                 }
+
                 break;
         }
 

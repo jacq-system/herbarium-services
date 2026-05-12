@@ -19,9 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class GeoController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly CoordinateConversionService $coordinateConversionService, protected readonly CoordinateBoundaryService $coordinateBoundaryService)
-    {
-    }
+    public function __construct(protected readonly CoordinateConversionService $coordinateConversionService, protected readonly CoordinateBoundaryService $coordinateBoundaryService) {}
 
     #[Get(
         path: '/v1/geo/convert',
@@ -92,7 +90,7 @@ class GeoController extends AbstractFOSRestController
     #[Route('/v1/geo/convert', name: 'services_rest_geo_convert', methods: ['GET'])]
     public function convert(#[MapQueryParameter] ?float $lat, #[MapQueryParameter] ?float $lon, #[MapQueryParameter] ?string $utm, #[MapQueryParameter] ?string $mgrs): Response
     {
-        if (isset($lat) && isset($lon)) {   // from lat/lon
+        if (isset($lat, $lon)) {   // from lat/lon
             $data = ['utm' => $this->coordinateConversionService->latlon2utm($lat, $lon)];
         } elseif (isset($utm)) {                      // from UTM
             $data = ['latlon' => $this->coordinateConversionService->utm2latlon($utm)];

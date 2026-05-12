@@ -18,9 +18,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class AutocompleteController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly SpeciesRepository $speciesRepository)
-    {
-    }
+    public function __construct(protected readonly SpeciesRepository $speciesRepository) {}
 
     #[Get(
         path: '/v1/autocomplete/scientificNames/{term}',

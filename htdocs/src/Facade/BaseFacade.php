@@ -10,9 +10,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 abstract readonly class BaseFacade
 {
-    public function __construct(protected EntityManagerInterface $entityManager, protected RouterInterface $router)
-    {
-    }
+    public function __construct(protected EntityManagerInterface $entityManager, protected RouterInterface $router) {}
 
     /**
      * @param mixed[] $params

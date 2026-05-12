@@ -10,9 +10,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ElasticsearchService
 {
-    public function __construct(protected readonly string $basePath, protected readonly CollectorRepository $collectorRepository, protected HttpClientInterface $client)
-    {
-    }
+    public function __construct(protected readonly string $basePath, protected readonly CollectorRepository $collectorRepository, protected HttpClientInterface $client) {}
 
     public function recreateIndex(string $index): void
     {

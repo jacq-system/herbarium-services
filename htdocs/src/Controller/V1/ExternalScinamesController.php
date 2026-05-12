@@ -17,9 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ExternalScinamesController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly ExternalScientificNamesService $scinamesService)
-    {
-    }
+    public function __construct(protected readonly ExternalScientificNamesService $scinamesService) {}
 
     #[Get(
         path: '/v1/externalScinames/find/{term}',

@@ -10,9 +10,7 @@ use JACQ\Entity\Jacq\Herbarinput\GeoProvinceBoundaries;
 
 readonly class CoordinateBoundaryService
 {
-    public function __construct(protected EntityManagerInterface $entityManager)
-    {
-    }
+    public function __construct(protected EntityManagerInterface $entityManager) {}
 
     /**
      * check a given coordinate with all known boundaries of a given nation.
@@ -28,7 +26,8 @@ readonly class CoordinateBoundaryService
         $qb = $this->entityManager->getRepository(GeoNationBoundaries::class)->createQueryBuilder('b')
             ->select('b')
             ->where('b.nationId = :nationID')
-            ->setParameter('nationID', $nationID);
+            ->setParameter('nationID', $nationID)
+        ;
         $boundaries = $qb->getQuery()->getResult();
 
         return ['nrBoundaries' => count($boundaries),
@@ -48,7 +47,8 @@ readonly class CoordinateBoundaryService
         $qb = $this->entityManager->getRepository(GeoProvinceBoundaries::class)->createQueryBuilder('b')
             ->select('b')
             ->where('b.provinceId = :provinceID')
-            ->setParameter('provinceID', $provinceID);
+            ->setParameter('provinceID', $provinceID)
+        ;
         $boundaries = $qb->getQuery()->getResult();
 
         return ['nrBoundaries' => count($boundaries),
@@ -62,7 +62,7 @@ readonly class CoordinateBoundaryService
      * @param float                                         $lon        longitude
      * @param GeoNationBoundaries[]|GeoProvinceBoundaries[] $boundaries list of boundaries (if any)
      *
-     * @return bool|null true if inside, false if outside, null if list of boundaries is empty
+     * @return null|bool true if inside, false if outside, null if list of boundaries is empty
      */
     protected function checkBoundingBox(float $lat, float $lon, array $boundaries): ?bool
     {

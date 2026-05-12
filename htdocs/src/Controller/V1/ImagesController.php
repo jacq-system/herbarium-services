@@ -18,9 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ImagesController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly ImageLinkMapper $imageLinkMapper)
-    {
-    }
+    public function __construct(protected readonly ImageLinkMapper $imageLinkMapper) {}
 
     #[Get(
         path: '/v1/images/show/{specimenID}/{imageNr}',

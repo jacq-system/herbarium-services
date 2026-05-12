@@ -34,9 +34,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ObjectsController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly ObjectsFacade $objectsFacade, protected readonly SpecimenService $specimenService, protected LoggerInterface $logger, protected SpecimenSearchParametersFromRequestFactory $fromRequestFactory, protected SpecimenSearchQueryFactory $searchQueryFactory, protected ExcelService $excelService, protected EntityManagerInterface $entityManager, protected KmlService $kmlService, protected GeojsonService $geojsonService)
-    {
-    }
+    public function __construct(protected readonly ObjectsFacade $objectsFacade, protected readonly SpecimenService $specimenService, protected LoggerInterface $logger, protected SpecimenSearchParametersFromRequestFactory $fromRequestFactory, protected SpecimenSearchQueryFactory $searchQueryFactory, protected ExcelService $excelService, protected EntityManagerInterface $entityManager, protected KmlService $kmlService, protected GeojsonService $geojsonService) {}
 
     #[Get(
         path: '/v1/objects/specimens/{specimenID}',
@@ -152,15 +150,6 @@ class ObjectsController extends AbstractFOSRestController
         $view = $this->view($data, 200);
 
         return $this->handleView($view);
-    }
-
-    private function fixSchemeSlashes(string $sid): string
-    {
-        // add slash
-        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
-
-        // reduce to exactly two
-        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 
     #[Get(
@@ -569,39 +558,54 @@ class ObjectsController extends AbstractFOSRestController
 
     protected function provideGeojson(QueryBuilder $qb): Response
     {
-        return new StreamedResponse(function () use ($qb) {
-            try {
-                foreach ($this->geojsonService->GeojsonRecords($qb) as $chunk) {
-                    echo $chunk;
+        return new StreamedResponse(
+            function () use ($qb) {
+                try {
+                    foreach ($this->geojsonService->GeojsonRecords($qb) as $chunk) {
+                        echo $chunk;
+                    }
+                } catch (\Throwable $e) {
+                    error_log($e->getMessage());
+
+                    throw $e;
                 }
-            } catch (\Throwable $e) {
-                error_log($e->getMessage());
-                throw $e;
-            }
-        }, 200,
+            },
+            200,
             [
                 'Content-Type' => 'application/geo+json',
                 'Content-Disposition' => 'attachment; filename="specimens_download.geojson"',
-            ]);
+            ]
+        );
     }
 
     protected function provideKml(QueryBuilder $qb): Response
     {
-        return new StreamedResponse(function () use ($qb) {
-            try {
-                foreach ($this->kmlService->KmlRecords($qb) as $chunk) {
-                    echo $chunk;
+        return new StreamedResponse(
+            function () use ($qb) {
+                try {
+                    foreach ($this->kmlService->KmlRecords($qb) as $chunk) {
+                        echo $chunk;
+                    }
+                } catch (\Throwable $e) {
+                    error_log($e->getMessage());
+
+                    throw $e;
                 }
-            } catch (\Throwable $e) {
-                error_log($e->getMessage());
-                throw $e;
-            }
-        },
+            },
             200,
             [
                 'Content-Type' => 'application/vnd.google-earth.kml+xml',
                 'Content-Disposition' => 'attachment; filename="specimens_download.kml"',
             ]
         );
+    }
+
+    private function fixSchemeSlashes(string $sid): string
+    {
+        // add slash
+        $sid = preg_replace('#^(https?):/([^/])#i', '$1://$2', $sid);
+
+        // reduce to exactly two
+        return preg_replace('#^(https?):/{3,}#i', '$1://', $sid);
     }
 }

@@ -20,9 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ClassificationController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly ClassificationFacade $classificationFacade, protected readonly ClassificationDownloadService $downloadService)
-    {
-    }
+    public function __construct(protected readonly ClassificationFacade $classificationFacade, protected readonly ClassificationDownloadService $downloadService) {}
 
     #[Get(
         path: '/v1/classification/download/{referenceType}/{referenceID}',
@@ -214,7 +212,6 @@ class ClassificationController extends AbstractFOSRestController
                                 new Property(property: 'hasType', description: ' true if Typi exist', type: 'boolean', example: false),
                                 new Property(property: 'hasSpecimen', description: 'true if at least one specimen exists', type: 'boolean', example: false),
                             ],
-
                             type: 'object'
                         )
                     )
@@ -376,7 +373,8 @@ class ClassificationController extends AbstractFOSRestController
                 description: 'number of children',
                 content: [new MediaType(
                     mediaType: 'application/json',
-                    schema: new Schema(type: 'array',
+                    schema: new Schema(
+                        type: 'array',
                         items: new Items(
                             properties: [
                                 new Property(property: 'nrAccTaxa', type: 'integer', example: 492),
@@ -392,7 +390,8 @@ class ClassificationController extends AbstractFOSRestController
                                         ]
                                     )
                                 ),
-                            ]),
+                            ]
+                        ),
                     )
                 ),
                 ]

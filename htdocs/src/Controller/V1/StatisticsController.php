@@ -19,9 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class StatisticsController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly StatisticsService $statisticsService)
-    {
-    }
+    public function __construct(protected readonly StatisticsService $statisticsService) {}
 
     #[Get(
         path: '/v1/statistics/results/{periodStart}/{periodEnd}/{updated}/{type}/{interval}',

@@ -63,13 +63,11 @@ readonly class CoordinateConversionService
             new Degree($lon)
         );
         $to = $from->asUTMPoint();
-        if ($lat < -32) {
-            $band = chr((int) floor($lat / 8) + ord('M')); // band is 'H' or below
-        } elseif ($lat < 8) {
-            $band = chr((int) floor($lat / 8) + ord('N')); // band is between 'J' and 'N'
-        } else {
-            $band = chr((int) floor($lat / 8) + ord('O')); // band is 'P' or above
-        }
+        $bands = 'CDEFGHJKLMNPQRSTUVWX';
+        $index = (int) floor(($lat + 80) / 8);
+        $index = max(0, min(strlen($bands) - 1, $index));
+
+        $band = $bands[$index];
 
         return [
             'zone' => $to->getZone(),
@@ -191,7 +189,7 @@ readonly class CoordinateConversionService
         }
         $num_digits = $pointerRun - $pointerStart;
         if ($num_digits <= 10 && 0 == $num_digits % 2) {
-            $n = $num_digits / 2;
+            $n = intdiv($num_digits, 2);
             $data['precision'] = $n;
             if ($n > 0) {
                 $multiplier = pow(10.0, 5 - $n);
@@ -249,17 +247,23 @@ readonly class CoordinateConversionService
     {
         if ('X' == $letter) {
             return 7900000;
-        } elseif ('W' == $letter) {
+        }
+        if ('W' == $letter) {
             return 7000000;
-        } elseif ($letter >= 'P') {
+        }
+        if ($letter >= 'P') {
             return (ord($letter) - ord('P')) * 900000 + 800000;
-        } elseif ('N' == $letter) {
+        }
+        if ('N' == $letter) {
             return 0;
-        } elseif ($letter >= 'J') {
+        }
+        if ($letter >= 'J') {
             return (ord($letter) - ord('J')) * 900000 + 6400000;
-        } elseif ($letter >= 'E') {
+        }
+        if ($letter >= 'E') {
             return (ord($letter) - ord('E')) * 900000 + 2800000;
-        } elseif ('D' == $letter) {
+        }
+        if ('D' == $letter) {
             return 2000000;
         }    // C
 

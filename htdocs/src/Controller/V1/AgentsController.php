@@ -19,9 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class AgentsController extends AbstractFOSRestController
 {
-    public function __construct(protected readonly ElasticsearchService $elasticsearchService)
-    {
-    }
+    public function __construct(protected readonly ElasticsearchService $elasticsearchService) {}
 
     #[Get(
         path: '/v1/agents/collector/{term}',
@@ -86,16 +84,15 @@ class AgentsController extends AbstractFOSRestController
     {
         $data = $this->elasticsearchService->search(ElasticsearchCollectorRefreshCommand::IndexName, $term);
 
-        $result =
-             array_map(function ($hit) use ($term) {
+        $result
+             = array_map(function ($hit) use ($term) {
                  return [
                      'id' => $hit['_id'],
                      'name' => $hit['_source']['name'],
                      'score' => $hit['_score'],
                      'match' => strtolower($term) === strtolower($hit['_source']['name']),
                  ];
-             }, $data['hits']['hits'])
-        ;
+             }, $data['hits']['hits']);
 
         $view = $this->view($result, 200);
         $view->setFormat('json');

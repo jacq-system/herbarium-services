@@ -11,26 +11,27 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ExternalScientificNamesService
 {
+    public const int ID_GBIF = 51;
+    public const int ID_WFO = 57;
+    public const int ID_WORMS = 58;
+
     /**
      * @var mixed[]
      */
     protected array $result = [];
+
     /**
      * @var mixed[]
      */
     protected array $apiResponses = [];
+
     /**
      * @var mixed[]
      */
     protected array $errors = [];
     protected string $searchString = '';
-    public const int ID_GBIF = 51;
-    public const int ID_WFO = 57;
-    public const int ID_WORMS = 58;
 
-    public function __construct(protected readonly ExternalServicesRepository $servicesRepository, protected HttpClientInterface $httpClient)
-    {
-    }
+    public function __construct(protected readonly ExternalServicesRepository $servicesRepository, protected HttpClientInterface $httpClient) {}
 
     /**
      * @return mixed[]
@@ -74,14 +75,19 @@ class ExternalScientificNamesService
             switch ($service->id) {
                 case self::ID_GBIF:
                     $this->gbif_read($service, $result);
+
                     break;
+
                 case self::ID_WFO:
                     $this->wfo_read($service, $result);
+
                     break;
+
                 case self::ID_WORMS:
                     if (200 === $response->getStatusCode()) {
                         $this->worms_read($service, $result);
                     }
+
                     break;
             }
         } catch (\Throwable $e) {

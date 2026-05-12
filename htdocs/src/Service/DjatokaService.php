@@ -12,9 +12,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 readonly class DjatokaService
 {
-    public function __construct(protected ImageService $imageService, protected HttpClientInterface $client, protected SpecimensRepository $specimensRepository, protected ImageDefinitionRepository $imageDefinitionRepository)
-    {
-    }
+    public function __construct(protected ImageService $imageService, protected HttpClientInterface $client, protected SpecimensRepository $specimensRepository, protected ImageDefinitionRepository $imageDefinitionRepository) {}
 
     /**
      * @return mixed[]
@@ -84,7 +82,7 @@ readonly class DjatokaService
                     // Construct URL to djatoka-resolver
                     $url = preg_replace('/([^:])\/\//', '$1/', $picdetails['url'].'adore-djatoka/resolver'
                         .'?url_ver=Z39.88-2004'
-                        ."&rft_id=$filename"
+                        ."&rft_id={$filename}"
                         .'&svc_id=info:lanl-repo/svc/getRegion'
                         .'&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000'
                         .'&svc.format=image/jpeg'
@@ -102,7 +100,7 @@ readonly class DjatokaService
                         } elseif (500 == $statusCode) {
                             $errorImage = 'FAIL: <500> Server Error';
                         } else {
-                            $errorImage = "FAIL: Status Code <$statusCode>";
+                            $errorImage = "FAIL: Status Code <{$statusCode}>";
                         }
                     }
                 } catch (\Exception $e) {
